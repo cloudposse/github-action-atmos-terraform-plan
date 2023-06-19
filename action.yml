@@ -86,6 +86,7 @@ runs:
     - name: Atmos Terraform Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
       id: atmos-plan
+      shell: bash
       run: |
         PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${{github.sha}}.planfile" | sed 's#/#_#g') 
         PLAN_FILE_PATH=$(pwd)
@@ -144,6 +145,5 @@ runs:
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
           --output $GITHUB_STEP_SUMMARY \
-          plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }} \
-          -no-color
+          plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
 
