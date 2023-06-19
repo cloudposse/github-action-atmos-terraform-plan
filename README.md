@@ -28,7 +28,7 @@
 
 -->
 
-This is GitHub Action that can be used as a workflow for automatic updates via Pull Requests in your infrastructure repository according to versions in components sources.
+This Github Action is used to run Terraform plan for a single, Atmos supported component and save the given planfile to S3 and DynamoDB.
 
 ---
 
@@ -58,7 +58,7 @@ It's 100% Open Source and licensed under the [APACHE2](LICENSE).
 
 ## Introduction
 
-This is GitHub Action that can be used as a workflow for automatic updates via Pull Requests in your infrastructure repository according to versions in components sources.
+This Github Action is used to run Terraform plan for a single, Atmos supported component and save the given planfile to S3 and DynamoDB.
 
 
 
@@ -108,6 +108,7 @@ this action. For more on setting up those components, see the `gitops` component
           with:
             component: "foobar"
             stack: "plat-ue2-sandbox"
+            component_path: "components/terraform/s3-bucket"
             terraform-plan-role: "arn:aws:iam::111111111111:role/acme-core-gbl-identity-gitops"
             terraform-state-bucket: "acme-core-ue2-auto-gitops"
             terraform-state-role: "arn:aws:iam::999999999999:role/acme-core-ue2-auto-gitops-gha"
