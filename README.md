@@ -138,6 +138,7 @@ this action. For more on setting up those components, see the `gitops` component
 | terraform-state-bucket |  | N/A | true |
 | terraform-state-role |  | N/A | true |
 | terraform-state-table |  | N/A | true |
+| tfcmt-config-path | The path to the `tfcmt` configuration | .tfcmt/atmos\_github\_summary.yaml | false |
 
 
 <!-- markdownlint-restore -->
