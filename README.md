@@ -28,7 +28,7 @@
 
 -->
 
-This Github Action is used to run Terraform plan for a single, Atmos supported component and save the given planfile to S3 and DynamoDB.
+This Github Action is used to run Terraform plan for a single, Atmos-supported component and save the given planfile to S3 and DynamoDB.
 
 ---
 
@@ -58,7 +58,7 @@ It's 100% Open Source and licensed under the [APACHE2](LICENSE).
 
 ## Introduction
 
-This Github Action is used to run Terraform plan for a single, Atmos supported component and save the given planfile to S3 and DynamoDB.
+This Github Action is used to run Terraform plan for a single, Atmos-supported component and save the given planfile to S3 and DynamoDB.
 
 
 

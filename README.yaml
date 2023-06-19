@@ -26,10 +26,10 @@ badges:
 
 related: []
 
-description: This Github Action is used to run Terraform plan for a single, Atmos supported component and save the given planfile to S3 and DynamoDB.
+description: This Github Action is used to run Terraform plan for a single, Atmos-supported component and save the given planfile to S3 and DynamoDB.
 
 introduction: |-
-  This Github Action is used to run Terraform plan for a single, Atmos supported component and save the given planfile to S3 and DynamoDB.
+  This Github Action is used to run Terraform plan for a single, Atmos-supported component and save the given planfile to S3 and DynamoDB.
 
 references:
   - name: "github-action-terraform-plan-storage"
