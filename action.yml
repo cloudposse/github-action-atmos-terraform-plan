@@ -38,10 +38,6 @@ inputs:
     description: "Log level for this action. Default 'INFO'"
     required: false
     default: 'INFO'
-  tfcmt-config-path: 
-    description: "The path to the `tfcmt` configuration"
-    required: false
-    default: ".tfcmt/atmos_github_summary.yaml"
 
 runs:
   using: "composite"
@@ -140,7 +136,7 @@ runs:
       run: |
         cd ${{ inputs.component-path }}
         tfcmt \
-          --config "${{ github.workspace }}/${{ inputs.tfcmt-config-path }}" \
+          --config "${{ github.action_path }}/.tfcmt/atmos_github_summary.yaml" \
           -owner "${{ github.repository_owner }}" \
           -repo "${{ github.event.repository.name }}" \
           -pr "${{ github.event.number }}" \
