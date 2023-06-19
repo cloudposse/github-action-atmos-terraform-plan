@@ -77,7 +77,7 @@ usage: |-
             with:
               component: "foobar"
               stack: "plat-ue2-sandbox"
-              component_path: "components/terraform/s3-bucket"
+              component-path: "components/terraform/s3-bucket"
               terraform-plan-role: "arn:aws:iam::111111111111:role/acme-core-gbl-identity-gitops"
               terraform-state-bucket: "acme-core-ue2-auto-gitops"
               terraform-state-role: "arn:aws:iam::999999999999:role/acme-core-ue2-auto-gitops-gha"
