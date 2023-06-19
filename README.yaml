@@ -1,0 +1,96 @@
+---
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
+name: github-action-atmos-terraform-plan
+
+tags:
+  - github-action
+  - atmos
+  - terraform
+
+# License of this project
+license: "APACHE2"
+
+github_repo: cloudposse/github-action-atmos-component-updater
+
+badges:
+  - name: "Latest Release"
+    image: "https://img.shields.io/github/release/cloudposse/github-action-atmos-component-updater.svg"
+    url: "https://github.com/cloudposse/github-action-atmos-component-updater/releases/latest"
+  - name: "Slack Community"
+    image: "https://slack.cloudposse.com/badge.svg"
+    url: "https://slack.cloudposse.com"
+
+related: []
+
+description: This is GitHub Action that can be used as a workflow for automatic updates via Pull Requests in your infrastructure repository according to versions in components sources.
+
+introduction: |-
+  This is GitHub Action that can be used as a workflow for automatic updates via Pull Requests in your infrastructure repository according to versions in components sources.
+
+references:
+  - name: "github-action-terraform-plan-storage"
+    description: "GitHub Action to store Terraform plans"
+    url: "https://github.com/cloudposse/github-action-terraform-plan-storage"
+
+usage: |-
+  ### Prerequisites
+
+  This GitHub Action requires AWS access for two different purposes. This action will attempt to first run `terraform plan` against a given component and 
+  then will use another role to save that given Terraform Plan to an S3 Bucket with metadata in a DynamoDB table. We recommend configuring 
+  [OpenID Connect with AWS](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services) 
+  to allow GitHub to assume roles in AWS, and then deploying both a Terraform Plan role and a Terraform State role. 
+  For Cloud Posse documentation on setting up GitHub OIDC, see our [`github-oidc-provider` component](https://docs.cloudposse.com/components/library/aws/github-oidc-provider/).
+
+  In order to store Terraform State, we configure an S3 Bucket to store plan files and a DynamoDB table to track plan metadata. Both will need to be deployed before running
+  this action. For more on setting up those components, see the `gitops` component (__documentation pending__). This action will then use the [github-action-terraform-plan-storage](https://github.com/cloudposse/github-action-terraform-plan-storage) action to update these resources.
+
+  ### Workflow example
+
+  ```yaml
+    name: "atmos-terraform-plan"
+
+    on:
+      workflow_dispatch: {}
+      pull_request:
+        types:
+          - opened
+          - synchronize
+          - reopened
+        branches:
+          - main
+
+    # These permissions are required for GitHub to assume roles in AWS
+    permissions:
+      id-token: write
+      contents: read
+
+    jobs:
+      plan:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Plan Atmos Component
+            uses: cloudposse/github-action-atmos-terraform-plan@v1
+            with:
+              component: "foobar"
+              stack: "plat-ue2-sandbox"
+              terraform-plan-role: "arn:aws:iam::111111111111:role/acme-core-gbl-identity-gitops"
+              terraform-state-bucket: "acme-core-ue2-auto-gitops"
+              terraform-state-role: "arn:aws:iam::999999999999:role/acme-core-ue2-auto-gitops-gha"
+              terraform-state-table: "acme-core-ue2-auto-gitops"
+              aws-region: "us-east-2"
+
+  ```
+
+include:
+  - "docs/github-action.md"
+
+# Contributors to this project
+contributors:
+  - name: "Erik Osterman"
+    github: "osterman"
+  - name: "Daniel Miller"
+    github: "milldr"

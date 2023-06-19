@@ -1,0 +1,149 @@
+name: 'GitHub Action Atmos Terraform Plan'
+description: 'GitHub Action Atmos Terraform Plan'
+author: hello@cloudposse.com
+branding:
+  icon: 'server'
+  color: 'white'
+inputs:
+  component:
+    description: ""
+    required: true
+  stack:
+    description: ""
+    required: true
+  component-path:
+    description: ""
+    required: true
+  terraform-plan-role:
+    description: ""
+    required: true
+  terraform-state-role:
+    description: ""
+    required: true
+  terraform-state-bucket:
+    description: ""
+    required: true
+  terraform-state-table:
+    description: ""
+    required: true
+  aws-region:
+    description: "AWS region for assuming identity"
+    required: false
+    default: "us-east-1"
+  atmos-version:
+    description: "Atmos version to use for vendoring. Default 'latest'"
+    required: false
+    default: 'latest'
+  log-level:
+    description: "Log level for this action. Default 'INFO'"
+    required: false
+    default: 'INFO'
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+
+    - uses: hashicorp/setup-terraform@v2
+
+    - uses: cloudposse/github-action-setup-atmos@v1.0.0
+      with:
+        install-wrapper: false
+
+    - name: Filter Atmos Settings Value
+      uses: cloudposse/github-action-atmos-get-setting@main
+      id: atmos-settings
+      with:
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        settings-path: github.actions_enabled
+
+    - name: Check if Action is Enable
+      id: settings
+      shell: bash
+      run: |
+        if [[ "${{ steps.atmos-settings.outputs.value }}" == "true" ]]; then
+          echo "actions_enabled=true" >> $GITHUB_OUTPUT
+        else
+          echo "actions_enabled=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Setup tfcmt
+      uses: shmokmt/actions-setup-tfcmt@v2
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      with:
+        version: v4.4.1
+
+    - name: Configure Plan AWS Credentials
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      uses: aws-actions/configure-aws-credentials@v2.2.0
+      with:
+        aws-region: ${{ inputs.aws-region }}
+        role-to-assume: ${{ inputs.terraform-plan-role }}
+        role-session-name: "atmos-terraform-plan-gitops"
+        mask-aws-account-id: "no"
+
+    - name: Atmos Terraform Plan
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      id: atmos-plan
+      run: |
+        PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${{github.sha}}.planfile" | sed 's#/#_#g') 
+        PLAN_FILE_PATH=$(pwd)
+        ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
+          --stack ${{ inputs.stack }} \
+          -out=$PLAN_FILE_PATH/$PLAN_FILE \
+          -input=false
+        echo "plan_file=$PLAN_FILE" >> $GITHUB_OUTPUT
+        echo "plan_file_path=$PLAN_FILE_PATH" >> $GITHUB_OUTPUT
+
+    - name: Configure State AWS Credentials
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      uses: aws-actions/configure-aws-credentials@v2.2.0
+      with:
+        aws-region: ${{ inputs.aws-region }}
+        role-to-assume: ${{ inputs.terraform-state-role }}
+        role-session-name: "atmos-terraform-state-gitops"
+        mask-aws-account-id: "no"
+
+    - name: Store Plan
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      uses: cloudposse/github-action-terraform-plan-storage@1.6.2
+      id: store-plan
+      with:
+        action: storePlan
+        planPath: ${{ steps.atmos-plan.outputs.plan_file }}
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        tableName: ${{ inputs.terraform-state-table }}
+        bucketName: ${{ inputs.terraform-state-bucket }}
+
+    - name: Store Lockfile
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      uses: cloudposse/github-action-terraform-plan-storage@1.6.2
+      with:
+        action: storePlan
+        planPath: ${{ inputs.component-path}}/.terraform.lock.hcl
+        component: ${{ inputs.component }}
+        stack: "${{ inputs.stack }}-lockfile"
+        tableName: ${{ inputs.terraform-state-table }}
+        bucketName: ${{ inputs.terraform-state-bucket }}
+
+    - name: Post Plan
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      id: post-plan
+      shell: bash
+      run: |
+        cd ${{ inputs.component-path }}
+        tfcmt \
+          --config "${{ github.workspace }}/.tfcmt/github_job_summary.yaml" \
+          -owner "${{ github.repository_owner }}" \
+          -repo "${{ github.event.repository.name }}" \
+          -pr "${{ github.event.number }}" \
+          -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
+          -var "component:${{ inputs.component }}" \
+          -var "stack:${{ inputs.stack }}" \
+          -var "job:${{ github.job }}" \
+          --output $GITHUB_STEP_SUMMARY \
+          plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }} \
+          -no-color
+
