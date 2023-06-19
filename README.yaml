@@ -14,12 +14,12 @@ tags:
 # License of this project
 license: "APACHE2"
 
-github_repo: cloudposse/github-action-atmos-component-updater
+github_repo: cloudposse/github-action-atmos-terraform-plan
 
 badges:
   - name: "Latest Release"
-    image: "https://img.shields.io/github/release/cloudposse/github-action-atmos-component-updater.svg"
-    url: "https://github.com/cloudposse/github-action-atmos-component-updater/releases/latest"
+    image: "https://img.shields.io/github/release/cloudposse/github-action-atmos-terraform-plan.svg"
+    url: "https://github.com/cloudposse/github-action-atmos-terraform-plan/releases/latest"
   - name: "Slack Community"
     image: "https://slack.cloudposse.com/badge.svg"
     url: "https://slack.cloudposse.com"
