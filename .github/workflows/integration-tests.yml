@@ -13,6 +13,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
       - name: Plan Atmos Component
         uses: ./
         with:
