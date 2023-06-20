@@ -129,16 +129,6 @@ runs:
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
 
-    # https://github.com/actions/runner/issues/716
-    - name: Workaround github.action_path Bug
-      id: action_path
-      shell: bash
-      run: |
-        echo "value=$GITHUB_ACTION_PATH" >> $GITHUB_OUTPUT
-        ls -al $GITHUB_ACTION_PATH
-        ls -al $GITHUB_ACTION_PATH/config
-        cat $GITHUB_ACTION_PATH/config/atmos_github_summary.yaml
-
     - name: Post Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
       id: post-plan
@@ -146,7 +136,7 @@ runs:
       run: |
         cd ${{ inputs.component-path }}
         tfcmt \
-          --config "${{ steps.action_path.outputs.value }}/config/atmos_github_summary.yaml" \
+          --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
           -owner "${{ github.repository_owner }}" \
           -repo "${{ github.event.repository.name }}" \
           -pr "${{ github.event.number }}" \
