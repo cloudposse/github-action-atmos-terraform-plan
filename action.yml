@@ -6,28 +6,28 @@ branding:
   color: 'white'
 inputs:
   component:
-    description: ""
+    description: "The name of the component to plan."
     required: true
   stack:
-    description: ""
+    description: "The stack name for the given component."
     required: true
   component-path:
-    description: ""
+    description: "The path to the base component. Atmos defines this value as component_path."
     required: true
   terraform-plan-role:
-    description: ""
+    description: "The AWS role to be used to plan Terraform."
     required: true
   terraform-state-role:
-    description: ""
+    description: "The AWS role to be used to retrieve the planfile from AWS."
     required: true
   terraform-state-bucket:
-    description: ""
+    description: "The S3 Bucket where the planfiles are stored."
     required: true
   terraform-state-table:
-    description: ""
+    description: "The DynamoDB table where planfile metadata is stored."
     required: true
   aws-region:
-    description: "AWS region for assuming identity"
+    description: "AWS region for assuming identity."
     required: false
     default: "us-east-1"
   atmos-version:
