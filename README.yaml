@@ -31,7 +31,12 @@ description: This Github Action is used to run Terraform plan for a single, Atmo
 introduction: |-
   This Github Action is used to run Terraform plan for a single, Atmos-supported component and save the given planfile to S3 and DynamoDB.
 
+  After running this action, apply Terraform with the companion action, [github-action-atmos-terraform-apply](https://github.com/cloudposse/github-action-atmos-terraform-apply)
+
 references:
+  - name: "github-action-atmos-terraform-apply"
+    description: "Companion GitHub Action to apply Terraform for a given component"
+    url: "https://github.com/cloudposse/github-action-atmos-terraform-apply"
   - name: "github-action-terraform-plan-storage"
     description: "GitHub Action to store Terraform plans"
     url: "https://github.com/cloudposse/github-action-terraform-plan-storage"
