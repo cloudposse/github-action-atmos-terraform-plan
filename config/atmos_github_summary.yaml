@@ -22,14 +22,6 @@ templates:
     {{- if .DeletedResources }} [![destroy](https://shields.io/badge/-DESTROY-critical?style=for-the-badge)](#user-content-destroy){{ end }}
     {{- if not (or .CreateResources .UpdatedResources .ReplacedResources .DeletedResources) }} [![no changes](https://shields.io/badge/-NO_CHANGE-inactive?style=for-the-badge)](#user-content-result){{ end }}{{ end }}
 
-  apply_title: |
-    {{ if eq .ExitCode 1}}
-    ## :x: Apply Failed for `{{.Vars.component}}` in `{{.Vars.stack}}`!
-    {{ end }}
-    {{- if eq .ExitCode 0}}
-    ## :white_check_mark: Apply Succeeded for `{{.Vars.component}}` in `{{.Vars.stack}}` 
-    {{ end }}
-
   result: |
     <details><summary><a id="result" />{{if .Result}}{{ .Result }}{{end}}</summary>
 
@@ -119,28 +111,6 @@ terraform:
     when_parse_error:
       template: |
         {{template "plan_title" .}}
-
-        Failed to parse the result.
-
-        <details><summary>Result</summary>
-        {{wrapCode .CombinedOutput}}
-        </details>
-  apply:
-    template: |
-      {{template "apply_title" .}}
-
-      {{template "result" .}}
-      ```shell
-      atmos terraform apply {{.Vars.component}} -s {{.Vars.stack}}
-      ```
-      </details>
-
-      <details><summary>Terraform <strong>Apply</strong> Summary</summary>
-      {{wrapCode .CombinedOutput}}
-      </details>
-    when_parse_error:
-      template: |
-        {{template "apply_title" .}}
 
         Failed to parse the result.
 
