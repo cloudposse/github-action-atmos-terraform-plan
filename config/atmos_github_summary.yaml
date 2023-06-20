@@ -20,7 +20,7 @@ templates:
     {{- if .UpdatedResources }} [![change](https://shields.io/badge/-CHANGE-important?style=for-the-badge)](#user-content-change){{ end }}
     {{- if .ReplacedResources }} [![replace](https://shields.io/badge/-REPLACE-critical?style=for-the-badge)](#user-content-replace){{ end }}
     {{- if .DeletedResources }} [![destroy](https://shields.io/badge/-DESTROY-critical?style=for-the-badge)](#user-content-destroy){{ end }}
-    {{- if not (or .CreateResources .UpdatedResources .ReplacedResources .DeletedResources) }} [![no changes](https://shields.io/badge/-NO_CHANGE-inactive?style=for-the-badge)](#user-content-result){{ end }}{{ end }}
+    {{- if not (or .CreatedResources .UpdatedResources .ReplacedResources .DeletedResources) }} [![no changes](https://shields.io/badge/-NO_CHANGE-inactive?style=for-the-badge)](#user-content-result){{ end }}{{ end }}
 
   result: |
     <details><summary><a id="result" />{{if .Result}}{{ .Result }}{{end}}</summary>
