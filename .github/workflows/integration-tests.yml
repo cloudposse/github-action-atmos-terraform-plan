@@ -12,7 +12,7 @@ env:
 # Permissions required for assuming AWS identity
 permissions:
   id-token: write
-  contents: write
+  contents: read
 
 jobs:
   test:
