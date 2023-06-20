@@ -1,18 +1,29 @@
 import:
   - catalog/foobar
 
-vars:
-  environment: ue2
-  namespace: foo
-  region: us-east-2
-  stage: sandbox
-  tenant: plat
-  label_order:
-  - namespace
-  - tenant
-  - environment
-  - stage
-  - name
-  - attributes
-
-
+terraform:
+  vars:
+    environment: ue2
+    namespace: foo
+    region: us-east-2
+    stage: sandbox
+    tenant: plat
+    label_order:
+    - namespace
+    - tenant
+    - environment
+    - stage
+    - name
+    - attributes
+  
+    backend_type: s3
+    backend:
+      s3:
+        bucket: cptest-core-ue2-root-tfstate-plat
+        dynamodb_table: cptest-core-ue2-root-tfstate-plat-lock
+        role_arn: arn:aws:iam::822777368227:role/cptest-core-gbl-root-tfstate-plat
+        encrypt: true
+        key: terraform.tfstate
+        acl: bucket-owner-full-control
+        region: us-east-2
+  
