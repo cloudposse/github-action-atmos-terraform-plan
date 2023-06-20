@@ -34,10 +34,10 @@ inputs:
     description: "Atmos version to use for vendoring. Default 'latest'"
     required: false
     default: 'latest'
-  log-level:
-    description: "Log level for this action. Default 'INFO'"
+  terraform_version:
+    description: 'The version of Terraform CLI to install. Instead of full version string you can also specify constraint string starting with "<" (for example `<1.13.0`) to install the latest version satisfying the constraint. A value of `latest` will install the latest version of Terraform CLI. Defaults to `latest`.'
+    default: 'latest'
     required: false
-    default: 'INFO'
 
 runs:
   using: "composite"
@@ -45,9 +45,12 @@ runs:
     - uses: actions/checkout@v3
 
     - uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: ${{ inputs.terraform_version }}
 
     - uses: cloudposse/github-action-setup-atmos@v1.0.0
       with:
+        version: ${{ inputs.atmos-version }}
         install-wrapper: false
 
     - name: Filter Atmos Settings Value
