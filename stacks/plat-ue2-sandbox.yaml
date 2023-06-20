@@ -1,0 +1,18 @@
+import:
+  - catalog/foobar
+
+vars:
+  environment: ue2
+  namespace: cptest
+  region: us-east-2
+  stage: sandbox
+  tenant: plat
+  label_order:
+  - namespace
+  - tenant
+  - environment
+  - stage
+  - name
+  - attributes
+
+

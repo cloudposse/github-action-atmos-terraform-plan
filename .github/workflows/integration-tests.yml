@@ -1,0 +1,28 @@
+name: "Integration Tests"
+
+on:
+  workflow_dispatch: {}
+
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+env:
+  AWS_REGION: us-east-2
+  ATMOS_PLAN_DYNAMODB_TABLE: cptest-core-ue2-auto-gitops
+  ATMOS_PLAN_S3_BUCKET: cptest-core-ue2-auto-gitops
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Plan Atmos Component
+        uses: cloudposse/github-action-atmos-terraform-plan@v1
+        with:
+          component: "foobar"
+          stack: "plat-ue2-sandbox"
+          component-path: "components/terraform/s3-bucket"
+          terraform-plan-role: ${{ secrets.TERRAFORM_PLAN_ROLE }}
+          terraform-state-bucket: ${{ env.ATMOS_PLAN_S3_BUCKET }}
+          terraform-state-role: ${{ secrets.TERRAFORM_STATE_ROLE }}
+          terraform-state-table: ${{ env.ATMOS_PLAN_DYNAMODB_TABLE }}
+          aws-region: ${{ env.AWS_REGION }}

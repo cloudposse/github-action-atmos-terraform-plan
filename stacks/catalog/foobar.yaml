@@ -1,0 +1,5 @@
+components:
+  terraform:
+    foobar:
+      vars:
+        example: blue
