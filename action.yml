@@ -51,7 +51,7 @@ runs:
         install-wrapper: false
 
     - name: Filter Atmos Settings Value
-      uses: cloudposse/github-action-atmos-get-setting@main
+      uses: cloudposse/github-action-atmos-get-setting@v0.2.0
       id: atmos-settings
       with:
         component: ${{ inputs.component }}
@@ -129,6 +129,12 @@ runs:
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
 
+    # https://github.com/actions/runner/issues/716
+    - name: Workaround github.action_path Bug
+      id: action_path
+      shell: bash
+      run: echo "value=$GITHUB_ACTION_PATH" >> $GITHUB_OUTPUT
+
     - name: Post Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
       id: post-plan
@@ -136,7 +142,7 @@ runs:
       run: |
         cd ${{ inputs.component-path }}
         tfcmt \
-          --config "${{ github.action_path }}/.tfcmt/atmos_github_summary.yaml" \
+          --config "${{ steps.action_path.outputs.value }}/.tfcmt/atmos_github_summary.yaml" \
           -owner "${{ github.repository_owner }}" \
           -repo "${{ github.event.repository.name }}" \
           -pr "${{ github.event.number }}" \
