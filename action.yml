@@ -50,7 +50,7 @@ runs:
 
     - uses: cloudposse/github-action-setup-atmos@v1.0.0
       with:
-        version: ${{ inputs.atmos-version }}
+        atmos-version: ${{ inputs.atmos-version }}
         install-wrapper: false
 
     - name: Filter Atmos Settings Value

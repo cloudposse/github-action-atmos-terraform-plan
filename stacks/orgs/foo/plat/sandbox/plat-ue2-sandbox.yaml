@@ -3,7 +3,7 @@ import:
 
 vars:
   environment: ue2
-  namespace: cptest
+  namespace: foo
   region: us-east-2
   stage: sandbox
   tenant: plat
