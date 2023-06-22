@@ -48,7 +48,7 @@ runs:
       with:
         terraform_version: ${{ inputs.terraform_version }}
 
-    - uses: cloudposse/github-action-setup-atmos@v1.0.0
+    - uses: cloudposse/github-action-setup-atmos@1.0.2
       with:
         atmos-version: ${{ inputs.atmos-version }}
         install-wrapper: false
