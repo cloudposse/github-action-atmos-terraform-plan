@@ -16,10 +16,10 @@ templates:
     {{- if eq .ExitCode 0 }}
     ## Plan Succeeded for `{{.Vars.component}}` in `{{.Vars.stack}}`
     
-    {{ if .CreatedResources}}[![create](https://shields.io/badge/-CREATE-success?style=for-the-badge)](#user-content-create){{ end }}
-    {{- if .UpdatedResources }} [![change](https://shields.io/badge/-CHANGE-important?style=for-the-badge)](#user-content-change){{ end }}
-    {{- if .ReplacedResources }} [![replace](https://shields.io/badge/-REPLACE-critical?style=for-the-badge)](#user-content-replace){{ end }}
-    {{- if .DeletedResources }} [![destroy](https://shields.io/badge/-DESTROY-critical?style=for-the-badge)](#user-content-destroy){{ end }}
+    {{ if .CreatedResources}}[![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#user-content-create){{ end }}
+    {{- if .UpdatedResources }} [![change](https://shields.io/badge/PLAN-CHANGE-important?style=for-the-badge)](#user-content-change){{ end }}
+    {{- if .ReplacedResources }} [![replace](https://shields.io/badge/PLAN-REPLACE-critical?style=for-the-badge)](#user-content-replace){{ end }}
+    {{- if .DeletedResources }} [![destroy](https://shields.io/badge/PLAN-DESTROY-critical?style=for-the-badge)](#user-content-destroy){{ end }}
     {{- if not (or .CreatedResources .UpdatedResources .ReplacedResources .DeletedResources) }} [![no changes](https://shields.io/badge/-NO_CHANGE-inactive?style=for-the-badge)](#user-content-result){{ end }}{{ end }}
 
   result: |
