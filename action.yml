@@ -38,6 +38,12 @@ inputs:
     description: 'The version of Terraform CLI to install. Instead of full version string you can also specify constraint string starting with "<" (for example `<1.13.0`) to install the latest version satisfying the constraint. A value of `latest` will install the latest version of Terraform CLI. Defaults to `latest`.'
     default: 'latest'
     required: false
+  token:
+    description:
+      Used to pull node distributions for Atmos from Cloud Posse's GitHub repository. Since there's a default, this is typically
+      not supplied by the user. When running this action on github.com, the default value is sufficient. When running on
+      GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
+    default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
 
 runs:
   using: "composite"
@@ -48,9 +54,10 @@ runs:
       with:
         terraform_version: ${{ inputs.terraform_version }}
 
-    - uses: cloudposse/github-action-setup-atmos@v1.0.0
+    - uses: cloudposse/github-action-setup-atmos@v1.0.2
       with:
         atmos-version: ${{ inputs.atmos-version }}
+        token: ${{ inputs.token }}
         install-wrapper: false
 
     - name: Filter Atmos Settings Value
