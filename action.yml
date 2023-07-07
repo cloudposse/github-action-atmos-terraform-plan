@@ -55,6 +55,8 @@ runs:
         terraform_version: ${{ inputs.terraform_version }}
 
     - uses: actions/setup-node@v3
+      with:
+        node-version: 16
 
     - uses: cloudposse/github-action-setup-atmos@1.0.2
       with:
