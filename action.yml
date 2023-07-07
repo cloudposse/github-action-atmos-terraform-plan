@@ -82,10 +82,10 @@ runs:
           echo "actions_enabled=false" >> $GITHUB_OUTPUT
         fi
 
-    - name: Update path
-      shell: bash
-      run: |
-        echo "/usr/local/bin" >> $GITHUB_PATH
+    #- name: Update path
+    #  shell: bash
+    #  run: |
+    #    echo "/usr/local/bin" >> $GITHUB_PATH
 
     - name: Setup tfcmt
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
@@ -107,10 +107,6 @@ runs:
       id: atmos-plan
       shell: bash
       run: |
-        echo $PATH
-        node --version
-        which node
-
         PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${{github.sha}}.planfile" | sed 's#/#_#g') 
         PLAN_FILE_PATH=$(pwd)
         ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
