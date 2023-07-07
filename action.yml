@@ -78,6 +78,9 @@ runs:
           echo "actions_enabled=false" >> $GITHUB_OUTPUT
         fi
 
+    - uses: actions/setup-node@v3
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+
     - name: Setup tfcmt
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
       uses: shirakiya/setup-tfcmt@v1.1.0
@@ -85,9 +88,6 @@ runs:
       # with:
       #   version: v4.4.1
     
-    - uses: actions/setup-node@v3
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
-
     - name: Configure Plan AWS Credentials
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
       uses: aws-actions/configure-aws-credentials@v2.2.0
