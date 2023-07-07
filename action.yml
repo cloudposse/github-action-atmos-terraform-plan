@@ -79,10 +79,11 @@ runs:
         fi
 
     - name: Setup tfcmt
-      uses: shmokmt/actions-setup-tfcmt@v2
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
-      with:
-        version: v4.4.1
+      uses: shirakiya/setup-tfcmt@v1.1.0
+      # uses: shmokmt/actions-setup-tfcmt@v2
+      # with:
+      #   version: v4.4.1
 
     - name: Configure Plan AWS Credentials
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
