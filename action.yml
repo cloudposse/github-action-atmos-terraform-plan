@@ -54,6 +54,8 @@ runs:
       with:
         terraform_version: ${{ inputs.terraform_version }}
 
+    - uses: actions/setup-node@v3
+
     - uses: cloudposse/github-action-setup-atmos@1.0.2
       with:
         atmos-version: ${{ inputs.atmos-version }}
@@ -77,9 +79,6 @@ runs:
         else
           echo "actions_enabled=false" >> $GITHUB_OUTPUT
         fi
-
-    - uses: actions/setup-node@v3
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
 
     - name: Setup tfcmt
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
