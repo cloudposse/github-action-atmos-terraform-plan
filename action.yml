@@ -82,10 +82,12 @@ runs:
           echo "actions_enabled=false" >> $GITHUB_OUTPUT
         fi
 
-    #- name: Update path
-    #  shell: bash
-    #  run: |
-    #    echo "/usr/local/bin" >> $GITHUB_PATH
+    # setup-tfcmt requires this PATH update when running on self-hosted (amazon linux)
+    # https://github.com/shmokmt/actions-setup-tfcmt/blob/main/action.yml#L11C1-L12C1
+    - name: Update path
+      shell: bash
+      run: |
+        echo "/usr/local/bin" >> $GITHUB_PATH
 
     - name: Setup tfcmt
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
