@@ -80,12 +80,16 @@ runs:
           echo "actions_enabled=false" >> $GITHUB_OUTPUT
         fi
 
+    - name: Update path
+      shell: bash
+      run: |
+        echo "/usr/local/bin" >> $GITHUB_PATH
+
     - name: Setup tfcmt
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
-      uses: shirakiya/setup-tfcmt@v1.1.0
-      # uses: shmokmt/actions-setup-tfcmt@v2
-      # with:
-      #   version: v4.4.1
+      uses: shmokmt/actions-setup-tfcmt@v2
+      with:
+        version: v4.4.1
     
     - name: Configure Plan AWS Credentials
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
