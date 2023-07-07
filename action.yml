@@ -84,6 +84,9 @@ runs:
       # uses: shmokmt/actions-setup-tfcmt@v2
       # with:
       #   version: v4.4.1
+    
+    - uses: actions/setup-node@v3
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
 
     - name: Configure Plan AWS Credentials
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
