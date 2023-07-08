@@ -54,7 +54,11 @@ runs:
       with:
         terraform_version: ${{ inputs.terraform_version }}
 
-    - uses: cloudposse/github-action-setup-atmos@1.0.2
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
+
+    - uses: cloudposse/github-action-setup-atmos@v1
       with:
         atmos-version: ${{ inputs.atmos-version }}
         token: ${{ inputs.token }}
@@ -78,12 +82,19 @@ runs:
           echo "actions_enabled=false" >> $GITHUB_OUTPUT
         fi
 
+    # setup-tfcmt requires this PATH update when running on self-hosted (amazon linux)
+    # https://github.com/shmokmt/actions-setup-tfcmt/blob/main/action.yml#L11C1-L12C1
+    - name: Update path
+      shell: bash
+      run: |
+        echo "/usr/local/bin" >> $GITHUB_PATH
+
     - name: Setup tfcmt
-      uses: shmokmt/actions-setup-tfcmt@v2
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      uses: shmokmt/actions-setup-tfcmt@v2
       with:
         version: v4.4.1
-
+    
     - name: Configure Plan AWS Credentials
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
       uses: aws-actions/configure-aws-credentials@v2.2.0
