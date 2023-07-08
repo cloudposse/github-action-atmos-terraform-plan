@@ -58,7 +58,7 @@ runs:
       with:
         node-version: 16
 
-    - uses: cloudposse/github-action-setup-atmos@1.0.2
+    - uses: cloudposse/github-action-setup-atmos@v1
       with:
         atmos-version: ${{ inputs.atmos-version }}
         token: ${{ inputs.token }}
