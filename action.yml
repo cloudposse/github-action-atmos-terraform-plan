@@ -42,6 +42,9 @@ inputs:
     description: "Whether to enable infracost summary. Requires secret `secrets.INFRACOST_API_KEY` to be specified. Default: 'false"
     default: 'false'
     required: false
+  infracost-api-key:
+    description: "Infracost API key"
+    required: false
   token:
     description:
       Used to pull node distributions for Atmos from Cloud Posse's GitHub repository. Since there's a default, this is typically
@@ -158,7 +161,7 @@ runs:
       if: ${{ inputs.enable-infracost == 'true' }}
       uses: infracost/actions/setup@v2
       with:
-        api-key: ${{ secrets.INFRACOST_API_KEY }}
+        api-key: ${{ inputs.infracost-api-key }}
 
     - name: Checkout base branch
       if: ${{ inputs.enable-infracost == 'true' }}
