@@ -176,12 +176,14 @@ runs:
         pwd
         ls -l
         ls -l "${{ github.event.repository.name }}-base"
+        ls -l ${{ github.event.repository.name }}-base/${{ inputs.component-path}}/
+        echo "${{ inputs.component-path}}"
 
     - name: Generate Infracost cost estimate baseline
       if: ${{ inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
-        infracost breakdown --path=/tmp/${{ github.event.repository.name }}/${{ inputs.component-path}}/ \
+        infracost breakdown --path=${{ github.event.repository.name }}-base/${{ inputs.component-path}}/ \
                             --format=json \
                             --out-file=/tmp/infracost-base.json
 
@@ -189,7 +191,7 @@ runs:
       if: ${{ inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
-        infracost diff --path=${TF_ROOT} \
+        infracost diff --path=${{ github.event.repository.name }}-base/${{ inputs.component-path}}/ \
                         --format=json \
                         --compare-to=/tmp/infracost-base.json \
                         --out-file=/tmp/infracost.json
