@@ -163,27 +163,18 @@ runs:
       with:
         api-key: ${{ inputs.infracost-api-key }}
 
-    - name: Checkout base branch
+    - name: Checkout default branch for Infracost to use as baseline
       if: ${{ inputs.enable-infracost == 'true' }}
       uses: actions/checkout@v3
       with:
         ref: '${{ github.event.pull_request.base.ref }}'
-        path: "${{ github.event.repository.name }}-base"
-
-    - if: ${{ inputs.enable-infracost == 'true' }}
-      shell: bash
-      run: |
-        pwd
-        ls -l
-        ls -l "${{ github.event.repository.name }}-base"
-        ls -l ${{ github.event.repository.name }}-base/${{ inputs.component-path}}/
-        echo "${{ inputs.component-path}}"
+        path: "base-${{github.sha}}"
 
     - name: Generate Infracost cost estimate baseline
       if: ${{ inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
-        infracost breakdown --path=${{ github.event.repository.name }}-base/${{ inputs.component-path}}/ \
+        infracost breakdown --path=base-${{github.sha}}/${{ inputs.component-path}}/ \
                             --format=json \
                             --out-file=/tmp/infracost-base.json
 
@@ -191,16 +182,15 @@ runs:
       if: ${{ inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
-        infracost diff --path=${{ github.event.repository.name }}-base/${{ inputs.component-path}}/ \
-                        --format=json \
+        infracost diff --path=base-${{github.sha}}/${{ inputs.component-path}}/ \
+                        --format=diff \
                         --compare-to=/tmp/infracost-base.json \
-                        --out-file=/tmp/infracost.json
+                        --out-file=/tmp/infracost.txt
 
     - if: ${{ inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
-        cat /tmp/infracost-base.json
-        cat /tmp/infracost.json
+        cat /tmp/infracost.txt
 
     - name: Post Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
