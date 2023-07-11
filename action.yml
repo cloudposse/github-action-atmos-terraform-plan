@@ -192,9 +192,9 @@ runs:
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
-        #if [[ ! -f "base-${{github.sha}}/${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json" ]]; then
-        #  echo "{}" > base-${{github.sha}}/${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json
-        #fi
+        if [[ ! -f "base-${{github.sha}}/${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json" ]]; then
+          echo "{}" > base-${{github.sha}}/${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json
+        fi
 
         infracost breakdown \
           --path=base-${{github.sha}}/${{ inputs.component-path}}/ \
