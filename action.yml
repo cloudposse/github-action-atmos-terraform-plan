@@ -170,9 +170,10 @@ runs:
         ref: '${{ github.event.pull_request.base.ref }}'
         path: "base-${{github.sha}}"
 
-    - if: ${{ inputs.enable-infracost == 'true' }}
+    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
+        ls -l
         ls -l base-${{github.sha}}/
         ls -l $GITHUB_WORKSPACE/base-${{github.sha}}/
 
@@ -207,7 +208,7 @@ runs:
                         --compare-to=/tmp/infracost-base.json \
                         --out-file=/tmp/infracost.txt
 
-    - if: ${{ inputs.enable-infracost == 'true' }}
+    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
         cat /tmp/infracost.txt
