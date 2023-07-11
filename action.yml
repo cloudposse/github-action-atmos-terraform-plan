@@ -209,7 +209,7 @@ runs:
         ls -l base-${{github.sha}}/
         ls -l base-${{github.sha}}/${{ inputs.component-path}}/
 
-    - name: Generate Infracost diff
+    - name: Generate Infracost diff as text
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
@@ -220,10 +220,22 @@ runs:
           --compare-to=/tmp/infracost-baseline.json \
           --out-file=/tmp/infracost.txt
 
+    - name: Generate Infracost diff as json
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
+      shell: bash
+      run: |
+        infracost diff \
+          --path=${{ inputs.component-path}}/ \
+          --terraform-var-file=${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json \
+          --format=json \
+          --compare-to=/tmp/infracost-baseline.json \
+          --out-file=/tmp/infracost.json
+
     - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
         cat /tmp/infracost.txt
+        cat /tmp/infracost.json
 
     - name: Post Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
@@ -243,3 +255,10 @@ runs:
           --output $GITHUB_STEP_SUMMARY \
           plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
 
+    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
+      shell: bash
+      run: |
+        echo "<details><summary>Infracost Summary</summary>" >> $GITHUB_STEP_SUMMARY
+        echo "```" >> $GITHUB_STEP_SUMMARY
+        cat /tmp/infracost.txt >> $GITHUB_STEP_SUMMARY
+        echo "```" >> $GITHUB_STEP_SUMMARY
