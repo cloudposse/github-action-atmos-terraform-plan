@@ -207,6 +207,7 @@ runs:
       shell: bash
       run: |
         cat /tmp/infracost-baseline.json
+        ls -l
 
     - name: Generate Infracost diff
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
@@ -214,6 +215,7 @@ runs:
       run: |
         infracost diff \
           --path=${{ inputs.component-path}}/ \
+          --terraform-var-file=${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json \
           --format=diff \
           --compare-to=/tmp/infracost-baseline.json \
           --out-file=/tmp/infracost.txt
