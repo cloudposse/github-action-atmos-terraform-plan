@@ -193,15 +193,13 @@ runs:
         if [[ ! -d "${{ env.BASE_BRANCH_COMPONENT_PATH }}" ]]; then
           mkdir -p ${{ env.BASE_BRANCH_COMPONENT_PATH }}
           echo "{}" > ${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}
-          NULL_RESOURCE=$(cat <<EOF
+          cat << EOF > "${{ env.BASE_BRANCH_COMPONENT_PATH }}/main.tf"
             resource "null_resource" "default" {
               provisioner "local-exec" {
                 command = "echo 'Hello World'"
               }
             }
           EOF
-          )
-          echo "$NULL_RESOURCE" > "${{ env.BASE_BRANCH_COMPONENT_PATH }}/main.tf"
         elif [[ ! -f "${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}" ]]; then
           echo "{}" > ${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}
         fi
