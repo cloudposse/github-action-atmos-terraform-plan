@@ -169,12 +169,6 @@ runs:
         ref: '${{ github.event.pull_request.base.ref }}'
         path: "base-${{github.sha}}"
 
-    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
-      shell: bash
-      run: |
-        ls -l
-        ls -l base-${{github.sha}}/
-
     - name: Atmos Terraform Plan for Infracost default branch
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       shell: bash
@@ -182,11 +176,6 @@ runs:
         ATMOS_BASE_PATH=$GITHUB_WORKSPACE/base-${{github.sha}} atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
           -input=false || true
-
-    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
-      shell: bash
-      run: |
-        ls -l base-${{github.sha}}/
 
     - name: Generate Infracost cost estimate baseline
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
@@ -201,13 +190,6 @@ runs:
           --terraform-var-file=${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json \
           --format=json \
           --out-file=/tmp/infracost-baseline.json
-
-    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
-      shell: bash
-      run: |
-        cat /tmp/infracost-baseline.json
-        ls -l base-${{github.sha}}/
-        ls -l base-${{github.sha}}/${{ inputs.component-path}}/
 
     - name: Generate Infracost diff as text
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
@@ -260,9 +242,12 @@ runs:
       run: |
         DIFF_TOTAL_MONTH_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
         echo $DIFF_TOTAL_MONTH_COST >> $GITHUB_STEP_SUMMARY
-        echo '<details><summary>Infracost Summary</summary><br/><br/>' >> $GITHUB_STEP_SUMMARY
+        echo '<details><summary>Infracost Summary</summary>\n\n' >> $GITHUB_STEP_SUMMARY
+        echo "\n\n" >> $GITHUB_STEP_SUMMARY
         echo '```hcl' >> $GITHUB_STEP_SUMMARY
-        echo '<br/>' >> $GITHUB_STEP_SUMMARY
+        echo "\n\n" >> $GITHUB_STEP_SUMMARY
+        echo '\n\n' >> $GITHUB_STEP_SUMMARY
         cat /tmp/infracost.txt >> $GITHUB_STEP_SUMMARY
+        echo "\n" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
         echo '<br/></details>' >> $GITHUB_STEP_SUMMARY
