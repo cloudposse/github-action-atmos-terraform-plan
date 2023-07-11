@@ -199,7 +199,8 @@ runs:
               command = "echo 'Hello World'"
             }
           }
-          EOF)
+          EOF
+          )
           echo "$NULL_RESOURCE" > "${{ env.BASE_BRANCH_COMPONENT_PATH }}/main.tf"
         elif [[ ! -f "${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}" ]]; then
           echo "{}" > ${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}
