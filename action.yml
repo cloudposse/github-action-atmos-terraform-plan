@@ -190,6 +190,7 @@ runs:
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
+        # create empty json file if component var file doesn't exist
         ls -l ${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }} || mkdir -p ${{ env.BASE_BRANCH_COMPONENT_PATH }} && echo "{}" > ${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}
 
         infracost breakdown \
@@ -203,8 +204,8 @@ runs:
       shell: bash
       run: |
         infracost diff \
-          --path=${{ inputs.component-path}}/ \
-          --terraform-var-file=${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json \
+          --path=${{ inputs.component-path }}/ \
+          --terraform-var-file=${{ env.VARS_FILE }} \
           --format=diff \
           --compare-to=/tmp/infracost-baseline.json \
           --out-file=/tmp/infracost.txt
@@ -214,8 +215,8 @@ runs:
       shell: bash
       run: |
         infracost diff \
-          --path=${{ inputs.component-path}}/ \
-          --terraform-var-file=${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json \
+          --path=${{ inputs.component-path }}/ \
+          --terraform-var-file=${{ env.VARS_FILE }} \
           --format=json \
           --compare-to=/tmp/infracost-baseline.json \
           --out-file=/tmp/infracost.json
