@@ -262,7 +262,7 @@ runs:
         echo $DIFF_TOTAL_MONTH_COST >> $GITHUB_STEP_SUMMARY
         echo '<details><summary>Infracost Summary</summary><br/><br/>' >> $GITHUB_STEP_SUMMARY
         echo '```hcl' >> $GITHUB_STEP_SUMMARY
-        echo '<br/><br/>' >> $GITHUB_STEP_SUMMARY
+        echo '<br/>' >> $GITHUB_STEP_SUMMARY
         cat /tmp/infracost.txt >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
-        echo '<br/><br/></details>' >> $GITHUB_STEP_SUMMARY
+        echo '<br/></details>' >> $GITHUB_STEP_SUMMARY
