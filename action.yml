@@ -213,11 +213,11 @@ runs:
           --compare-to=/tmp/infracost-baseline.json \
           --out-file=/tmp/infracost.json
 
-    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
-      shell: bash
-      run: |
-        cat /tmp/infracost.txt
-        cat /tmp/infracost.json
+    # - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
+    #   shell: bash
+    #   run: |
+    #     cat /tmp/infracost.txt
+    #     cat /tmp/infracost.json
 
     - name: Post Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
@@ -248,11 +248,11 @@ runs:
         elif (( DIFF_TOTAL_MONTH_COST > 0 )); then
             # Rounding the value to two decimal places
             DIFF_TOTAL_MONTH_COST_SUMMARY=$(printf "%.2f" $DIFF_TOTAL_MONTH_COST)
-            DIFF_TOTAL_MONTH_COST_SUMMARY="monthly cost increase by \$$DIFF_TOTAL_MONTH_COST_SUMMARY"
+            DIFF_TOTAL_MONTH_COST_SUMMARY="monthly cost will increase by \$$DIFF_TOTAL_MONTH_COST_SUMMARY 📈"
         else
             # Rounding the value to two decimal places
             DIFF_TOTAL_MONTH_COST_SUMMARY=$(printf "%.2f" $DIFF_TOTAL_MONTH_COST)
-            DIFF_TOTAL_MONTH_COST_SUMMARY="monthly cost decrease by \$$DIFF_TOTAL_MONTH_COST_SUMMARY"
+            DIFF_TOTAL_MONTH_COST_SUMMARY="monthly cost will decrease by \$$DIFF_TOTAL_MONTH_COST_SUMMARY 📉"
         fi
 
         echo $DIFF_TOTAL_MONTH_COST >> $GITHUB_STEP_SUMMARY
