@@ -255,7 +255,6 @@ runs:
             DIFF_TOTAL_MONTH_COST_SUMMARY="monthly cost will decrease by \$$DIFF_TOTAL_MONTH_COST_SUMMARY 📉"
         fi
 
-        echo $DIFF_TOTAL_MONTH_COST >> $GITHUB_STEP_SUMMARY
         echo "<details><summary>💰 Infracost estimate: ${DIFF_TOTAL_MONTH_COST_SUMMARY}</summary>" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
