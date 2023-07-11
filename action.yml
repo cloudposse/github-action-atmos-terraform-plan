@@ -191,6 +191,7 @@ runs:
       shell: bash
       run: |
         if [[ ! -d "${{ env.BASE_BRANCH_COMPONENT_PATH }}" ]]; then
+          mkdir -p ${{ env.BASE_BRANCH_COMPONENT_PATH }}
           echo "{}" > ${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}
           touch ${{ env.BASE_BRANCH_COMPONENT_PATH }}/main.tf
         elif [[ ! -f "${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}" ]]; then
