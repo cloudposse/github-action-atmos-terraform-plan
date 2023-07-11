@@ -215,7 +215,7 @@ runs:
         infracost diff \
           --path=base-${{github.sha}}/${{ inputs.component-path}}/ \
           --format=diff \
-          --compare-to=/tmp/infracost-base.json \
+          --compare-to=/tmp/infracost-baseline.json \
           --out-file=/tmp/infracost.txt
 
     - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
