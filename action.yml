@@ -259,6 +259,6 @@ runs:
       shell: bash
       run: |
         echo '<details><summary>Infracost Summary</summary>' >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
+        echo '\n```\n' >> $GITHUB_STEP_SUMMARY
         cat /tmp/infracost.txt >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
+        echo '\n```\n' >> $GITHUB_STEP_SUMMARY
