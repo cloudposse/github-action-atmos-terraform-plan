@@ -193,7 +193,11 @@ runs:
         if [[ ! -d "${{ env.BASE_BRANCH_COMPONENT_PATH }}" ]]; then
           mkdir -p ${{ env.BASE_BRANCH_COMPONENT_PATH }}
           echo "{}" > ${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}
-          touch ${{ env.BASE_BRANCH_COMPONENT_PATH }}/main.tf
+          echo 'resource "null_resource" "default" {
+            provisioner "local-exec" {
+              command = "echo \'Hello World\'"
+            }
+          }' > ${{ env.BASE_BRANCH_COMPONENT_PATH }}/main.tf
         elif [[ ! -f "${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}" ]]; then
           echo "{}" > ${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}
         fi
