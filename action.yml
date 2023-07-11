@@ -259,6 +259,12 @@ runs:
       shell: bash
       run: |
         echo '<details><summary>Infracost Summary</summary>' >> $GITHUB_STEP_SUMMARY
-        echo '\n```\n' >> $GITHUB_STEP_SUMMARY
+        echo '```<br/>' >> $GITHUB_STEP_SUMMARY
         cat /tmp/infracost.txt >> $GITHUB_STEP_SUMMARY
-        echo '\n```\n' >> $GITHUB_STEP_SUMMARY
+        echo '<br/>```' >> $GITHUB_STEP_SUMMARY
+
+    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
+      shell: bash
+      run: |
+        DIFF_TOTAL_MONTH_COST=$(cat 1.json | jq --raw-output .diffTotalMonthlyCost)
+        echo $DIFF_TOTAL_MONTH_COST >> $GITHUB_STEP_SUMMARY
