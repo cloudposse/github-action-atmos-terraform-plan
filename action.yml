@@ -213,7 +213,7 @@ runs:
       shell: bash
       run: |
         infracost diff \
-          --path=base-${{github.sha}}/${{ inputs.component-path}}/ \
+          --path=base-${{ inputs.component-path}}/ \
           --format=diff \
           --compare-to=/tmp/infracost-baseline.json \
           --out-file=/tmp/infracost.txt
