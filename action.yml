@@ -162,18 +162,26 @@ runs:
       with:
         api-key: ${{ inputs.infracost-api-key }}
 
+    - name: Setup Infracost env vars
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
+      shell: bash
+      run: |
+        echo "BASE_BRANCH_PATH=base-${{ github.sha }}" >> $GITHUB_ENV
+        echo "BASE_BRANCH_COMPONENT_PATH=${{ env.BASE_BRANCH_PATH }}/${{ inputs.component-path }}/" >> $GITHUB_ENV
+        echo "VARS_FILE=${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json" >> $GITHUB_ENV
+
     - name: Checkout default branch for Infracost to use as baseline
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       uses: actions/checkout@v3
       with:
         ref: '${{ github.event.pull_request.base.ref }}'
-        path: "base-${{github.sha}}"
+        path: "${{ env.BASE_BRANCH_PATH }}"
 
     - name: Atmos Terraform Plan for Infracost default branch
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
-        ATMOS_BASE_PATH=$GITHUB_WORKSPACE/base-${{github.sha}} atmos terraform plan ${{ inputs.component }} \
+        ATMOS_BASE_PATH=$GITHUB_WORKSPACE/${{ env.BASE_BRANCH_PATH }} atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
           -input=false || true
 
@@ -181,13 +189,11 @@ runs:
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
-        if [[ ! -f "base-${{github.sha}}/${{ inputs.component-path}}/${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json" ]]; then
-          echo "{}" > base-${{github.sha}}/${{ inputs.component-path}}/${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json
-        fi
+        ls -l ${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }} || mkdir -p ${{ env.BASE_BRANCH_COMPONENT_PATH }} && echo "{}" > ${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}
 
         infracost breakdown \
-          --path=base-${{github.sha}}/${{ inputs.component-path}}/ \
-          --terraform-var-file=${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json \
+          --path=${{ env.BASE_BRANCH_COMPONENT_PATH }} \
+          --terraform-var-file=${{ env.VARS_FILE }} \
           --format=json \
           --out-file=/tmp/infracost-baseline.json
 
