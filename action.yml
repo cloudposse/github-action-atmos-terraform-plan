@@ -120,8 +120,7 @@ runs:
         PLAN_FILE_PATH=$(pwd)
         ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
-          -out=$PLAN_FILE_PATH/$PLAN_FILE \
-          -input=false
+          -out=$PLAN_FILE_PATH/$PLAN_FILE
         echo "plan_file=$PLAN_FILE" >> $GITHUB_OUTPUT
         echo "plan_file_path=$PLAN_FILE_PATH" >> $GITHUB_OUTPUT
 
