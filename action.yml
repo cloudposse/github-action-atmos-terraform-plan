@@ -233,6 +233,7 @@ runs:
     - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
+        cat /tmp/infracost-baseline.json
         cat /tmp/infracost.txt
         cat /tmp/infracost.json
 
