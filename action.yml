@@ -158,28 +158,48 @@ runs:
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Setup Infracost
-      if: ${{ inputs.enable-infracost == 'true' }}
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       uses: infracost/actions/setup@v2
       with:
         api-key: ${{ inputs.infracost-api-key }}
 
     - name: Checkout default branch for Infracost to use as baseline
-      if: ${{ inputs.enable-infracost == 'true' }}
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       uses: actions/checkout@v3
       with:
         ref: '${{ github.event.pull_request.base.ref }}'
         path: "base-${{github.sha}}"
 
-    - name: Generate Infracost cost estimate baseline
-      if: ${{ inputs.enable-infracost == 'true' }}
+    - if: ${{ inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
-        infracost breakdown --path=base-${{github.sha}}/${{ inputs.component-path}}/ \
-                            --format=json \
-                            --out-file=/tmp/infracost-base.json
+        ls -l base-${{github.sha}}/
+        ls -l $GITHUB_WORKSPACE/base-${{github.sha}}/
+
+    - name: Atmos Terraform Plan for Infracost default branch
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
+      shell: bash
+      run: |
+        ATMOS_BASE_PATH=$GITHUB_WORKSPACE/base-${{github.sha}} atmos terraform plan ${{ inputs.component }} \
+          --stack ${{ inputs.stack }} \
+          -input=false || true
+
+    - name: Generate Infracost cost estimate baseline
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
+      shell: bash
+      run: |
+        if [[ ! -f "base-${{github.sha}}/${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json" ]]; then
+          echo "{}" > base-${{github.sha}}/${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json
+        fi
+
+        infracost breakdown \
+          --path=base-${{github.sha}}/${{ inputs.component-path}}/ \
+          --terraform-var-file=base-${{github.sha}}/${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json \
+          --format=json \
+          --out-file=/tmp/infracost-baseline.json
 
     - name: Generate Infracost diff
-      if: ${{ inputs.enable-infracost == 'true' }}
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
         infracost diff --path=base-${{github.sha}}/${{ inputs.component-path}}/ \
