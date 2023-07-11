@@ -166,8 +166,9 @@ runs:
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       shell: bash
       run: |
-        echo "BASE_BRANCH_PATH=base-${{ github.sha }}" >> $GITHUB_ENV
-        echo "BASE_BRANCH_COMPONENT_PATH=${{ env.BASE_BRANCH_PATH }}/${{ inputs.component-path }}/" >> $GITHUB_ENV
+        BASE_BRANCH_PATH="base-${{ github.sha }}"
+        echo "BASE_BRANCH_PATH=$BASE_BRANCH_PATH" >> $GITHUB_ENV
+        echo "BASE_BRANCH_COMPONENT_PATH=$BASE_BRANCH_PATH/${{ inputs.component-path }}" >> $GITHUB_ENV
         echo "VARS_FILE=${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json" >> $GITHUB_ENV
 
     - name: Checkout default branch for Infracost to use as baseline
