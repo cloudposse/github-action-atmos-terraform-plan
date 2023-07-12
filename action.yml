@@ -124,7 +124,8 @@ runs:
         PLAN_FILE_PATH=$(pwd)
         ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
-          -out=$PLAN_FILE_PATH/$PLAN_FILE
+          -out=$PLAN_FILE_PATH/$PLAN_FILE \
+          -input=false
         echo "plan_file=$PLAN_FILE" >> $GITHUB_OUTPUT
         echo "plan_file_path=$PLAN_FILE_PATH" >> $GITHUB_OUTPUT
 
@@ -195,6 +196,7 @@ runs:
       shell: bash
       run: |
         if [[ ! -d "${{ env.BASE_BRANCH_COMPONENT_PATH }}" ]]; then
+          # creating null_resource if resource didn't exist before so breakdown can be executed
           mkdir -p ${{ env.BASE_BRANCH_COMPONENT_PATH }}
           echo "{}" > ${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}
           echo 'resource "null_resource" "default" {}' > "${{ env.BASE_BRANCH_COMPONENT_PATH }}/main.tf"
