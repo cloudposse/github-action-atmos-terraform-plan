@@ -230,7 +230,7 @@ runs:
           --compare-to=/tmp/infracost-baseline.json \
           --out-file=/tmp/infracost.json
 
-    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' && && inputs.debug == 'true' }}
+    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' && inputs.debug == 'true' }}
       shell: bash
       run: |
         cat /tmp/infracost-baseline.json
