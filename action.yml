@@ -45,6 +45,10 @@ inputs:
   infracost-api-key:
     description: "Infracost API key"
     required: false
+  debug:
+    description: "Enable action debug mode. Default: 'false'"
+    default: 'false'
+    required: false
   token:
     description:
       Used to pull node distributions for Atmos from Cloud Posse's GitHub repository. Since there's a default, this is typically
@@ -226,12 +230,27 @@ runs:
           --compare-to=/tmp/infracost-baseline.json \
           --out-file=/tmp/infracost.json
 
-    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
+    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' && && inputs.debug == 'true' }}
       shell: bash
       run: |
         cat /tmp/infracost-baseline.json
         cat /tmp/infracost.txt
         cat /tmp/infracost.json
+
+    - name: Set infracost variables
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      shell: bash
+      run: |
+        if [[ "${{ inputs.enable-infracost }}" == "true" ]]; then
+          INFRACOST_DIFF_TOTAL_MONTHLY_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
+          INFRACOST_DETAILS_DIFF_BREAKDOWN=$(cat /tmp/infracost.txt)
+        else
+          INFRACOST_DIFF_TOTAL_MONTHLY_COST=0
+          INFRACOST_DETAILS_DIFF_BREAKDOWN=""
+        fi
+
+        echo "INFRACOST_DIFF_TOTAL_MONTHLY_COST=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> $GITHUB_ENV
+        echo "INFRACOST_DETAILS_DIFF_BREAKDOWN=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> $GITHUB_ENV
 
     - name: Post Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
@@ -248,32 +267,34 @@ runs:
           -var "component:${{ inputs.component }}" \
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
+          -var "infracost_diff_total_monthly_cost:${{ env.INFRACOST_DIFF_TOTAL_MONTHLY_COST }}" \
+          -var "infracost_details_diff_breakdown:${{ env.INFRACOST_DETAILS_DIFF_BREAKDOWN }}" \
           --output $GITHUB_STEP_SUMMARY \
           plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
 
-    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
-      shell: bash
-      run: |
-        DIFF_TOTAL_MONTH_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
-        DIFF_TOTAL_MONTH_COST_SUMMARY=""
+    # - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
+    #   shell: bash
+    #   run: |
+    #     DIFF_TOTAL_MONTH_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
+    #     DIFF_TOTAL_MONTH_COST_SUMMARY=""
 
-        if (( $(awk 'BEGIN {print ('$DIFF_TOTAL_MONTH_COST' == 0)}') )); then
-            DIFF_TOTAL_MONTH_COST_SUMMARY="monthly cost will not change"
-        elif (( $(awk 'BEGIN {print ('$DIFF_TOTAL_MONTH_COST' > 0)}') )); then
-            # Rounding the value to two decimal places
-            DIFF_TOTAL_MONTH_COST_SUMMARY=$(printf "%.2f" $DIFF_TOTAL_MONTH_COST)
-            DIFF_TOTAL_MONTH_COST_SUMMARY="monthly cost <strong>increase by \$$DIFF_TOTAL_MONTH_COST_SUMMARY</strong> 📈"
-        else
-            # Rounding the value to two decimal places
-            DIFF_TOTAL_MONTH_COST_SUMMARY=$(printf "%.2f" $DIFF_TOTAL_MONTH_COST)
-            DIFF_TOTAL_MONTH_COST_SUMMARY="monthly cost <strong>decrease by \$$DIFF_TOTAL_MONTH_COST_SUMMARY</strong> 📉"
-        fi
+    #     if (( $(awk 'BEGIN {print ('$DIFF_TOTAL_MONTH_COST' == 0)}') )); then
+    #         DIFF_TOTAL_MONTH_COST_SUMMARY="monthly cost will not change"
+    #     elif (( $(awk 'BEGIN {print ('$DIFF_TOTAL_MONTH_COST' > 0)}') )); then
+    #         # Rounding the value to two decimal places
+    #         DIFF_TOTAL_MONTH_COST_SUMMARY=$(printf "%.2f" $DIFF_TOTAL_MONTH_COST)
+    #         DIFF_TOTAL_MONTH_COST_SUMMARY="monthly cost will <strong>increase by \$$DIFF_TOTAL_MONTH_COST_SUMMARY</strong> 📈"
+    #     else
+    #         # Rounding the value to two decimal places
+    #         DIFF_TOTAL_MONTH_COST_SUMMARY=$(printf "%.2f" $DIFF_TOTAL_MONTH_COST)
+    #         DIFF_TOTAL_MONTH_COST_SUMMARY="monthly cost will <strong>decrease by \$$DIFF_TOTAL_MONTH_COST_SUMMARY</strong> 📉"
+    #     fi
 
-        echo "<details><summary>Infracost Estimate: ${DIFF_TOTAL_MONTH_COST_SUMMARY}</summary>" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
-        cat /tmp/infracost.txt >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo '</details>' >> $GITHUB_STEP_SUMMARY
+    #     echo "<details><summary>Infracost Estimate: ${DIFF_TOTAL_MONTH_COST_SUMMARY}</summary>" >> $GITHUB_STEP_SUMMARY
+    #     echo "" >> $GITHUB_STEP_SUMMARY
+    #     echo '```' >> $GITHUB_STEP_SUMMARY
+    #     cat /tmp/infracost.txt >> $GITHUB_STEP_SUMMARY
+    #     echo "" >> $GITHUB_STEP_SUMMARY
+    #     echo '```' >> $GITHUB_STEP_SUMMARY
+    #     echo "" >> $GITHUB_STEP_SUMMARY
+    #     echo '</details>' >> $GITHUB_STEP_SUMMARY
