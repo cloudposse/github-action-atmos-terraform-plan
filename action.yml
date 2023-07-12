@@ -39,7 +39,7 @@ inputs:
     default: 'latest'
     required: false
   enable-infracost:
-    description: "Whether to enable infracost summary. Requires secret `secrets.INFRACOST_API_KEY` to be specified. Default: 'false"
+    description: "Whether to enable infracost summary. Requires secret `infracost-api-key` to be specified. Default: 'false"
     default: 'false'
     required: false
   infracost-api-key:
