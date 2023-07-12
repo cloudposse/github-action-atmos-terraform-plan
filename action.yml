@@ -262,11 +262,11 @@ runs:
         elif (( $(awk 'BEGIN {print ('$DIFF_TOTAL_MONTH_COST' > 0)}') )); then
             # Rounding the value to two decimal places
             DIFF_TOTAL_MONTH_COST_SUMMARY=$(printf "%.2f" $DIFF_TOTAL_MONTH_COST)
-            DIFF_TOTAL_MONTH_COST_SUMMARY="monthly cost increase by \$$DIFF_TOTAL_MONTH_COST_SUMMARY" 📈
+            DIFF_TOTAL_MONTH_COST_SUMMARY="monthly cost increase by \$$DIFF_TOTAL_MONTH_COST_SUMMARY 📈"
         else
             # Rounding the value to two decimal places
             DIFF_TOTAL_MONTH_COST_SUMMARY=$(printf "%.2f" $DIFF_TOTAL_MONTH_COST)
-            DIFF_TOTAL_MONTH_COST_SUMMARY="monthly cost decrease by \$$DIFF_TOTAL_MONTH_COST_SUMMARY" 📉
+            DIFF_TOTAL_MONTH_COST_SUMMARY="monthly cost decrease by \$$DIFF_TOTAL_MONTH_COST_SUMMARY 📉"
         fi
 
         echo "<details><summary>Infracost Estimate: ${DIFF_TOTAL_MONTH_COST_SUMMARY}</summary>" >> $GITHUB_STEP_SUMMARY
