@@ -108,11 +108,6 @@ terraform:
       {{template "change_outside_terraform" .}}
       {{template "warning" .}}
       {{template "error_messages" .}}
-      {{if ne .Vars.infracost_details_diff_breakdown ''}}
-        <details><summary>Infracost Estimate: {{.Vars.infracost_diff_total_monthly_cost}}</summary>
-        {{wrapCode .Vars.infracost_details_diff_breakdown}}
-        </details>
-      {{end}}
     when_parse_error:
       template: |
         {{template "plan_title" .}}
