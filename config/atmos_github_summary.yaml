@@ -88,6 +88,8 @@ templates:
     {{range .ErrorMessages}}
     * {{. -}}
     {{- end}}{{end}}
+  infracost: |
+    asdf
 terraform:
   plan:
     disable_label: false
@@ -108,9 +110,7 @@ terraform:
       {{template "change_outside_terraform" .}}
       {{template "warning" .}}
       {{template "error_messages" .}}
-      {{if ne .Vars.infracost_details_diff_breakdown ''}}
-        asdf
-      {{end}}
+      {{if ne .Vars.infracost_details_diff_breakdown ""}}{{template "infracost" .}}{{end}}
     when_parse_error:
       template: |
         {{template "plan_title" .}}
