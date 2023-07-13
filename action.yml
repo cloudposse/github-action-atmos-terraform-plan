@@ -245,16 +245,14 @@ runs:
       run: |
         if [[ "${{ inputs.enable-infracost }}" == "true" ]]; then
           INFRACOST_DIFF_TOTAL_MONTHLY_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
-          INFRACOST_DETAILS_DIFF_BREAKDOWN="$(cat /tmp/infracost.txt)"
+          INFRACOST_DETAILS_DIFF_BREAKDOWN=$(tr '\n' '!' < /tmp/infracost.txt)
         else
           INFRACOST_DIFF_TOTAL_MONTHLY_COST="0"
           INFRACOST_DETAILS_DIFF_BREAKDOWN=""
         fi
 
-        DIFF_BREAKDOWN=$(echo $INFRACOST_DETAILS_DIFF_BREAKDOWN | sed "s/\n/%%%%/g")
-
         echo "INFRACOST_DIFF_TOTAL_MONTHLY_COST=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> $GITHUB_ENV
-        echo "INFRACOST_DETAILS_DIFF_BREAKDOWN=$DIFF_BREAKDOWN" >> $GITHUB_ENV
+        echo "INFRACOST_DETAILS_DIFF_BREAKDOWN=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> $GITHUB_ENV
 
     - name: Post Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
