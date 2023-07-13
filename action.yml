@@ -263,6 +263,8 @@ runs:
       shell: bash
       run: |
         cd ${{ inputs.component-path }}
+        DIFF_BREAKDOWN=$(<<< "infracost_details_diff_breakdown:${{ env.INFRACOST_DETAILS_DIFF_BREAKDOWN }}"
+        
         tfcmt \
           --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
           -owner "${{ github.repository_owner }}" \
@@ -272,11 +274,10 @@ runs:
           -var "component:${{ inputs.component }}" \
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
+          -var "infracost_diff_total_monthly_cost:${{ env.INFRACOST_DIFF_TOTAL_MONTHLY_COST }}" \
+          -var "$DIFF_BREAKDOWN" \
           --output $GITHUB_STEP_SUMMARY \
           plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
-
-          # -var "infracost_diff_total_monthly_cost:${{ env.INFRACOST_DIFF_TOTAL_MONTHLY_COST }}" \
-          # -var "infracost_details_diff_breakdown:'${{ env.INFRACOST_DETAILS_DIFF_BREAKDOWN }}"' \
 
     - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && inputs.enable-infracost == 'true' }}
       shell: bash
