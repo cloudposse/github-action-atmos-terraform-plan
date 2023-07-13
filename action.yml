@@ -265,7 +265,7 @@ runs:
         cd ${{ inputs.component-path }}
         echo "${{ env.INFRACOST_DETAILS_DIFF_BREAKDOWN }}"
         DIFF_BREAKDOWN=$(echo "${{ env.INFRACOST_DETAILS_DIFF_BREAKDOWN }}" | sed "s/\n/%%%%/g")
-        echo "${{ DIFF_BREAKDOWN }}"
+        echo "$DIFF_BREAKDOWN"
         
         tfcmt \
           --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
