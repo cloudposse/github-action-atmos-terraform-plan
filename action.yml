@@ -251,22 +251,17 @@ runs:
           INFRACOST_DETAILS_DIFF_BREAKDOWN=""
         fi
 
+        DIFF_BREAKDOWN=$(echo $INFRACOST_DETAILS_DIFF_BREAKDOWN | sed "s/\n/%%%%/g")
+
         echo "INFRACOST_DIFF_TOTAL_MONTHLY_COST=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> $GITHUB_ENV
-        EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64) # writing multiline string to $GITHUB_ENV - https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-of-a-multiline-string
-        echo "INFRACOST_DETAILS_DIFF_BREAKDOWN<<$EOF" >> "$GITHUB_ENV"
-        echo $INFRACOST_DETAILS_DIFF_BREAKDOWN >> $GITHUB_ENV
-        echo "$EOF" >> "$GITHUB_ENV"
+        echo "INFRACOST_DETAILS_DIFF_BREAKDOWN=DIFF_BREAKDOWN" >> $GITHUB_ENV
 
     - name: Post Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
       id: post-plan
       shell: bash
       run: |
-        cd ${{ inputs.component-path }}
-        echo "${{ env.INFRACOST_DETAILS_DIFF_BREAKDOWN }}"
-        DIFF_BREAKDOWN=$(echo "${{ env.INFRACOST_DETAILS_DIFF_BREAKDOWN }}" | sed "s/\n/%%%%/g")
-        echo "$DIFF_BREAKDOWN"
-        
+        cd ${{ inputs.component-path }}        
         tfcmt \
           --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
           -owner "${{ github.repository_owner }}" \
@@ -277,7 +272,7 @@ runs:
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
           -var "infracost_diff_total_monthly_cost:${{ env.INFRACOST_DIFF_TOTAL_MONTHLY_COST }}" \
-          -var "infracost_details_diff_breakdown:$DIFF_BREAKDOWN" \
+          -var "infracost_details_diff_breakdown:${{ env.INFRACOST_DETAILS_DIFF_BREAKDOWN }}" \
           --output $GITHUB_STEP_SUMMARY \
           plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
 
