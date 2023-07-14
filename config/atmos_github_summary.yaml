@@ -93,8 +93,8 @@ templates:
 
       ```shell
       {{- b64dec .Vars.infracost_details_diff_breakdown | html -}}
-      ```
 
+      ```
     </details>
 terraform:
   plan:
