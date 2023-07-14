@@ -186,7 +186,7 @@ runs:
           --format=json \
           --out-file=/tmp/infracost.json
 
-    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) && inputs.debug == 'true' }}
+    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) && fromJSON(inputs.debug) }}
       shell: bash
       run: |
         cat ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json
@@ -195,6 +195,7 @@ runs:
 
     - name: Set infracost variables
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      id: infracost-diff
       shell: bash
       run: |
         if [[ "${{ inputs.enable-infracost }}" == "true" ]]; then
@@ -205,14 +206,19 @@ runs:
           INFRACOST_DETAILS_DIFF_BREAKDOWN=""
         fi
 
-        echo "INFRACOST_DETAILS_DIFF_BREAKDOWN=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> "$GITHUB_ENV"
-        echo "INFRACOST_DIFF_TOTAL_MONTHLY_COST=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> "$GITHUB_ENV"
+        echo "infracost_details_diff_breakdown=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> "$GITHUB_OUTPUT"
+        echo "infracost_diff_total_monthly_cost=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> "$GITHUB_OUTPUT"
 
     - name: Post Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
       id: post-plan
       shell: bash
       run: |
+        if [[ "${{ inputs.debug }}" == "true" ]]; then
+          LOG_LEVEL="DEBUG"
+        else
+          LOG_LEVEL="INFO"
+        fi
         cd ${{ inputs.component-path }}
         tfcmt \
           --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
@@ -223,8 +229,8 @@ runs:
           -var "component:${{ inputs.component }}" \
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
-          -var "infracost_details_diff_breakdown:${{ env.INFRACOST_DETAILS_DIFF_BREAKDOWN }}" \
-          -var "infracost_total_monthly_cost:${{ env.INFRACOST_DIFF_TOTAL_MONTHLY_COST }}" \
+          -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
+          -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
           --output $GITHUB_STEP_SUMMARY \
-          --log-level DEBUG \
+          --log-level $LOG_LEVEL \
           plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
