@@ -92,9 +92,9 @@ templates:
     <details><summary>Infracost Estimate: {{.Vars.infracost_diff_total_monthly_cost}}</summary>
 
       ```shell
-      {{- b64dec .Vars.infracost_details_diff_breakdown | html -}}
-
+      {{- b64dec .Vars.infracost_details_diff_breakdown | html }}
       ```
+
     </details>
 terraform:
   plan:
