@@ -216,15 +216,21 @@ runs:
       run: |
         PLAN_FILE="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}"
         PLAN_FILE_JSON="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json"
+        echo $PLAN_FILE
+        echo $PLAN_FILE_JSON
+        ls -l
         terraform show -json $PLAN_FILE > $PLAN_FILE_JSON
-        infracost diff \
-          --path=$PLAN_FILE_JSON \
-          --format=diff \
-          --out-file=/tmp/infracost.txt
-        infracost diff \
-          --path=$PLAN_FILE_JSON \
-          --format=json \
-          --out-file=/tmp/infracost.json
+        ls -l
+        cat $PLAN_FILE_JSON
+
+        # infracost diff \
+        #   --path=$PLAN_FILE_JSON \
+        #   --format=diff \
+        #   --out-file=/tmp/infracost.txt
+        # infracost diff \
+        #   --path=$PLAN_FILE_JSON \
+        #   --format=json \
+        #   --out-file=/tmp/infracost.json
 
     - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) && inputs.debug == 'true' }}
       shell: bash
