@@ -91,7 +91,7 @@ templates:
   infracost: |
     <details><summary>
     {{- $cost := .Vars.infracost_total_monthly_cost | toDecimal }}
-    ${{ $cost }}
+    ${{ $cost }} - {{.Vars.infracost_total_monthly_cost}}
     </summary>
 
       ```
