@@ -94,9 +94,9 @@ templates:
     {{- if eq .Vars.infracost_total_monthly_cost "0" }}
     Infracost Estimate: monthly cost will not change
     {{- else if gt $cost 0 }}
-    Infracost Estimate: monthly cost will increase by ${{ printf "%.2f" $cost }} 📈
+    Infracost Estimate: monthly cost will increase by ${{ $cost }} 📈
     {{- else }}
-    Infracost Estimate: monthly cost will decrease by ${{ printf "%.2f" $cost }} 📉
+    Infracost Estimate: monthly cost will decrease by ${{ $cost }} 📉
     {{- end }}
     </summary>
 
