@@ -180,10 +180,12 @@ runs:
         infracost diff \
           --path=$PLAN_FILE_JSON \
           --format=diff \
+          --project-name ${{ inputs.stack }}-${{ inputs.component }} \
           --out-file=/tmp/infracost.txt
         infracost diff \
           --path=$PLAN_FILE_JSON \
           --format=json \
+          --project-name ${{ inputs.stack }}-${{ inputs.component }} \
           --out-file=/tmp/infracost.json
 
     - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) && fromJSON(inputs.debug) }}
