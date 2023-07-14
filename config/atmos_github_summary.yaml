@@ -95,9 +95,9 @@ templates:
     cost: {{ $cost }}
     {{- $roundedCost := printf "%.2f" $cost }}
     rounded cost: {{ $roundedCost }}
-    {{- if eq $cost 0 }}
+    {{- if eq $cost 0.0 }}
     Infracost Estimate: monthly cost will not change
-    {{- else if gt $cost 0 }}
+    {{- else if gt $cost 0.0 }}
     Infracost Estimate: monthly cost will increase by ${{ $roundedCost }} 📈
     {{- else }}
     Infracost Estimate: monthly cost will decrease by ${{ $roundedCost }} 📉
