@@ -89,7 +89,14 @@ templates:
     * {{. -}}
     {{- end}}{{end}}
   infracost: |
-    <details><summary>{{b64dec .Vars.infracost_total_monthly_cost_summary | html}}</summary>
+    <details><summary>
+    {{- if eq .Vars.infracost_total_monthly_cost 0 }}
+    Infracost Estimate: monthly cost will not change
+    {{- else if gt .Vars.infracost_total_monthly_cost 0 }}
+    Infracost Estimate: monthly cost will increase by ${{ .Vars.infracost_total_monthly_cost }} 📈
+    {{- else }}
+    Infracost Estimate: monthly cost will decrease by ${{ .Vars.infracost_total_monthly_cost }} 📉
+    {{- end }}</summary>
 
       ```
       {{- b64dec .Vars.infracost_details_diff_breakdown | html }}
