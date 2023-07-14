@@ -245,7 +245,7 @@ runs:
       run: |
         if [[ "${{ inputs.enable-infracost }}" == "true" ]]; then
           INFRACOST_DIFF_TOTAL_MONTHLY_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
-          INFRACOST_DETAILS_DIFF_BREAKDOWN=$(tr '\n' '!' < /tmp/infracost.txt | sed s/:/#/g)
+          INFRACOST_DETAILS_DIFF_BREAKDOWN="$(cat /tmp/infracost.txt | base64)"
         else
           INFRACOST_DIFF_TOTAL_MONTHLY_COST="0"
           INFRACOST_DETAILS_DIFF_BREAKDOWN=""
