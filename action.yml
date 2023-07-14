@@ -121,7 +121,7 @@ runs:
       shell: bash
       run: |
         PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${{github.sha}}.planfile" | sed 's#/#_#g') 
-        PLAN_FILE_PATH=${{ inputs.component-path}}
+        PLAN_FILE_PATH=$(pwd)/${{ inputs.component-path}}
         ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
           -out=$PLAN_FILE_PATH/$PLAN_FILE \
