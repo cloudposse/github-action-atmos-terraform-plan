@@ -98,7 +98,7 @@ templates:
     Infracost Estimate: monthly cost will increase by ${{ $roundedCost }} 📈
     {{- else }}
     Infracost Estimate: monthly cost will decrease by ${{ $roundedCost }} 📉
-    {{- end }}
+    {{- end }} - {{ .Vars.infracost_total_monthly_cost }}
     </summary>
 
       ```
