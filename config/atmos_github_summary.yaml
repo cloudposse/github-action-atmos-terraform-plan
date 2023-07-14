@@ -91,12 +91,13 @@ templates:
   infracost: |
     <details><summary>
     {{- $cost := .Vars.infracost_total_monthly_cost | float64 }}
-    {{- if eq .Vars.infracost_total_monthly_cost "0" }}
+    {{- $roundedCost := printf "%.2f" $cost }}
+    {{- if eq $cost 0 }}
     Infracost Estimate: monthly cost will not change
     {{- else if gt $cost 0 }}
-    Infracost Estimate: monthly cost will increase by ${{ $cost }} 📈
+    Infracost Estimate: monthly cost will increase by ${{ $roundedCost }} 📈
     {{- else }}
-    Infracost Estimate: monthly cost will decrease by ${{ $cost }} 📉
+    Infracost Estimate: monthly cost will decrease by ${{ $roundedCost }} 📉
     {{- end }}
     </summary>
 
