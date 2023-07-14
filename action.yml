@@ -200,25 +200,9 @@ runs:
         if [[ "${{ inputs.enable-infracost }}" == "true" ]]; then
           INFRACOST_DIFF_TOTAL_MONTHLY_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
           INFRACOST_DETAILS_DIFF_BREAKDOWN="$(cat /tmp/infracost.txt | base64 --wrap 0)"
-          INFRACOST_TOTAL_MONTHLY_COST_SUMMARY=""
-
-          if (( $(awk 'BEGIN {print ('$INFRACOST_DIFF_TOTAL_MONTHLY_COST' == 0)}') )); then
-              INFRACOST_TOTAL_MONTHLY_COST_SUMMARY="Infracost Estimate: monthly cost will not change"
-          elif (( $(awk 'BEGIN {print ('$INFRACOST_DIFF_TOTAL_MONTHLY_COST' > 0)}') )); then
-              # Rounding the value to two decimal places
-              INFRACOST_TOTAL_MONTHLY_COST_SUMMARY=$(printf "%.2f" $INFRACOST_DIFF_TOTAL_MONTHLY_COST)
-              INFRACOST_TOTAL_MONTHLY_COST_SUMMARY="Infracost Estimate: monthly cost will increase by \$$INFRACOST_TOTAL_MONTHLY_COST_SUMMARY 📈"
-          else
-              # Rounding the value to two decimal places
-              INFRACOST_TOTAL_MONTHLY_COST_SUMMARY=$(printf "%.2f" $INFRACOST_DIFF_TOTAL_MONTHLY_COST)
-              INFRACOST_TOTAL_MONTHLY_COST_SUMMARY="Infracost Estimate: monthly cost will decrease by \$$INFRACOST_TOTAL_MONTHLY_COST_SUMMARY 📉"
-          fi
-
-          INFRACOST_TOTAL_MONTHLY_COST_SUMMARY=$(echo $INFRACOST_TOTAL_MONTHLY_COST_SUMMARY | base64 --wrap 0)
         else
           INFRACOST_DIFF_TOTAL_MONTHLY_COST="0"
           INFRACOST_DETAILS_DIFF_BREAKDOWN=""
-          INFRACOST_TOTAL_MONTHLY_COST_SUMMARY=""
         fi
 
         echo "INFRACOST_DETAILS_DIFF_BREAKDOWN=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> "$GITHUB_ENV"
