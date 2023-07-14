@@ -90,7 +90,9 @@ templates:
     {{- end}}{{end}}
   infracost: |
     <details><summary>Infracost Estimate: {{.Vars.infracost_diff_total_monthly_cost}}</summary>
-      {{wrapCode b64dec .Vars.infracost_details_diff_breakdown}}
+      ```
+      {{b64dec .Vars.infracost_details_diff_breakdown | replace "&#43;" "+"}}
+      ```
     </details>
 terraform:
   plan:
