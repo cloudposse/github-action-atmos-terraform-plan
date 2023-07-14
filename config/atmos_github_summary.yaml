@@ -90,10 +90,8 @@ templates:
     {{- end}}{{end}}
   infracost: |
     <details><summary>Infracost Estimate: {{.Vars.infracost_diff_total_monthly_cost}}</summary>
-      ```
-
+      ```shell
       {{b64dec .Vars.infracost_details_diff_breakdown}}
-
       ```
     </details>
 terraform:
@@ -116,7 +114,9 @@ terraform:
       {{template "change_outside_terraform" .}}
       {{template "warning" .}}
       {{template "error_messages" .}}
-      {{if ne .Vars.infracost_details_diff_breakdown ""}}{{template "infracost" .}}{{end}}
+      {{if ne .Vars.infracost_details_diff_breakdown ""}}
+      {{template "infracost" .}}
+      {{end}}
     when_parse_error:
       template: |
         {{template "plan_title" .}}
