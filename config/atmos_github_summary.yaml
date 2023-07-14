@@ -89,7 +89,7 @@ templates:
     * {{. -}}
     {{- end}}{{end}}
   infracost: |
-    <details><summary>Infracost Estimate: {{.Vars.infracost_diff_total_monthly_cost}}</summary>
+    <details><summary>{{b64dec .Vars.infracost_total_monthly_cost_summary | html}}</summary>
 
       ```
       {{- b64dec .Vars.infracost_details_diff_breakdown | html }}

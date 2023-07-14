@@ -246,13 +246,31 @@ runs:
         if [[ "${{ inputs.enable-infracost }}" == "true" ]]; then
           INFRACOST_DIFF_TOTAL_MONTHLY_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
           INFRACOST_DETAILS_DIFF_BREAKDOWN="$(cat /tmp/infracost.txt | base64 --wrap 0)"
+          DIFF_TOTAL_MONTHLY_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
+          INFRACOST_TOTAL_MONTHLY_COST_SUMMARY=""
+
+          if (( $(awk 'BEGIN {print ('$DIFF_TOTAL_MONTHLY_COST' == 0)}') )); then
+              INFRACOST_TOTAL_MONTHLY_COST_SUMMARY="Infracost Estimate: monthly cost will not change"
+          elif (( $(awk 'BEGIN {print ('$DIFF_TOTAL_MONTHLY_COST' > 0)}') )); then
+              # Rounding the value to two decimal places
+              INFRACOST_TOTAL_MONTHLY_COST_SUMMARY=$(printf "%.2f" $DIFF_TOTAL_MONTHLY_COST)
+              INFRACOST_TOTAL_MONTHLY_COST_SUMMARY="Infracost Estimate: monthly cost will <strong>increase by \$$INFRACOST_TOTAL_MONTHLY_COST_SUMMARY</strong> 📈"
+          else
+              # Rounding the value to two decimal places
+              INFRACOST_TOTAL_MONTHLY_COST_SUMMARY=$(printf "%.2f" $DIFF_TOTAL_MONTHLY_COST)
+              INFRACOST_TOTAL_MONTHLY_COST_SUMMARY="Infracost Estimate: monthly cost will <strong>decrease by \$$INFRACOST_TOTAL_MONTHLY_COST_SUMMARY</strong> 📉"
+          fi
+
+          INFRACOST_TOTAL_MONTHLY_COST_SUMMARY=$(echo $INFRACOST_TOTAL_MONTHLY_COST_SUMMARY | base64 --wrap 0)
         else
           INFRACOST_DIFF_TOTAL_MONTHLY_COST="0"
           INFRACOST_DETAILS_DIFF_BREAKDOWN=""
+          INFRACOST_TOTAL_MONTHLY_COST_SUMMARY=""
         fi
 
         echo "INFRACOST_DIFF_TOTAL_MONTHLY_COST=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> $GITHUB_ENV
         echo "INFRACOST_DETAILS_DIFF_BREAKDOWN=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> "$GITHUB_ENV"
+        echo "INFRACOST_TOTAL_MONTHLY_COST_SUMMARY=$INFRACOST_TOTAL_MONTHLY_COST_SUMMARY" >> "$GITHUB_ENV"
 
     - name: Post Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
@@ -269,7 +287,7 @@ runs:
           -var "component:${{ inputs.component }}" \
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
-          -var "infracost_diff_total_monthly_cost:${{ env.INFRACOST_DIFF_TOTAL_MONTHLY_COST }}" \
           -var "infracost_details_diff_breakdown:${{ env.INFRACOST_DETAILS_DIFF_BREAKDOWN }}" \
+          -var "infracost_total_monthly_cost_summary:${{ env.INFRACOST_TOTAL_MONTHLY_COST_SUMMARY }}" \
           --output $GITHUB_STEP_SUMMARY \
           plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
