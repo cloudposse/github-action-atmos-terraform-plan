@@ -167,50 +167,7 @@ runs:
       with:
         api-key: ${{ inputs.infracost-api-key }}
 
-    # - name: Setup Infracost env vars
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) }}
-    #   shell: bash
-    #   run: |
-    #     BASE_BRANCH_PATH="base-${{ github.sha }}"
-    #     echo "BASE_BRANCH_PATH=$BASE_BRANCH_PATH" >> $GITHUB_ENV
-    #     echo "BASE_BRANCH_COMPONENT_PATH=$BASE_BRANCH_PATH/${{ inputs.component-path }}" >> $GITHUB_ENV
-    #     echo "VARS_FILE=${{ inputs.stack }}-${{ inputs.component }}.terraform.tfvars.json" >> $GITHUB_ENV
-
-    # - name: Checkout default branch for Infracost to use as baseline
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) }}
-    #   uses: actions/checkout@v3
-    #   with:
-    #     ref: '${{ github.event.pull_request.base.ref }}'
-    #     path: "${{ env.BASE_BRANCH_PATH }}"
-
-    # - name: Atmos Terraform Plan for Infracost default branch
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) }}
-    #   shell: bash
-    #   run: |
-    #     ATMOS_BASE_PATH=$GITHUB_WORKSPACE/${{ env.BASE_BRANCH_PATH }} atmos terraform plan ${{ inputs.component }} \
-    #       --stack ${{ inputs.stack }} \
-    #       -input=false || true
-
-    # - name: Generate Infracost cost estimate baseline
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) }}
-    #   shell: bash
-    #   run: |
-    #     if [[ ! -d "${{ env.BASE_BRANCH_COMPONENT_PATH }}" ]]; then
-    #       # creating null_resource if resource didn't exist before so breakdown can be executed
-    #       mkdir -p ${{ env.BASE_BRANCH_COMPONENT_PATH }}
-    #       echo "{}" > ${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}
-    #       echo 'resource "null_resource" "default" {}' > "${{ env.BASE_BRANCH_COMPONENT_PATH }}/main.tf"
-    #     elif [[ ! -f "${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}" ]]; then
-    #       echo "{}" > ${{ env.BASE_BRANCH_COMPONENT_PATH }}/${{ env.VARS_FILE }}
-    #     fi
-
-    #     infracost breakdown \
-    #       --path=${{ env.BASE_BRANCH_COMPONENT_PATH }} \
-    #       --terraform-var-file=${{ env.VARS_FILE }} \
-    #       --format=json \
-    #       --out-file=/tmp/infracost-baseline.json
-
-    - name: Generate Infracost diff as text
+    - name: Generate Infracost diff
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) }}
       shell: bash
       run: |
@@ -219,7 +176,6 @@ runs:
 
         cd ${{ inputs.component-path }}
         terraform show -json $PLAN_FILE > $PLAN_FILE_JSON
-        cat $PLAN_FILE_JSON
 
         infracost diff \
           --path=$PLAN_FILE_JSON \
@@ -233,6 +189,7 @@ runs:
     - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) && inputs.debug == 'true' }}
       shell: bash
       run: |
+        cat ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json
         cat /tmp/infracost.txt
         cat /tmp/infracost.json
 
@@ -240,6 +197,9 @@ runs:
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
       shell: bash
       run: |
+        INFRACOST_DETAILS_DIFF_BREAKDOWN=""
+        INFRACOST_TOTAL_MONTHLY_COST_SUMMARY=""
+
         if [[ "${{ inputs.enable-infracost }}" == "true" ]]; then
           INFRACOST_DIFF_TOTAL_MONTHLY_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
           INFRACOST_DETAILS_DIFF_BREAKDOWN="$(cat /tmp/infracost.txt | base64 --wrap 0)"
@@ -258,10 +218,6 @@ runs:
           fi
 
           INFRACOST_TOTAL_MONTHLY_COST_SUMMARY=$(echo $INFRACOST_TOTAL_MONTHLY_COST_SUMMARY | base64 --wrap 0)
-        else
-          INFRACOST_DIFF_TOTAL_MONTHLY_COST="0"
-          INFRACOST_DETAILS_DIFF_BREAKDOWN=""
-          INFRACOST_TOTAL_MONTHLY_COST_SUMMARY=""
         fi
 
         echo "INFRACOST_DETAILS_DIFF_BREAKDOWN=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> "$GITHUB_ENV"
