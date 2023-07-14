@@ -257,8 +257,6 @@ runs:
         echo $INFRACOST_DETAILS_DIFF_BREAKDOWN >> "$GITHUB_ENV"
         echo "$EOF" >> "$GITHUB_ENV"
 
-        echo $INFRACOST_DETAILS_DIFF_BREAKDOWN
-
     - name: Post Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
       id: post-plan
