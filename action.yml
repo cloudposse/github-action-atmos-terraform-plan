@@ -252,7 +252,7 @@ runs:
         fi
 
         echo "INFRACOST_DIFF_TOTAL_MONTHLY_COST=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> $GITHUB_ENV
-        echo "INFRACOST_DETAILS_DIFF_BREAKDOWN=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> $GITHUB_ENV
+        echo "INFRACOST_DETAILS_DIFF_BREAKDOWN='$INFRACOST_DETAILS_DIFF_BREAKDOWN'" >> $GITHUB_ENV
 
     - name: Post Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
