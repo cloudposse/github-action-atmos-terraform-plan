@@ -242,4 +242,5 @@ runs:
           -var "infracost_details_diff_breakdown:${{ env.INFRACOST_DETAILS_DIFF_BREAKDOWN }}" \
           -var "infracost_total_monthly_cost:${{ env.INFRACOST_DIFF_TOTAL_MONTHLY_COST }}" \
           --output $GITHUB_STEP_SUMMARY \
+          --log-level debug \
           plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
