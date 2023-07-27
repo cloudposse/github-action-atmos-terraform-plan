@@ -140,7 +140,8 @@ runs:
 
     - name: Store Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
-      uses: cloudposse/github-action-terraform-plan-storage@1.7.0
+      #uses: cloudposse/github-action-terraform-plan-storage@v1
+      uses: cloudposse/github-action-terraform-plan-storage@workflow_dispatch_support
       id: store-plan
       with:
         action: storePlan
@@ -152,7 +153,8 @@ runs:
 
     - name: Store Lockfile
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
-      uses: cloudposse/github-action-terraform-plan-storage@1.7.0
+      #uses: cloudposse/github-action-terraform-plan-storage@v1
+      uses: cloudposse/github-action-terraform-plan-storage@workflow_dispatch_support
       with:
         action: storePlan
         planPath: ${{ inputs.component-path}}/.terraform.lock.hcl
