@@ -228,7 +228,6 @@ runs:
           --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
           -owner "${{ github.repository_owner }}" \
           -repo "${{ github.event.repository.name }}" \
-          -pr "${{ github.event.number }}" \
           -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
           -var "component:${{ inputs.component }}" \
           -var "stack:${{ inputs.stack }}" \

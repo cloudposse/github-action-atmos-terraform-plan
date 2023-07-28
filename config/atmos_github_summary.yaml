@@ -2,7 +2,6 @@
 # https://suzuki-shunsuke.github.io/tfcmt/config
 embedded_var_names: []
 ci:
-  pr: []
   owner: []
   repo: []
   sha: []
