@@ -15,14 +15,14 @@ templates:
     {{- if eq .ExitCode 0 }}
     ## Plan Succeeded for `{{.Vars.component}}` in `{{.Vars.stack}}`
     
-    {{ if .CreatedResources}}[![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#user-content-create){{ end }}
-    {{- if .UpdatedResources }} [![change](https://shields.io/badge/PLAN-CHANGE-important?style=for-the-badge)](#user-content-change){{ end }}
-    {{- if .ReplacedResources }} [![replace](https://shields.io/badge/PLAN-REPLACE-critical?style=for-the-badge)](#user-content-replace){{ end }}
-    {{- if .DeletedResources }} [![destroy](https://shields.io/badge/PLAN-DESTROY-critical?style=for-the-badge)](#user-content-destroy){{ end }}
-    {{- if not (or .CreatedResources .UpdatedResources .ReplacedResources .DeletedResources) }} [![no changes](https://shields.io/badge/-NO_CHANGE-inactive?style=for-the-badge)](#user-content-result){{ end }}{{ end }}
+    {{ if .CreatedResources}}[![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#user-content-create-{{.Vars.stack}}-{{.Vars.component}}){{ end }}
+    {{- if .UpdatedResources }} [![change](https://shields.io/badge/PLAN-CHANGE-important?style=for-the-badge)](#user-content-change-{{.Vars.stack}}-{{.Vars.component}}){{ end }}
+    {{- if .ReplacedResources }} [![replace](https://shields.io/badge/PLAN-REPLACE-critical?style=for-the-badge)](#user-content-replace-{{.Vars.stack}}-{{.Vars.component}}){{ end }}
+    {{- if .DeletedResources }} [![destroy](https://shields.io/badge/PLAN-DESTROY-critical?style=for-the-badge)](#user-content-destroy-{{.Vars.stack}}-{{.Vars.component}}){{ end }}
+    {{- if not (or .CreatedResources .UpdatedResources .ReplacedResources .DeletedResources) }} [![no changes](https://shields.io/badge/-NO_CHANGE-inactive?style=for-the-badge)](#user-content-result-{{.Vars.stack}}-{{.Vars.component}}){{ end }}{{ end }}
 
   result: |
-    <details><summary><a id="result" />{{if .Result}}{{ .Result }}{{end}}</summary>
+    <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />{{if .Result}}{{ .Result }}{{end}}</summary>
 
     <br/>
     To reproduce this locally, run:<br/><br/>
@@ -30,7 +30,7 @@ templates:
   updated_resources: |
     ---
     {{- if .CreatedResources}}
-    ### <a id="create" />Create
+    ### <a id="create-{{.Vars.stack}}-{{.Vars.component}}" />Create
     ```diff
     {{- range .CreatedResources}}
     + {{.}}
@@ -38,7 +38,7 @@ templates:
     ```
     {{- end}}
     {{- if .UpdatedResources}}
-    ### <a id="change" />Change
+    ### <a id="change-{{.Vars.stack}}-{{.Vars.component}}" />Change
     ```diff
     {{- range .UpdatedResources}}
     ~ {{.}}
@@ -46,7 +46,7 @@ templates:
     ```
     {{- end}}
     {{- if .ReplacedResources}}
-    ### <a id="replace" />Replace
+    ### <a id="replace-{{.Vars.stack}}-{{.Vars.component}}" />Replace
     ```diff
     {{- range .ReplacedResources}}
     - {{.}}
@@ -55,7 +55,7 @@ templates:
     ```
     {{- end}}
     {{- if .DeletedResources}}
-    ### <a id="destroy" />Destroy
+    ### <a id="destroy-{{.Vars.stack}}-{{.Vars.component}}" />Destroy
     ```diff
     {{- range .DeletedResources}}
     - {{.}}
