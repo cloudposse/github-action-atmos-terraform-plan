@@ -34,6 +34,10 @@ inputs:
     description: "Atmos version to use for vendoring. Default 'latest'"
     required: false
     default: 'latest'
+  atmos-config-path:
+    description: The path to the folder where atmos.yaml file is located
+    required: false
+    default: '.'
   terraform-version:
     description: 'The version of Terraform CLI to install. Instead of full version string you can also specify constraint string starting with "<" (for example `<1.13.0`) to install the latest version satisfying the constraint. A value of `latest` will install the latest version of Terraform CLI. Defaults to `latest`.'
     default: 'latest'
@@ -119,6 +123,8 @@ runs:
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
       id: atmos-plan
       shell: bash
+      env:
+        ATMOS_CLI_CONFIG_PATH: ${{ inputs.atmos-config-path }}
       run: |
         PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${{github.sha}}.planfile" | sed 's#/#_#g') 
         PLAN_FILE_PATH=$(pwd)
