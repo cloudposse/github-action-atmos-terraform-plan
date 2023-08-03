@@ -80,12 +80,13 @@ runs:
         install-wrapper: false
 
     - name: Filter Atmos Settings Value
-      uses: cloudposse/github-action-atmos-get-setting@v0
+      uses: cloudposse/github-action-atmos-get-setting@added-atmos-config-path-input
       id: atmos-settings
       with:
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
         settings-path: github.actions_enabled
+        atmos-config-path: ${{ inputs.atmos-config-path }}
 
     - name: Check if Action is Enable
       id: settings
