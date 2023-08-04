@@ -150,6 +150,11 @@ runs:
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
 
+    - name: Echo component-path
+      shell: bash
+      run: |
+        echo "${{ inputs.component-path }}"
+
     - name: Store Lockfile
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
