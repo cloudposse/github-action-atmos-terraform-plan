@@ -56,12 +56,10 @@ inputs:
       GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
 
-# Limit concurrency for any plan for the same trigger (typically PR or dispatch), component, and stack
-concurrency:
-  group: ${{ github.ref }}-${{ inputs.stack }}-${{ inputs.component }}
-
 runs:
   using: "composite"
+  concurrency:
+    group: ${{ github.ref }}-${{ inputs.stack }}-${{ inputs.component }}
   steps:
     - uses: actions/checkout@v3
 
