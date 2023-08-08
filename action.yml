@@ -55,6 +55,13 @@ inputs:
       not supplied by the user. When running this action on github.com, the default value is sufficient. When running on
       GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+outputs:
+  plan-file-path:
+    description: Plan File
+    value: ${{ steps.atmos-plan.outputs.plan_file_path }}
+  plan-file:
+    description: Plan File
+    value: ${{ steps.atmos-plan.outputs.plan_file }}
 
 runs:
   using: "composite"
