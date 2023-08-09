@@ -132,7 +132,7 @@ runs:
       shell: bash
       run: |
         SUFFIX="${{ github.sha }}"
-        if [ "$variable" != "" ]; then
+        if [ "${{ inputs.plan-file-suffix }}" != "" ]; then
           SUFFIX="${{ inputs.plan-file-suffix }}"
         fi
 
