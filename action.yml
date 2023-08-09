@@ -158,7 +158,7 @@ runs:
         fi
 
     - name: Configure State AWS Credentials
-      if: ${{ fromJSON(env.HAS_CHANGES) }}
+      if: env.HAS_CHANGES == 'true'
       uses: aws-actions/configure-aws-credentials@v2.2.0
       with:
         aws-region: ${{ inputs.aws-region }}
@@ -167,7 +167,7 @@ runs:
         mask-aws-account-id: "no"
 
     - name: Store Plan
-      if: ${{ fromJSON(env.HAS_CHANGES) }}
+      if: env.HAS_CHANGES == 'true'
       uses: cloudposse/github-action-terraform-plan-storage@v1
       id: store-plan
       with:
@@ -179,7 +179,7 @@ runs:
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Store Lockfile
-      if: ${{ fromJSON(env.HAS_CHANGES) }}
+      if: env.HAS_CHANGES == 'true'
       uses: cloudposse/github-action-terraform-plan-storage@v1
       with:
         action: storePlan
@@ -190,13 +190,13 @@ runs:
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Setup Infracost
-      if: ${{ fromJSON(env.HAS_CHANGES) && fromJSON(inputs.enable-infracost) }}
+      if: ${{ env.HAS_CHANGES == 'true' && fromJSON(inputs.enable-infracost) }}
       uses: infracost/actions/setup@v2
       with:
         api-key: ${{ inputs.infracost-api-key }}
 
     - name: Generate Infracost diff
-      if: ${{ fromJSON(env.HAS_CHANGES) && fromJSON(inputs.enable-infracost) }}
+      if: ${{ env.HAS_CHANGES == 'true' && fromJSON(inputs.enable-infracost) }}
       shell: bash
       run: |
         PLAN_FILE="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}"
@@ -216,7 +216,7 @@ runs:
           --project-name ${{ inputs.stack }}-${{ inputs.component }} \
           --out-file=/tmp/infracost.json
 
-    - if: ${{ fromJSON(env.HAS_CHANGES) && fromJSON(inputs.enable-infracost) && fromJSON(inputs.debug) }}
+    - if: ${{ env.HAS_CHANGES == 'true' && fromJSON(inputs.enable-infracost) && fromJSON(inputs.debug) }}
       shell: bash
       run: |
         cat ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json
@@ -224,7 +224,7 @@ runs:
         cat /tmp/infracost.json
 
     - name: Set infracost variables
-      if: ${{ fromJSON(env.HAS_CHANGES) }}
+      if: env.HAS_CHANGES == 'true'
       id: infracost-diff
       shell: bash
       run: |
@@ -240,7 +240,7 @@ runs:
         echo "infracost_diff_total_monthly_cost=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> "$GITHUB_OUTPUT"
 
     - name: Post Plan
-      if: ${{ fromJSON(env.HAS_CHANGES) }}
+      if: env.HAS_CHANGES == 'true'
       id: post-plan
       shell: bash
       run: |
