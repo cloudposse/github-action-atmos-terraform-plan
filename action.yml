@@ -161,9 +161,10 @@ runs:
         cd ${{ inputs.component-path }}
         terraform show -json $PLAN_FILE > $PLAN_FILE_JSON
 
-        cat $PLAN_FILE_JSON | jq .
+        ls -l ${{ steps.atmos-plan.outputs.plan_file_path }}/
+        cat $PLAN_FILE_JSON
 
-        HAS_CHANGES=$(jq '.resource_changes[] | select(.change.actions[] != "no-op")' "$PLAN_FILE_JSON")
+        HAS_CHANGES=$(jq '.resource_changes[] | select(.change.actions[] != "no-op")' $PLAN_FILE_JSON)
         echo "HAS_CHANGES=$HAS_CHANGES"
 
         if [[ "$HAS_CHANGES" == "" ]]; then
