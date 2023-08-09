@@ -153,8 +153,8 @@ runs:
         ls -l
         pwd
 
-        PLAN_FILE="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}"
-        PLAN_FILE_JSON="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json"
+        PLAN_FILE="${{ steps.atmos-plan.outputs.plan_file }}"
+        PLAN_FILE_JSON="${{ steps.atmos-plan.outputs.plan_file }}.json"
 
         echo $PLAN_FILE
         echo $PLAN_FILE_JSON
