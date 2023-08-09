@@ -103,7 +103,6 @@ runs:
         else
           echo "actions_enabled=false" >> $GITHUB_OUTPUT
         fi
-        echo "HAS_CHANGES=true" >> $GITHUB_ENV
 
     # setup-tfcmt requires this PATH update when running on self-hosted (amazon linux)
     # https://github.com/shmokmt/actions-setup-tfcmt/blob/main/action.yml#L11C1-L12C1
@@ -145,6 +144,8 @@ runs:
         EXIT_CODE=$?
         if [[ "$EXIT_CODE" != "0" ]]; then
           echo "has_changes='true'" >> $GITHUB_OUTPUT
+        else
+          echo "has_changes='false'" >> $GITHUB_OUTPUT
         fi
         echo "plan_file=$PLAN_FILE" >> $GITHUB_OUTPUT
         echo "plan_file_path=$PLAN_FILE_PATH" >> $GITHUB_OUTPUT
