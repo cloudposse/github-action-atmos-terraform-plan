@@ -156,12 +156,15 @@ runs:
         PLAN_FILE="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}"
         PLAN_FILE_JSON="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json"
 
-        cd ${{ inputs.component-path }}
-        ls -l
-        pwd
+        echo $PLAN_FILE
+        echo $PLAN_FILE_JSON
+
         terraform show -json $PLAN_FILE > $PLAN_FILE_JSON
 
+        cat $PLAN_FILE_JSON | jq .
+
         HAS_CHANGES=$(jq '.resource_changes[] | select(.change.actions[] != "no-op")' "${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json")
+        echo "HAS_CHANGES=$HAS_CHANGES"
 
         if [[ "$HAS_CHANGES" == "" ]]; then
           echo "HAS_CHANGES=false" >> $GITHUB_ENV
