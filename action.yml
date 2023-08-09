@@ -150,10 +150,15 @@ runs:
       id: plan-state
       shell: bash
       run: |
+        ls -l
+        pwd
+
         PLAN_FILE="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}"
         PLAN_FILE_JSON="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json"
 
         cd ${{ inputs.component-path }}
+        ls -l
+        pwd
         terraform show -json $PLAN_FILE > $PLAN_FILE_JSON
 
         HAS_CHANGES=$(jq '.resource_changes[] | select(.change.actions[] != "no-op")' "${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json")
