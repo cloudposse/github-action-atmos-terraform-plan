@@ -142,6 +142,7 @@ runs:
           -out=$PLAN_FILE_PATH/$PLAN_FILE \
           -input=false -detailed-exitcode
         EXIT_CODE=$?
+        echo "EXIT_CODE: $EXIT_CODE"
         if [[ "$EXIT_CODE" != "0" ]]; then
           echo "has_changes='true'" >> $GITHUB_OUTPUT
         else
