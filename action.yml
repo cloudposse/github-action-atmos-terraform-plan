@@ -156,10 +156,15 @@ runs:
         cd ${{ inputs.component-path }}
         terraform show -json $PLAN_FILE > $PLAN_FILE_JSON
 
-        cat $PLAN_FILE_JSON
+        json_output=$(terraform show -json $PLAN_FILE)
+        change_summary=$(echo "$json_output" | jq '.resource_changes | map(select(.change.actions | length > 0)) | length')
 
-        jq --version
-        jq . $PLAN_FILE_JSON
+        if [[ $change_summary -gt 0 ]]; then
+            echo "There are changes."
+        else
+            echo "No changes."
+        fi
+
 
         # HAS_CHANGES=$(jq '.resource_changes[] | select(.change.actions[] != "no-op")' $PLAN_FILE_JSON)
         # echo "HAS_CHANGES=$HAS_CHANGES"
