@@ -156,14 +156,17 @@ runs:
         cd ${{ inputs.component-path }}
         terraform show -json $PLAN_FILE > $PLAN_FILE_JSON
 
+        cat $PLAN_FILE_JSON
+
+        jq --version
         jq . $PLAN_FILE_JSON
 
-        HAS_CHANGES=$(jq '.resource_changes[] | select(.change.actions[] != "no-op")' $PLAN_FILE_JSON)
-        echo "HAS_CHANGES=$HAS_CHANGES"
+        # HAS_CHANGES=$(jq '.resource_changes[] | select(.change.actions[] != "no-op")' $PLAN_FILE_JSON)
+        # echo "HAS_CHANGES=$HAS_CHANGES"
 
-        if [[ "$HAS_CHANGES" == "" ]]; then
-          echo "HAS_CHANGES=false" >> $GITHUB_ENV
-        fi
+        # if [[ "$HAS_CHANGES" == "" ]]; then
+        #   echo "HAS_CHANGES=false" >> $GITHUB_ENV
+        # fi
 
     - name: Configure State AWS Credentials
       if: env.HAS_CHANGES == 'true'
