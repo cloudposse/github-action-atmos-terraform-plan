@@ -15,9 +15,9 @@ inputs:
     description: "The path to the base component. Atmos defines this value as component_path."
     required: true
   plan-file-suffix:
-    description: "Suffix that is used to build plan file name. Default: '${{ github.sha }}'"
-    required: true
-    default: "${{ github.sha }}"
+    description: "Suffix that is used to build plan file name. Default: ''"
+    required: false
+    default: ""
   terraform-plan-role:
     description: "The AWS role to be used to plan Terraform."
     required: true
@@ -131,7 +131,12 @@ runs:
       id: atmos-plan
       shell: bash
       run: |
-        PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${{ inputs.plan-file-suffix }}.planfile" | sed 's#/#_#g') 
+        SUFFIX="${{ github.sha }}"
+        if [ "$variable" != "" ]; then
+          SUFFIX="${{ inputs.plan-file-suffix }}"
+        fi
+
+        PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${SUFFIX}.planfile" | sed 's#/#_#g') 
         PLAN_FILE_PATH=$(pwd)
         ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
