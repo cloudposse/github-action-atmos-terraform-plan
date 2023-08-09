@@ -103,6 +103,7 @@ runs:
         else
           echo "actions_enabled=false" >> $GITHUB_OUTPUT
         fi
+        echo "HAS_CHANGES=true" >> $GITHUB_ENV
 
     # setup-tfcmt requires this PATH update when running on self-hosted (amazon linux)
     # https://github.com/shmokmt/actions-setup-tfcmt/blob/main/action.yml#L11C1-L12C1
@@ -144,8 +145,20 @@ runs:
         echo "plan_file=$PLAN_FILE" >> $GITHUB_OUTPUT
         echo "plan_file_path=$PLAN_FILE_PATH" >> $GITHUB_OUTPUT
 
-    - name: Configure State AWS Credentials
+    - name: Plan Has Changes
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      id: plan-state
+      shell: bash
+      run: |
+        terraform show -json "${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}" > "${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json"
+        HAS_CHANGES=$(jq '.resource_changes[] | select(.change.actions[] != "no-op")' "${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json")
+
+        if [[ "$HAS_CHANGES" == "" ]]; then
+          echo "HAS_CHANGES=false" >> $GITHUB_ENV
+        fi
+
+    - name: Configure State AWS Credentials
+      if: ${{ fromJSON(env.HAS_CHANGES) }}
       uses: aws-actions/configure-aws-credentials@v2.2.0
       with:
         aws-region: ${{ inputs.aws-region }}
@@ -154,7 +167,7 @@ runs:
         mask-aws-account-id: "no"
 
     - name: Store Plan
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      if: ${{ fromJSON(env.HAS_CHANGES) }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       id: store-plan
       with:
@@ -166,7 +179,7 @@ runs:
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Store Lockfile
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      if: ${{ fromJSON(env.HAS_CHANGES) }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       with:
         action: storePlan
@@ -177,13 +190,13 @@ runs:
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Setup Infracost
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) }}
+      if: ${{ fromJSON(env.HAS_CHANGES) && fromJSON(inputs.enable-infracost) }}
       uses: infracost/actions/setup@v2
       with:
         api-key: ${{ inputs.infracost-api-key }}
 
     - name: Generate Infracost diff
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) }}
+      if: ${{ fromJSON(env.HAS_CHANGES) && fromJSON(inputs.enable-infracost) }}
       shell: bash
       run: |
         PLAN_FILE="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}"
@@ -203,7 +216,7 @@ runs:
           --project-name ${{ inputs.stack }}-${{ inputs.component }} \
           --out-file=/tmp/infracost.json
 
-    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) && fromJSON(inputs.debug) }}
+    - if: ${{ fromJSON(env.HAS_CHANGES) && fromJSON(inputs.enable-infracost) && fromJSON(inputs.debug) }}
       shell: bash
       run: |
         cat ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json
@@ -211,7 +224,7 @@ runs:
         cat /tmp/infracost.json
 
     - name: Set infracost variables
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      if: ${{ fromJSON(env.HAS_CHANGES) }}
       id: infracost-diff
       shell: bash
       run: |
@@ -227,7 +240,7 @@ runs:
         echo "infracost_diff_total_monthly_cost=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> "$GITHUB_OUTPUT"
 
     - name: Post Plan
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      if: ${{ fromJSON(env.HAS_CHANGES) }}
       id: post-plan
       shell: bash
       run: |
