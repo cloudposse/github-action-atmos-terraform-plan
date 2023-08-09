@@ -151,11 +151,17 @@ runs:
       shell: bash
       run: |
         terraform show -json "${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}" > "${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json"
+        echo "here1"
         HAS_CHANGES=$(jq '.resource_changes[] | select(.change.actions[] != "no-op")' "${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json")
+        echo "here2"
 
         if [[ "$HAS_CHANGES" == "" ]]; then
+          echo "here3"
           echo "HAS_CHANGES=false" >> $GITHUB_ENV
+          echo "here4"
         fi
+
+        echo "here5"
 
     - name: Configure State AWS Credentials
       if: env.HAS_CHANGES == 'true'
