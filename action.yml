@@ -66,6 +66,9 @@ outputs:
   plan-file:
     description: Plan File
     value: ${{ steps.atmos-plan.outputs.plan_file }}
+  has-changes:
+    description: Has Changes
+    value: ${{ steps.atmos-plan.outputs.has_changes }}
 
 runs:
   using: "composite"
