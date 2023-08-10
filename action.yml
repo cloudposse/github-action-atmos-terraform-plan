@@ -144,13 +144,6 @@ runs:
           --stack ${{ inputs.stack }} \
           -out=$PLAN_FILE_PATH/$PLAN_FILE \
           -input=false -detailed-exitcode
-        
-        PLAN_FILE_JSON="$PLAN_FILE_PATH/$PLAN_FILE.json"
-        terraform show -json "$PLAN_FILE_PATH/$PLAN_FILE" > $PLAN_FILE_JSON
-
-        cat $PLAN_FILE_JSON
-        jq . $PLAN_FILE_JSON
-
         EXIT_CODE=$?
         echo "EXIT_CODE: $EXIT_CODE"
         if [[ "$EXIT_CODE" != "0" ]]; then
@@ -160,6 +153,17 @@ runs:
         fi
         echo "plan_file=$PLAN_FILE" >> $GITHUB_OUTPUT
         echo "plan_file_path=$PLAN_FILE_PATH" >> $GITHUB_OUTPUT
+
+    - name: json
+      shell: bash
+      run: |
+        PLAN_FILE_JSON="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json"
+
+        cd ${{ inputs.component-path }}
+        terraform show -json "$PLAN_FILE_PATH/$PLAN_FILE" > $PLAN_FILE_JSON
+
+        cat $PLAN_FILE_JSON
+        jq . $PLAN_FILE_JSON
 
     - name: Configure State AWS Credentials
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
