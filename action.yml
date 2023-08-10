@@ -168,7 +168,7 @@ runs:
 
         sleep 3
 
-        jq . $PLAN_FILE_JSON
+        jq -e . $PLAN_FILE_JSON
 
     - name: Configure State AWS Credentials
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
