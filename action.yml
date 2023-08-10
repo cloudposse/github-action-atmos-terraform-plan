@@ -167,7 +167,6 @@ runs:
       run: |
         echo ${{ steps.atmos-plan.outputs.has_changes }}
         echo ${{ fromJSON(steps.atmos-plan.outputs.has_changes) }}
-        echo ${{ "fromJSON(steps.atmos-plan.outputs.has_changes)" == "false" }}
         echo ${{ fromJSON(steps.atmos-plan.outputs.has_changes) == false }}
 
     - name: Configure State AWS Credentials
