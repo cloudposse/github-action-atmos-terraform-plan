@@ -144,6 +144,13 @@ runs:
           --stack ${{ inputs.stack }} \
           -out=$PLAN_FILE_PATH/$PLAN_FILE \
           -input=false -detailed-exitcode
+        
+        PLAN_FILE_JSON="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json"
+        terraform show -json "${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}" > $PLAN_FILE_JSON
+
+        cat $PLAN_FILE_JSON
+        jq . $PLAN_FILE_JSON
+
         EXIT_CODE=$?
         echo "EXIT_CODE: $EXIT_CODE"
         if [[ "$EXIT_CODE" != "0" ]]; then
