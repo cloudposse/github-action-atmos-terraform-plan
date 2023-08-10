@@ -87,7 +87,7 @@ runs:
       with:
         atmos-version: ${{ inputs.atmos-version }}
         token: ${{ inputs.token }}
-        install-wrapper: true
+        install-wrapper: false
 
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v0
