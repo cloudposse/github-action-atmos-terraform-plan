@@ -162,7 +162,12 @@ runs:
         cd ${{ inputs.component-path }}
         terraform show -json "${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}" > $PLAN_FILE_JSON
 
+        sleep 3
+
         cat $PLAN_FILE_JSON
+
+        sleep 3
+
         jq . $PLAN_FILE_JSON
 
     - name: Configure State AWS Credentials
