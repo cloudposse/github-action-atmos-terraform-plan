@@ -147,115 +147,115 @@ runs:
         EXIT_CODE=$?
         echo "EXIT_CODE: $EXIT_CODE"
         if [[ "$EXIT_CODE" != "0" ]]; then
-          echo "has_changes='true'" >> $GITHUB_OUTPUT
+          echo "has_changes=true" >> $GITHUB_OUTPUT
         else
-          echo "has_changes='false'" >> $GITHUB_OUTPUT
+          echo "has_changes=false" >> $GITHUB_OUTPUT
         fi
         echo "plan_file=$PLAN_FILE" >> $GITHUB_OUTPUT
         echo "plan_file_path=$PLAN_FILE_PATH" >> $GITHUB_OUTPUT
 
-    - name: Configure State AWS Credentials
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-      uses: aws-actions/configure-aws-credentials@v2.2.0
-      with:
-        aws-region: ${{ inputs.aws-region }}
-        role-to-assume: ${{ inputs.terraform-state-role }}
-        role-session-name: "atmos-terraform-state-gitops"
-        mask-aws-account-id: "no"
+    # - name: Configure State AWS Credentials
+    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+    #   uses: aws-actions/configure-aws-credentials@v2.2.0
+    #   with:
+    #     aws-region: ${{ inputs.aws-region }}
+    #     role-to-assume: ${{ inputs.terraform-state-role }}
+    #     role-session-name: "atmos-terraform-state-gitops"
+    #     mask-aws-account-id: "no"
 
-    - name: Store Plan
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
-      id: store-plan
-      with:
-        action: storePlan
-        planPath: ${{ steps.atmos-plan.outputs.plan_file }}
-        component: ${{ inputs.component }}
-        stack: ${{ inputs.stack }}
-        tableName: ${{ inputs.terraform-state-table }}
-        bucketName: ${{ inputs.terraform-state-bucket }}
+    # - name: Store Plan
+    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+    #   uses: cloudposse/github-action-terraform-plan-storage@v1
+    #   id: store-plan
+    #   with:
+    #     action: storePlan
+    #     planPath: ${{ steps.atmos-plan.outputs.plan_file }}
+    #     component: ${{ inputs.component }}
+    #     stack: ${{ inputs.stack }}
+    #     tableName: ${{ inputs.terraform-state-table }}
+    #     bucketName: ${{ inputs.terraform-state-bucket }}
 
-    - name: Store Lockfile
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
-      with:
-        action: storePlan
-        planPath: ${{ inputs.component-path}}/.terraform.lock.hcl
-        component: ${{ inputs.component }}
-        stack: "${{ inputs.stack }}-lockfile"
-        tableName: ${{ inputs.terraform-state-table }}
-        bucketName: ${{ inputs.terraform-state-bucket }}
+    # - name: Store Lockfile
+    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+    #   uses: cloudposse/github-action-terraform-plan-storage@v1
+    #   with:
+    #     action: storePlan
+    #     planPath: ${{ inputs.component-path}}/.terraform.lock.hcl
+    #     component: ${{ inputs.component }}
+    #     stack: "${{ inputs.stack }}-lockfile"
+    #     tableName: ${{ inputs.terraform-state-table }}
+    #     bucketName: ${{ inputs.terraform-state-bucket }}
 
-    - name: Setup Infracost
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
-      uses: infracost/actions/setup@v2
-      with:
-        api-key: ${{ inputs.infracost-api-key }}
+    # - name: Setup Infracost
+    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
+    #   uses: infracost/actions/setup@v2
+    #   with:
+    #     api-key: ${{ inputs.infracost-api-key }}
 
-    - name: Generate Infracost diff
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
-      shell: bash
-      run: |
-        PLAN_FILE_JSON="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json"
+    # - name: Generate Infracost diff
+    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
+    #   shell: bash
+    #   run: |
+    #     PLAN_FILE_JSON="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json"
 
-        cd ${{ inputs.component-path }}
-        terraform show -json $PLAN_FILE > $PLAN_FILE_JSON
+    #     cd ${{ inputs.component-path }}
+    #     terraform show -json $PLAN_FILE > $PLAN_FILE_JSON
 
-        infracost diff \
-          --path=$PLAN_FILE_JSON \
-          --format=diff \
-          --project-name ${{ inputs.stack }}-${{ inputs.component }} \
-          --out-file=/tmp/infracost.txt
-        infracost diff \
-          --path=$PLAN_FILE_JSON \
-          --format=json \
-          --project-name ${{ inputs.stack }}-${{ inputs.component }} \
-          --out-file=/tmp/infracost.json
+    #     infracost diff \
+    #       --path=$PLAN_FILE_JSON \
+    #       --format=diff \
+    #       --project-name ${{ inputs.stack }}-${{ inputs.component }} \
+    #       --out-file=/tmp/infracost.txt
+    #     infracost diff \
+    #       --path=$PLAN_FILE_JSON \
+    #       --format=json \
+    #       --project-name ${{ inputs.stack }}-${{ inputs.component }} \
+    #       --out-file=/tmp/infracost.json
 
-    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) && fromJSON(inputs.debug) }}
-      shell: bash
-      run: |
-        cat ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json
-        cat /tmp/infracost.txt
-        cat /tmp/infracost.json
+    # - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) && fromJSON(inputs.debug) }}
+    #   shell: bash
+    #   run: |
+    #     cat ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json
+    #     cat /tmp/infracost.txt
+    #     cat /tmp/infracost.json
 
-    - name: Set infracost variables
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
-      id: infracost-diff
-      shell: bash
-      run: |
-        if [[ "${{ inputs.enable-infracost }}" == "true" ]]; then
-          INFRACOST_DIFF_TOTAL_MONTHLY_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
-          INFRACOST_DETAILS_DIFF_BREAKDOWN="$(cat /tmp/infracost.txt | base64 --wrap 0)"
-        else
-          INFRACOST_DIFF_TOTAL_MONTHLY_COST="0"
-          INFRACOST_DETAILS_DIFF_BREAKDOWN=""
-        fi
+    # - name: Set infracost variables
+    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
+    #   id: infracost-diff
+    #   shell: bash
+    #   run: |
+    #     if [[ "${{ inputs.enable-infracost }}" == "true" ]]; then
+    #       INFRACOST_DIFF_TOTAL_MONTHLY_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
+    #       INFRACOST_DETAILS_DIFF_BREAKDOWN="$(cat /tmp/infracost.txt | base64 --wrap 0)"
+    #     else
+    #       INFRACOST_DIFF_TOTAL_MONTHLY_COST="0"
+    #       INFRACOST_DETAILS_DIFF_BREAKDOWN=""
+    #     fi
 
-        echo "infracost_details_diff_breakdown=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> "$GITHUB_OUTPUT"
-        echo "infracost_diff_total_monthly_cost=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> "$GITHUB_OUTPUT"
+    #     echo "infracost_details_diff_breakdown=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> "$GITHUB_OUTPUT"
+    #     echo "infracost_diff_total_monthly_cost=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> "$GITHUB_OUTPUT"
 
-    - name: Post Plan
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
-      id: post-plan
-      shell: bash
-      run: |
-        if [[ "${{ inputs.debug }}" == "true" ]]; then
-          LOG_LEVEL="DEBUG"
-        else
-          LOG_LEVEL="INFO"
-        fi
-        cd ${{ inputs.component-path }}
-        tfcmt \
-          --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
-          -owner "${{ github.repository_owner }}" \
-          -repo "${{ github.event.repository.name }}" \
-          -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
-          -var "component:${{ inputs.component }}" \
-          -var "stack:${{ inputs.stack }}" \
-          -var "job:${{ github.job }}" \
-          -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
-          -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
-          --output $GITHUB_STEP_SUMMARY \
-          --log-level $LOG_LEVEL \
-          plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
+    # - name: Post Plan
+    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
+    #   id: post-plan
+    #   shell: bash
+    #   run: |
+    #     if [[ "${{ inputs.debug }}" == "true" ]]; then
+    #       LOG_LEVEL="DEBUG"
+    #     else
+    #       LOG_LEVEL="INFO"
+    #     fi
+    #     cd ${{ inputs.component-path }}
+    #     tfcmt \
+    #       --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
+    #       -owner "${{ github.repository_owner }}" \
+    #       -repo "${{ github.event.repository.name }}" \
+    #       -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
+    #       -var "component:${{ inputs.component }}" \
+    #       -var "stack:${{ inputs.stack }}" \
+    #       -var "job:${{ github.job }}" \
+    #       -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
+    #       -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
+    #       --output $GITHUB_STEP_SUMMARY \
+    #       --log-level $LOG_LEVEL \
+    #       plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
