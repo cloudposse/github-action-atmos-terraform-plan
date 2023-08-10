@@ -143,7 +143,9 @@ runs:
         TERRAFORM_OUTPUT=$(ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
           -out=$PLAN_FILE_PATH/$PLAN_FILE \
-          -input=false -no-color)
+          -lock=false \
+          -input=false \
+          -no-color)
 
         echo "$TERRAFORM_OUTPUT"
 
