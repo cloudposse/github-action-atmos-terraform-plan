@@ -148,9 +148,9 @@ runs:
         echo "$TERRAFORM_OUTPUT"
 
         if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
-          echo "has_changes=true" >> $GITHUB_OUTPUT
-        else
           echo "has_changes=false" >> $GITHUB_OUTPUT
+        else
+          echo "has_changes=true" >> $GITHUB_OUTPUT
         fi
 
         echo "plan_file=$PLAN_FILE" >> $GITHUB_OUTPUT
