@@ -87,7 +87,7 @@ runs:
       with:
         atmos-version: ${{ inputs.atmos-version }}
         token: ${{ inputs.token }}
-        install-wrapper: false
+        install-wrapper: true
 
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v0
@@ -97,7 +97,7 @@ runs:
         stack: ${{ inputs.stack }}
         settings-path: github.actions_enabled
 
-    - name: Check if Action is Enable
+    - name: Check if Action is Enabled
       id: settings
       shell: bash
       run: |
