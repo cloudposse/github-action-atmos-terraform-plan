@@ -14,8 +14,8 @@ inputs:
   component-path:
     description: "The path to the base component. Atmos defines this value as component_path."
     required: true
-  sha:
-    description: "Commit SHA to use when building plan file name. Default: github.sha"
+  plan-id:
+    description: "Suffix that will be used for plan file name to uniquely identify it. Default: github.sha"
     required: true
     default: "${{ github.sha }}"
   terraform-plan-role:
@@ -134,7 +134,7 @@ runs:
       id: atmos-plan
       shell: bash
       run: |
-        PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${{ inputs.sha }}.planfile" | sed 's#/#_#g') 
+        PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${{ inputs.plan-id }}.planfile" | sed 's#/#_#g') 
         PLAN_FILE_PATH=$(pwd)
 
         TERRAFORM_OUTPUT=$(ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
@@ -143,8 +143,6 @@ runs:
           -lock=false \
           -input=false \
           -no-color)
-
-        echo "$TERRAFORM_OUTPUT"
 
         if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
           echo "has_changes=false" >> $GITHUB_OUTPUT
