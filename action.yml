@@ -15,9 +15,9 @@ inputs:
     description: "The path to the base component. Atmos defines this value as component_path."
     required: true
   sha:
-    description: "Commit SHA to use when building plan file name. Default: ${{ github.sha }}"
+    description: "Commit SHA to use when building plan file name. Default: github.sha"
     required: true
-    default: ${{ github.sha }}
+    default: "${{ github.sha }}"
   terraform-plan-role:
     description: "The AWS role to be used to plan Terraform."
     required: true
