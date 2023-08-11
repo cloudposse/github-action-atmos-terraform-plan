@@ -166,24 +166,26 @@ runs:
 
     - name: Store Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
+      uses: cloudposse/github-action-terraform-plan-storage@added-commitsha-overwrite-input
       id: store-plan
       with:
         action: storePlan
         planPath: ${{ steps.atmos-plan.outputs.plan_file }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
+        commitSHA: ${{ inputs.plan-id }}
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Store Lockfile
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
+      uses: cloudposse/github-action-terraform-plan-storage@added-commitsha-overwrite-input
       with:
         action: storePlan
         planPath: ${{ inputs.component-path}}/.terraform.lock.hcl
         component: ${{ inputs.component }}
         stack: "${{ inputs.stack }}-lockfile"
+        commitSHA: ${{ inputs.plan-id }}
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
 
