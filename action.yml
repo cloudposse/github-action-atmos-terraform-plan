@@ -14,10 +14,10 @@ inputs:
   component-path:
     description: "The path to the base component. Atmos defines this value as component_path."
     required: true
-  plan-file:
-    description: "Full name of the plan-file to use. If not set plan-file name will be built by pattern '<stack>-<component>-<github.sha>'. Default: ''"
-    required: false
-    default: ''
+  sha:
+    description: "Commit SHA to use when building plan file name. Default: ${{ github.sha }}"
+    required: true
+    default: ${{ github.sha }}
   terraform-plan-role:
     description: "The AWS role to be used to plan Terraform."
     required: true
@@ -134,12 +134,9 @@ runs:
       id: atmos-plan
       shell: bash
       run: |
-        PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${{ github.sha }}.planfile" | sed 's#/#_#g') 
-        if [ "${{ inputs.plan-file }}" != "" ]; then
-          PLAN_FILE="${{ inputs.plan-file }}"
-        fi
-
+        PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${{ inputs.sha }}.planfile" | sed 's#/#_#g') 
         PLAN_FILE_PATH=$(pwd)
+
         TERRAFORM_OUTPUT=$(ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
           -out=$PLAN_FILE_PATH/$PLAN_FILE \
