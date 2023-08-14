@@ -60,12 +60,6 @@ inputs:
       GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
 outputs:
-  plan-file-path:
-    description: Plan File
-    value: ${{ steps.atmos-plan.outputs.plan_file_path }}
-  plan-file:
-    description: Plan File
-    value: ${{ steps.atmos-plan.outputs.plan_file }}
   has-changes:
     description: Has Changes
     value: ${{ steps.atmos-plan.outputs.has_changes }}
