@@ -130,6 +130,7 @@ this action. For more on setting up those components, see the `gitops` component
 
 | Name | Description | Default | Required |
 |------|-------------|---------|----------|
+| atmos-config-path | The path to the atmos.yaml file | atmos.yaml | false |
 | atmos-version | Atmos version to use for vendoring. Default 'latest' | latest | false |
 | aws-region | AWS region for assuming identity. | us-east-1 | false |
 | component | The name of the component to plan. | N/A | true |
@@ -147,11 +148,6 @@ this action. For more on setting up those components, see the `gitops` component
 | token | Used to pull node distributions for Atmos from Cloud Posse's GitHub repository. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting. | ${{ github.server\_url == 'https://github.com' && github.token \|\| '' }} | false |
 
 
-## Outputs
-
-| Name | Description |
-|------|-------------|
-| has-changes | Has Changes |
 <!-- markdownlint-restore -->
 
 
