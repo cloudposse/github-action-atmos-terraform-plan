@@ -95,7 +95,7 @@ templates:
     ```
     </details>
 terraform:
-  show:
+  plan:
     disable_label: false
     template: |
       {{template "plan_title" .}}
