@@ -59,16 +59,6 @@ inputs:
       not supplied by the user. When running this action on github.com, the default value is sufficient. When running on
       GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
-outputs:
-  plan-file-path:
-    description: Plan File
-    value: ${{ steps.atmos-plan.outputs.plan_file_path }}
-  plan-file:
-    description: Plan File
-    value: ${{ steps.atmos-plan.outputs.plan_file }}
-  has-changes:
-    description: Has Changes
-    value: ${{ steps.atmos-plan.outputs.has_changes }}
 
 runs:
   using: "composite"
@@ -239,7 +229,7 @@ runs:
         echo "infracost_details_diff_breakdown=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> "$GITHUB_OUTPUT"
         echo "infracost_diff_total_monthly_cost=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> "$GITHUB_OUTPUT"
 
-    - name: Post Plan
+    - name: Post Plan to Step Summary
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
       id: post-plan
       shell: bash
@@ -263,3 +253,23 @@ runs:
           --output $GITHUB_STEP_SUMMARY \
           --log-level $LOG_LEVEL \
           plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
+
+    - name: Render Summary
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+      shell: bash
+      run: |
+        cd ${{ inputs.component-path }}
+
+        tfcmt \
+          --config "${{ github.action_path }}/config/atmos_github_issue.yaml" \
+          -owner "${{ github.repository_owner }}" \
+          -repo "${{ github.event.repository.name }}" \
+          -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
+          -var "stack:${{ inputs.stack }}" \
+          -var "component:${{ inputs.component }}" \
+          -var "componentPath:${{ inputs.component-path }}" \
+          -var "planFile:${{ steps.atmos-plan.outputs.plan-file }}" \
+          -var "planId:${{ inputs.plan-id }}" \
+          --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
+          --output $GITHUB_WORKSPACE/github-issues-summaries/${{ inputs.stack }}____${{ inputs.component }}.md \
+          show -- terraform show ${{ steps.atmos-plan.outputs.plan-file-path }}/${{ steps.atmos-plan.outputs.plan-file }}
