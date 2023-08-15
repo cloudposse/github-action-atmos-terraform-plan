@@ -271,5 +271,12 @@ runs:
           -var "planFile:${{ steps.atmos-plan.outputs.plan-file }}" \
           -var "planId:${{ inputs.plan-id }}" \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
-          --output $GITHUB_WORKSPACE/github-issues-summaries/${{ inputs.stack }}____${{ inputs.component }}.md \
+          --output summary/${{ inputs.stack }}____${{ inputs.component }}.md \
           show -- terraform show ${{ steps.atmos-plan.outputs.plan-file-path }}/${{ steps.atmos-plan.outputs.plan-file }}
+
+    - name: Upload Summary Artifact
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: summary
+        path: summary/${{ inputs.stack }}____${{ inputs.component }}.md
