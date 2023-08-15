@@ -274,5 +274,5 @@ runs:
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
       uses: actions/upload-artifact@v3
       with:
-        name: summary
-        path: summary/${{ inputs.stack }}____${{ inputs.component }}.md
+        name: summary-${{ inputs.stack }}____${{ inputs.component }}
+        path: issue.md
