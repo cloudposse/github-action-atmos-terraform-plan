@@ -234,12 +234,8 @@ runs:
       id: post-plan
       shell: bash
       run: |
-        if [[ "${{ inputs.debug }}" == "true" ]]; then
-          LOG_LEVEL="DEBUG"
-        else
-          LOG_LEVEL="INFO"
-        fi
         cd ${{ inputs.component-path }}
+
         tfcmt \
           --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
           -owner "${{ github.repository_owner }}" \
@@ -251,7 +247,7 @@ runs:
           -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
           --output $GITHUB_STEP_SUMMARY \
-          --log-level $LOG_LEVEL \
+          --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
           plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
 
     - name: Render Summary
@@ -272,7 +268,7 @@ runs:
           -var "planId:${{ inputs.plan-id }}" \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
           --output summary/${{ inputs.stack }}____${{ inputs.component }}.md \
-          plan -- terraform show ${{ steps.atmos-plan.outputs.plan-file-path }}/${{ steps.atmos-plan.outputs.plan-file }}
+          plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
 
     - name: Upload Summary Artifact
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
