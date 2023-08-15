@@ -11,6 +11,7 @@
 | debug | Enable action debug mode. Default: 'false' | false | false |
 | enable-infracost | Whether to enable infracost summary. Requires secret `infracost-api-key` to be specified. Default: 'false | false | false |
 | infracost-api-key | Infracost API key | N/A | false |
+| plan-id | Suffix that will be used for plan file name to uniquely identify it. Default: github.sha | ${{ github.sha }} | true |
 | stack | The stack name for the given component. | N/A | true |
 | terraform-plan-role | The AWS role to be used to plan Terraform. | N/A | true |
 | terraform-state-bucket | The S3 Bucket where the planfiles are stored. | N/A | true |
@@ -20,4 +21,9 @@
 | token | Used to pull node distributions for Atmos from Cloud Posse's GitHub repository. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting. | ${{ github.server\_url == 'https://github.com' && github.token \|\| '' }} | false |
 
 
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| has-changes | Has Changes |
 <!-- markdownlint-restore -->

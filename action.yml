@@ -14,6 +14,10 @@ inputs:
   component-path:
     description: "The path to the base component. Atmos defines this value as component_path."
     required: true
+  plan-id:
+    description: "Suffix that will be used for plan file name to uniquely identify it. Default: github.sha"
+    required: true
+    default: "${{ github.sha }}"
   terraform-plan-role:
     description: "The AWS role to be used to plan Terraform."
     required: true
@@ -55,6 +59,16 @@ inputs:
       not supplied by the user. When running this action on github.com, the default value is sufficient. When running on
       GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+outputs:
+  plan-file-path:
+    description: Plan File
+    value: ${{ steps.atmos-plan.outputs.plan_file_path }}
+  plan-file:
+    description: Plan File
+    value: ${{ steps.atmos-plan.outputs.plan_file }}
+  has-changes:
+    description: Has Changes
+    value: ${{ steps.atmos-plan.outputs.has_changes }}
 
 runs:
   using: "composite"
@@ -83,7 +97,7 @@ runs:
         stack: ${{ inputs.stack }}
         settings-path: github.actions_enabled
 
-    - name: Check if Action is Enable
+    - name: Check if Action is Enabled
       id: settings
       shell: bash
       run: |
@@ -120,17 +134,29 @@ runs:
       id: atmos-plan
       shell: bash
       run: |
-        PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${{github.sha}}.planfile" | sed 's#/#_#g') 
+        PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${{ inputs.plan-id }}.planfile" | sed 's#/#_#g') 
         PLAN_FILE_PATH=$(pwd)
-        ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
+
+        TERRAFORM_OUTPUT=$(ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
           -out=$PLAN_FILE_PATH/$PLAN_FILE \
-          -input=false
+          -lock=false \
+          -input=false \
+          -no-color)
+
+        if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+          echo "No changes"
+        else
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+          echo "Found changes"
+        fi
+
         echo "plan_file=$PLAN_FILE" >> $GITHUB_OUTPUT
         echo "plan_file_path=$PLAN_FILE_PATH" >> $GITHUB_OUTPUT
 
     - name: Configure State AWS Credentials
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
       uses: aws-actions/configure-aws-credentials@v2.2.0
       with:
         aws-region: ${{ inputs.aws-region }}
@@ -139,36 +165,38 @@ runs:
         mask-aws-account-id: "no"
 
     - name: Store Plan
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+      uses: cloudposse/github-action-terraform-plan-storage@added-commitsha-overwrite-input
       id: store-plan
       with:
         action: storePlan
         planPath: ${{ steps.atmos-plan.outputs.plan_file }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
+        commitSHA: ${{ inputs.plan-id }}
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Store Lockfile
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+      uses: cloudposse/github-action-terraform-plan-storage@added-commitsha-overwrite-input
       with:
         action: storePlan
         planPath: ${{ inputs.component-path}}/.terraform.lock.hcl
         component: ${{ inputs.component }}
         stack: "${{ inputs.stack }}-lockfile"
+        commitSHA: ${{ inputs.plan-id }}
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Setup Infracost
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) }}
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
       uses: infracost/actions/setup@v2
       with:
         api-key: ${{ inputs.infracost-api-key }}
 
     - name: Generate Infracost diff
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) }}
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
       shell: bash
       run: |
         PLAN_FILE="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}"
@@ -188,7 +216,7 @@ runs:
           --project-name ${{ inputs.stack }}-${{ inputs.component }} \
           --out-file=/tmp/infracost.json
 
-    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(inputs.enable-infracost) && fromJSON(inputs.debug) }}
+    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) && fromJSON(inputs.debug) }}
       shell: bash
       run: |
         cat ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json
@@ -196,7 +224,7 @@ runs:
         cat /tmp/infracost.json
 
     - name: Set infracost variables
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
       id: infracost-diff
       shell: bash
       run: |
@@ -212,7 +240,7 @@ runs:
         echo "infracost_diff_total_monthly_cost=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> "$GITHUB_OUTPUT"
 
     - name: Post Plan
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
       id: post-plan
       shell: bash
       run: |
