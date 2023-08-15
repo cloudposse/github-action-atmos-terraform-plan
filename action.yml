@@ -38,6 +38,10 @@ inputs:
     description: "Atmos version to use for vendoring. Default 'latest'"
     required: false
     default: 'latest'
+  atmos-config-path:
+    description: "The path to the atmos.yaml file"
+    required: false
+    default: atmos.yaml
   terraform-version:
     description: 'The version of Terraform CLI to install. Instead of full version string you can also specify constraint string starting with "<" (for example `<1.13.0`) to install the latest version satisfying the constraint. A value of `latest` will install the latest version of Terraform CLI. Defaults to `latest`.'
     default: 'latest'
@@ -74,6 +78,8 @@ runs:
         node-version: 16
 
     - uses: cloudposse/github-action-setup-atmos@v1
+      env:
+       ATMOS_CLI_CONFIG_PATH: ${{inputs.atmos-config-path}}
       with:
         atmos-version: ${{ inputs.atmos-version }}
         token: ${{ inputs.token }}
