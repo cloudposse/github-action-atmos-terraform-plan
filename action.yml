@@ -276,7 +276,8 @@ runs:
       run: |
         mkdir -p "${{ steps.variables.outputs.artifacts_path }}"
         echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "component-path": "${{ inputs.component-path }}" }' > "${{ steps.variables.outputs.artifacts_path }}/metadata.json"
-        cp "${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file }}" "${{ steps.variables.outputs.artifacts_path }}/terraform.planfile"
+        cp "${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}" "${{ steps.variables.outputs.artifacts_path }}/terraform.planfile"
+        cp "${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_json }}" "${{ steps.variables.outputs.artifacts_path }}/terraform.json"
         cp "${{ steps.variables.outputs.lock_file }}" "${{ steps.variables.outputs.artifacts_path }}/terraform.lockfile"
 
     - name: Upload Artifacts
