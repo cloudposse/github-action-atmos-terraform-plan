@@ -103,7 +103,7 @@ runs:
         PLAN_FILE_PATH=$(pwd)
         PLAN_FILE_JSON="$PLAN_FILE_NAME.json"
         LOCK_FILE="${{ inputs.component-path}}/.terraform.lock.hcl"
-        ARTIFACTS_PATH="plan-artifacts/$STACK_NAME/$COMPONENT_NAME"
+        ARTIFACTS_PATH="plan-artifacts/$STACK_NAME-$COMPONENT_NAME"
 
         echo "stack=$STACK_NAME" >> $GITHUB_OUTPUT
         echo "component=$COMPONENT_NAME" >> $GITHUB_OUTPUT
