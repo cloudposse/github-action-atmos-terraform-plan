@@ -277,7 +277,7 @@ runs:
       shell: bash
       run: |
         mkdir -p "${{ steps.variables.outputs.artifacts_path }}"
-        echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "component-path": "${{ inputs.component-path }}" }' > "${{ steps.variables.outputs.artifacts_path }}/${{ steps.variables.outputs.component_slug }}.metadata.json"
+        echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}" }' > "${{ steps.variables.outputs.artifacts_path }}/${{ steps.variables.outputs.component_slug }}.metadata.json"
         cp "${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}" "${{ steps.variables.outputs.artifacts_path }}/${{ steps.variables.outputs.component_slug }}.terraform.planfile"
         cp "${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_json }}" "${{ steps.variables.outputs.artifacts_path }}/${{ steps.variables.outputs.component_slug }}.terraform.json"
         cp "${{ steps.variables.outputs.lock_file }}" "${{ steps.variables.outputs.artifacts_path }}/${{ steps.variables.outputs.component_slug }}.terraform.lockfile"
