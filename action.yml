@@ -92,6 +92,26 @@ runs:
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
         settings-path: github.actions_enabled
+    
+    - name: Variables
+      id: variables
+      shell: bash
+      run: |
+        STACK_NAME=$(echo "${{ inputs.stack }}" | sed 's#/#_#g')
+        COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
+        PLAN_FILE_NAME="$STACK_NAME-$COMPONENT_NAME-${{ github.sha }}.planfile"
+        PLAN_FILE_PATH=$(pwd)
+        PLAN_FILE_JSON="$PLAN_FILE_NAME.json"
+        LOCK_FILE="${{ inputs.component-path}}/.terraform.lock.hcl"
+        ARTIFACTS_PATH="plan-artifacts/${{ steps.variables.outputs.stack }}/${{ steps.variables.outputs.component }}"
+
+        echo "stack=$STACK_NAME" >> $GITHUB_OUTPUT
+        echo "component=$COMPONENT_NAME" >> $GITHUB_OUTPUT
+        echo "plan_file_name=$PLAN_FILE_NAME" >> $GITHUB_OUTPUT
+        echo "plan_file_path=$PLAN_FILE_PATH" >> $GITHUB_OUTPUT
+        echo "plan_file_json=$PLAN_FILE_JSON" >> $GITHUB_OUTPUT
+        echo "lock_file=$LOCK_FILE" >> $GITHUB_OUTPUT
+        echo "artifacts_path=$ARTIFACTS_PATH" >> $GITHUB_OUTPUT
 
     - name: Check if Action is Enabled
       id: settings
@@ -130,12 +150,11 @@ runs:
       id: atmos-plan
       shell: bash
       run: |
-        PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${{ github.sha }}.planfile" | sed 's#/#_#g') 
-        PLAN_FILE_PATH=$(pwd)
+        PLAN_FILE="${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}"
 
         TERRAFORM_OUTPUT=$(ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
-          -out=$PLAN_FILE_PATH/$PLAN_FILE \
+          -out=$PLAN_FILE \
           -lock=false \
           -input=false \
           -no-color)
@@ -148,8 +167,8 @@ runs:
           echo "Found changes"
         fi
 
-        echo "plan_file=$PLAN_FILE" >> $GITHUB_OUTPUT
-        echo "plan_file_path=$PLAN_FILE_PATH" >> $GITHUB_OUTPUT
+        cd "${{ inputs.component-path }}"     # terraform show should be execute from component dir
+        terraform show -json "$PLAN_FILE" > "$PLAN_FILE.json"
 
     - name: Configure State AWS Credentials
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.persist-plan) }}
@@ -166,7 +185,7 @@ runs:
       id: store-plan
       with:
         action: storePlan
-        planPath: ${{ steps.atmos-plan.outputs.plan_file }}
+        planPath: ${{ steps.variables.outputs.plan_file_name }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
         tableName: ${{ inputs.terraform-state-table }}
@@ -177,7 +196,7 @@ runs:
       uses: cloudposse/github-action-terraform-plan-storage@v1
       with:
         action: storePlan
-        planPath: ${{ inputs.component-path}}/.terraform.lock.hcl
+        planPath: "${{ steps.variables.outputs.lock_file }}"
         component: ${{ inputs.component }}
         stack: "${{ inputs.stack }}-lockfile"
         tableName: ${{ inputs.terraform-state-table }}
@@ -193,28 +212,24 @@ runs:
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
       shell: bash
       run: |
-        PLAN_FILE="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}"
-        PLAN_FILE_JSON="${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json"
-
-        cd ${{ inputs.component-path }}
-        terraform show -json $PLAN_FILE > $PLAN_FILE_JSON
+        PLAN_FILE_JSON="${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_json }}"
 
         infracost diff \
           --path=$PLAN_FILE_JSON \
           --format=diff \
-          --project-name ${{ inputs.stack }}-${{ inputs.component }} \
+          --project-name "${{ inputs.stack }}-${{ inputs.component }}" \
           --out-file=/tmp/infracost.txt
         infracost diff \
           --path=$PLAN_FILE_JSON \
           --format=json \
-          --project-name ${{ inputs.stack }}-${{ inputs.component }} \
+          --project-name "${{ inputs.stack }}-${{ inputs.component }}" \
           --out-file=/tmp/infracost.json
 
     - name: Debug
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) && fromJSON(inputs.debug) }}
       shell: bash
       run: |
-        cat ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json
+        cat ${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_json }}
         cat /tmp/infracost.txt
         cat /tmp/infracost.json
 
@@ -239,7 +254,7 @@ runs:
       id: post-plan
       shell: bash
       run: |
-        cd ${{ inputs.component-path }}
+        cd "${{ inputs.component-path }}"
 
         tfcmt \
           --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
@@ -253,18 +268,20 @@ runs:
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
           --output $GITHUB_STEP_SUMMARY \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
-          plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
+          plan -- terraform show ${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file }}
 
-    - name: Upload Plan
+    - name: Prepare Artifacts
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+      shell: bash
+      run: |
+        mkdir -p "${{ steps.variables.outputs.artifacts_path }}"
+        echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "component-path": "${{ inputs.component-path }}" }' > "${{ steps.variables.outputs.artifacts_path }}/metadata.json"
+        cp "${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file }}" "${{ steps.variables.outputs.artifacts_path }}/terraform.planfile"
+        cp "${{ steps.variables.outputs.lock_file }}" "${{ steps.variables.outputs.artifacts_path }}/terraform.lockfile"
+
+    - name: Upload Artifacts
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
       uses: actions/upload-artifact@v3
       with:
-        name: plan-files
-        path: plan-files/${{ inputs.component-path}}/${{ steps.atmos-plan.outputs.plan_file }}
-
-    - name: Upload Lock File
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-      uses: actions/upload-artifact@v3
-      with:
-        name: lock-files
-        path: lock-files/${{ inputs.component-path}}/.terraform.lock.hcl
+        name: plan-artifacts
+        path: "${{ steps.variables.outputs.artifacts_path }}"
