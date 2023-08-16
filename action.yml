@@ -14,10 +14,6 @@ inputs:
   component-path:
     description: "The path to the base component. Atmos defines this value as component_path."
     required: true
-  plan-id:
-    description: "Suffix that will be used for plan file name to uniquely identify it. Default: github.sha"
-    required: true
-    default: "${{ github.sha }}"
   terraform-plan-role:
     description: "The AWS role to be used to plan Terraform."
     required: true
@@ -46,6 +42,10 @@ inputs:
     description: 'The version of Terraform CLI to install. Instead of full version string you can also specify constraint string starting with "<" (for example `<1.13.0`) to install the latest version satisfying the constraint. A value of `latest` will install the latest version of Terraform CLI. Defaults to `latest`.'
     default: 'latest'
     required: false
+  persist-plan:
+    description: "Specify whether to persist plan file. Default: true"
+    default: 'true'
+    required: true
   enable-infracost:
     description: "Whether to enable infracost summary. Requires secret `infracost-api-key` to be specified. Default: 'false"
     default: 'false'
@@ -130,7 +130,7 @@ runs:
       id: atmos-plan
       shell: bash
       run: |
-        PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${{ inputs.plan-id }}.planfile" | sed 's#/#_#g') 
+        PLAN_FILE=$(echo "${{ inputs.stack }}-${{ inputs.component }}-${{ github.sha }}.planfile" | sed 's#/#_#g') 
         PLAN_FILE_PATH=$(pwd)
 
         TERRAFORM_OUTPUT=$(ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
@@ -152,7 +152,7 @@ runs:
         echo "plan_file_path=$PLAN_FILE_PATH" >> $GITHUB_OUTPUT
 
     - name: Configure State AWS Credentials
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.persist-plan) }}
       uses: aws-actions/configure-aws-credentials@v2.2.0
       with:
         aws-region: ${{ inputs.aws-region }}
@@ -161,27 +161,25 @@ runs:
         mask-aws-account-id: "no"
 
     - name: Store Plan
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-      uses: cloudposse/github-action-terraform-plan-storage@added-commitsha-overwrite-input
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.persist-plan) }}
+      uses: cloudposse/github-action-terraform-plan-storage@v1
       id: store-plan
       with:
         action: storePlan
         planPath: ${{ steps.atmos-plan.outputs.plan_file }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
-        commitSHA: ${{ inputs.plan-id }}
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Store Lockfile
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-      uses: cloudposse/github-action-terraform-plan-storage@added-commitsha-overwrite-input
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.persist-plan) }}
+      uses: cloudposse/github-action-terraform-plan-storage@v1
       with:
         action: storePlan
         planPath: ${{ inputs.component-path}}/.terraform.lock.hcl
         component: ${{ inputs.component }}
         stack: "${{ inputs.stack }}-lockfile"
-        commitSHA: ${{ inputs.plan-id }}
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
 
@@ -212,7 +210,8 @@ runs:
           --project-name ${{ inputs.stack }}-${{ inputs.component }} \
           --out-file=/tmp/infracost.json
 
-    - if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) && fromJSON(inputs.debug) }}
+    - name: Debug
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) && fromJSON(inputs.debug) }}
       shell: bash
       run: |
         cat ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}.json
@@ -256,29 +255,16 @@ runs:
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
           plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
 
-    - name: Render Summary
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-      shell: bash
-      run: |
-        cd ${{ inputs.component-path }}
-
-        tfcmt \
-          --config "${{ github.action_path }}/config/atmos_github_issue.yaml" \
-          -owner "${{ github.repository_owner }}" \
-          -repo "${{ github.event.repository.name }}" \
-          -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
-          -var "stack:${{ inputs.stack }}" \
-          -var "component:${{ inputs.component }}" \
-          -var "componentPath:${{ inputs.component-path }}" \
-          -var "planFile:${{ steps.atmos-plan.outputs.plan-file }}" \
-          -var "planId:${{ inputs.plan-id }}" \
-          --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
-          --output summary-${{ inputs.stack }}____${{ inputs.component }}.md \
-          plan -- terraform show ${{ steps.atmos-plan.outputs.plan_file_path }}/${{ steps.atmos-plan.outputs.plan_file }}
-
-    - name: Upload Summary Artifact
+    - name: Upload Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
       uses: actions/upload-artifact@v3
       with:
-        name: summary
-        path: ${{ inputs.component-path }}/summary-${{ inputs.stack }}____${{ inputs.component }}.md
+        name: plan-files
+        path: plan-files/${{ inputs.component-path}}/${{ steps.atmos-plan.outputs.plan_file }}
+
+    - name: Upload Lock File
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: lock-files
+        path: lock-files/${{ inputs.component-path}}/.terraform.lock.hcl
