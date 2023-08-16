@@ -268,7 +268,7 @@ runs:
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
           --output $GITHUB_STEP_SUMMARY \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
-          plan -- terraform show ${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file }}
+          plan -- terraform show ${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}
 
     - name: Prepare Artifacts
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
