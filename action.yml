@@ -191,11 +191,39 @@ runs:
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
 
-    - name: Debug
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.debug) }}
+    - name: Check
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
       shell: bash
       run: |
-        ls -l
+        PLAN_FILE="${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}"
+        PLAN_FILE_JSON="$PLAN_FILE.json"
+        PLAN_FILE_STORED="${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}.stored"
+        PLAN_FILE_STORED_JSON="$PLAN_FILE_STORED.json"
+
+        if [ -f "$PLAN_FILE_STORED" ]; then
+          cd "${{ inputs.component-path }}"     # terraform show should be execute from component dir
+
+          terraform show -json "$PLAN_FILE_STORED" > "$PLAN_FILE_STORED_JSON"
+
+          cat "$PLAN_FILE_STORED_JSON"
+          cat "$PLAN_FILE_JSON"
+
+          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_JSON" > current.json
+          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_STORED_JSON" > stored.json
+
+          MD5_CURRENT=$(md5sum current.json | awk '{ print $1 }')
+          MD5_STORED=$(md5sum stored.json | awk '{ print $1 }')
+
+          if [ "$MD5_CURRENT" == "$MD5_STORED" ]; then
+            echo "files are equal"
+            echo "files should not be stored"
+          else
+            echo "files are different"
+            echo "files should be stored again"
+          fi
+        else
+          echo "files should be stored"
+        fi
 
     # - name: Store Plan
     #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
