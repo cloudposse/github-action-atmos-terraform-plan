@@ -356,3 +356,10 @@ runs:
       with:
         name: plan-artifacts
         path: "${{ steps.variables.outputs.artifacts_path }}"
+
+    - name: Fail
+      shell: bash
+      run: |
+        # failing intentionally
+        # need for debugging
+        exit 1
