@@ -218,8 +218,8 @@ runs:
           MD5_CURRENT=$(md5sum current.json | awk '{ print $1 }')
           MD5_STORED=$(md5sum stored.json | awk '{ print $1 }')
 
-          echo $MD5_CURRENT
-          echo $MD5_STORED
+          echo "MD5_CURRENT: $MD5_CURRENT"
+          echo "MD5_STORE: $MD5_STORED"
 
           if [ "$MD5_CURRENT" == "$MD5_STORED" ]; then
             echo "files are equal"
