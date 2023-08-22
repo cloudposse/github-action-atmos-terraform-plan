@@ -68,6 +68,7 @@ runs:
     - uses: hashicorp/setup-terraform@v2
       with:
         terraform_version: ${{ inputs.terraform-version }}
+        terraform_wrapper: false
 
     - uses: actions/setup-node@v3
       with:
@@ -165,7 +166,6 @@ runs:
           echo "Found changes"
         fi
 
-        export TF_LOG=INFO
         cd "${{ inputs.component-path }}"     # terraform show should be execute from component dir
         terraform show -json "$PLAN_FILE" > "$PLAN_FILE.json" 2> error.log
 
@@ -204,7 +204,6 @@ runs:
         if [ -f "$PLAN_FILE_STORED" ]; then
           cd "${{ inputs.component-path }}"     # terraform show should be execute from component dir
 
-          export TF_LOG=INFO
           terraform show -json "$PLAN_FILE_STORED" > "$PLAN_FILE_STORED_JSON" 2> error.log
 
           cat "$PLAN_FILE_STORED_JSON"
