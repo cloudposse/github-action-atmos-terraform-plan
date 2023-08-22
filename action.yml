@@ -194,6 +194,7 @@ runs:
 
     - name: Check
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+      id: compare-plans
       shell: bash
       run: |
         PLAN_FILE="${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}"
@@ -206,14 +207,8 @@ runs:
 
           terraform show -json "$PLAN_FILE_STORED" > "$PLAN_FILE_STORED_JSON" 2> error.log
 
-          cat "$PLAN_FILE_STORED_JSON"
-          cat "$PLAN_FILE_JSON"
-
-          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_JSON" > current.json
-          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_STORED_JSON" > stored.json
-
-          cat current.json
-          cat stored.json
+          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_JSON" | jq 'del(.timestamp)' > current.json
+          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_STORED_JSON" | jq 'del(.timestamp)' > stored.json
 
           MD5_CURRENT=$(md5sum current.json | awk '{ print $1 }')
           MD5_STORED=$(md5sum stored.json | awk '{ print $1 }')
@@ -224,36 +219,38 @@ runs:
           if [ "$MD5_CURRENT" == "$MD5_STORED" ]; then
             echo "files are equal"
             echo "files should not be stored"
+            echo "store_plans=false" >> $GITHUB_OUTPUT
           else
             echo "files are different"
             echo "files should be stored again"
           fi
         else
+          echo "store_plans=true" >> $GITHUB_OUTPUT
           echo "files should be stored"
         fi
 
-    # - name: Store Plan
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-    #   uses: cloudposse/github-action-terraform-plan-storage@v1
-    #   id: store-plan
-    #   with:
-    #     action: storePlan
-    #     planPath: ${{ steps.variables.outputs.plan_file_name }}
-    #     component: ${{ inputs.component }}
-    #     stack: ${{ inputs.stack }}
-    #     tableName: ${{ inputs.terraform-state-table }}
-    #     bucketName: ${{ inputs.terraform-state-bucket }}
+    - name: Store Plan
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(steps.compare-plans.outputs.store_plans) }}
+      uses: cloudposse/github-action-terraform-plan-storage@v1
+      id: store-plan
+      with:
+        action: storePlan
+        planPath: ${{ steps.variables.outputs.plan_file_name }}
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        tableName: ${{ inputs.terraform-state-table }}
+        bucketName: ${{ inputs.terraform-state-bucket }}
 
-    # - name: Store Lockfile
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-    #   uses: cloudposse/github-action-terraform-plan-storage@v1
-    #   with:
-    #     action: storePlan
-    #     planPath: "${{ steps.variables.outputs.lock_file }}"
-    #     component: ${{ inputs.component }}
-    #     stack: "${{ inputs.stack }}-lockfile"
-    #     tableName: ${{ inputs.terraform-state-table }}
-    #     bucketName: ${{ inputs.terraform-state-bucket }}
+    - name: Store Lockfile
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+      uses: cloudposse/github-action-terraform-plan-storage@v1
+      with:
+        action: storePlan
+        planPath: "${{ steps.variables.outputs.lock_file }}"
+        component: ${{ inputs.component }}
+        stack: "${{ inputs.stack }}-lockfile"
+        tableName: ${{ inputs.terraform-state-table }}
+        bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Prepare Artifacts
       shell: bash
