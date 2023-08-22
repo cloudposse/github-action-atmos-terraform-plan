@@ -180,7 +180,7 @@ runs:
 
     - name: Retrieve Plan
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
+      uses: cloudposse/github-action-terraform-plan-storage@added-commitsha-overwrite-input
       id: retrieve-plan
       continue-on-error: true
       with:
