@@ -242,7 +242,7 @@ runs:
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Store Lockfile
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(steps.compare-plans.outputs.store_plans) }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       with:
         action: storePlan
@@ -253,6 +253,7 @@ runs:
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Prepare Artifacts
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && !fromJSON(steps.compare-plans.outputs.store_plans) }}
       shell: bash
       run: |
         mkdir -p artifacts
