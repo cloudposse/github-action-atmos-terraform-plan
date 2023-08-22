@@ -121,29 +121,19 @@ runs:
           echo "actions_enabled=false" >> $GITHUB_OUTPUT
         fi
 
-    # setup-tfcmt requires this PATH update when running on self-hosted (amazon linux)
-    # https://github.com/shmokmt/actions-setup-tfcmt/blob/main/action.yml#L11C1-L12C1
-    - name: Update path
-      shell: bash
-      run: |
-        echo "/usr/local/bin" >> $GITHUB_PATH
+    # # setup-tfcmt requires this PATH update when running on self-hosted (amazon linux)
+    # # https://github.com/shmokmt/actions-setup-tfcmt/blob/main/action.yml#L11C1-L12C1
+    # - name: Update path
+    #   shell: bash
+    #   run: |
+    #     echo "/usr/local/bin" >> $GITHUB_PATH
 
-    - name: Variables
-      shell: bash
-      run: |
-        env
-
-    - name: Setup tfcmt
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
-      uses: shmokmt/actions-setup-tfcmt@v2
-      with:
-        version: v4.4.1
+    # - name: Setup tfcmt
+    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
+    #   uses: shmokmt/actions-setup-tfcmt@v2
+    #   with:
+    #     version: v4.4.1
     
-    - name: Variables
-      shell: bash
-      run: |
-        env
-
     - name: Configure Plan AWS Credentials
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
       uses: aws-actions/configure-aws-credentials@v2.2.0
@@ -200,11 +190,6 @@ runs:
         stack: ${{ inputs.stack }}
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
-
-    - name: Variables
-      shell: bash
-      run: |
-        env
 
     - name: Check
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
