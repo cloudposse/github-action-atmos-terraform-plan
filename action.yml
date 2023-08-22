@@ -232,28 +232,28 @@ runs:
           echo "files should be stored"
         fi
 
-    - name: Store Plan
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
-      id: store-plan
-      with:
-        action: storePlan
-        planPath: ${{ steps.variables.outputs.plan_file_name }}
-        component: ${{ inputs.component }}
-        stack: ${{ inputs.stack }}
-        tableName: ${{ inputs.terraform-state-table }}
-        bucketName: ${{ inputs.terraform-state-bucket }}
+    # - name: Store Plan
+    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+    #   uses: cloudposse/github-action-terraform-plan-storage@v1
+    #   id: store-plan
+    #   with:
+    #     action: storePlan
+    #     planPath: ${{ steps.variables.outputs.plan_file_name }}
+    #     component: ${{ inputs.component }}
+    #     stack: ${{ inputs.stack }}
+    #     tableName: ${{ inputs.terraform-state-table }}
+    #     bucketName: ${{ inputs.terraform-state-bucket }}
 
-    - name: Store Lockfile
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
-      with:
-        action: storePlan
-        planPath: "${{ steps.variables.outputs.lock_file }}"
-        component: ${{ inputs.component }}
-        stack: "${{ inputs.stack }}-lockfile"
-        tableName: ${{ inputs.terraform-state-table }}
-        bucketName: ${{ inputs.terraform-state-bucket }}
+    # - name: Store Lockfile
+    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+    #   uses: cloudposse/github-action-terraform-plan-storage@v1
+    #   with:
+    #     action: storePlan
+    #     planPath: "${{ steps.variables.outputs.lock_file }}"
+    #     component: ${{ inputs.component }}
+    #     stack: "${{ inputs.stack }}-lockfile"
+    #     tableName: ${{ inputs.terraform-state-table }}
+    #     bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Prepare Artifacts
       shell: bash
