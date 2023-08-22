@@ -259,6 +259,8 @@ runs:
       shell: bash
       run: |
         mkdir -p artifacts
+        cp ${{ inputs.component-path }}/current.json artifacts/
+        cp ${{ inputs.component-path }}/stored.json artifacts/
         PLAN_FILE="${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}"
         PLAN_FILE_JSON="$PLAN_FILE.json"
         PLAN_FILE_STORED="${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}.stored"
