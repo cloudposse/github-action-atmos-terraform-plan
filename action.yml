@@ -223,6 +223,7 @@ runs:
           else
             echo "files are different"
             echo "files should be stored again"
+            echo "store_plans=true" >> $GITHUB_OUTPUT
           fi
         else
           echo "store_plans=true" >> $GITHUB_OUTPUT
