@@ -166,7 +166,7 @@ runs:
         fi
 
         cd "${{ inputs.component-path }}"     # terraform show should be execute from component dir
-        terraform show -json "$PLAN_FILE" > "$PLAN_FILE.json"
+        terraform show -json "$PLAN_FILE" > "$PLAN_FILE.json" 2> error.log
 
     - name: Configure State AWS Credentials
       if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
@@ -203,7 +203,7 @@ runs:
         if [ -f "$PLAN_FILE_STORED" ]; then
           cd "${{ inputs.component-path }}"     # terraform show should be execute from component dir
 
-          terraform show -json "$PLAN_FILE_STORED" > "$PLAN_FILE_STORED_JSON"
+          terraform show -json "$PLAN_FILE_STORED" > "$PLAN_FILE_STORED_JSON" 2> error.log
 
           cat "$PLAN_FILE_STORED_JSON"
           cat "$PLAN_FILE_JSON"
