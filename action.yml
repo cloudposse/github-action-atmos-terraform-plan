@@ -209,25 +209,25 @@ runs:
           cat "$PLAN_FILE_STORED_JSON"
           cat "$PLAN_FILE_JSON"
 
-          # jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_JSON" > current.json
-          # jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_STORED_JSON" > stored.json
+          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_JSON" > current.json
+          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_STORED_JSON" > stored.json
 
-          # cat current.json
-          # cat stored.json
+          cat current.json
+          cat stored.json
 
-          # MD5_CURRENT=$(md5sum current.json | awk '{ print $1 }')
-          # MD5_STORED=$(md5sum stored.json | awk '{ print $1 }')
+          MD5_CURRENT=$(md5sum current.json | awk '{ print $1 }')
+          MD5_STORED=$(md5sum stored.json | awk '{ print $1 }')
 
-          # echo $MD5_CURRENT
-          # echo $MD5_STORED
+          echo $MD5_CURRENT
+          echo $MD5_STORED
 
-          # if [ "$MD5_CURRENT" == "$MD5_STORED" ]; then
-          #   echo "files are equal"
-          #   echo "files should not be stored"
-          # else
-          #   echo "files are different"
-          #   echo "files should be stored again"
-          # fi
+          if [ "$MD5_CURRENT" == "$MD5_STORED" ]; then
+            echo "files are equal"
+            echo "files should not be stored"
+          else
+            echo "files are different"
+            echo "files should be stored again"
+          fi
         else
           echo "files should be stored"
         fi
