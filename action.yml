@@ -208,51 +208,69 @@ runs:
           cat "$PLAN_FILE_STORED_JSON"
           cat "$PLAN_FILE_JSON"
 
-          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_JSON" > current.json
-          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_STORED_JSON" > stored.json
+          # jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_JSON" > current.json
+          # jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_STORED_JSON" > stored.json
 
-          cat current.json
-          cat stored.json
+          # cat current.json
+          # cat stored.json
 
-          MD5_CURRENT=$(md5sum current.json | awk '{ print $1 }')
-          MD5_STORED=$(md5sum stored.json | awk '{ print $1 }')
+          # MD5_CURRENT=$(md5sum current.json | awk '{ print $1 }')
+          # MD5_STORED=$(md5sum stored.json | awk '{ print $1 }')
 
-          echo $MD5_CURRENT
-          echo $MD5_STORED
+          # echo $MD5_CURRENT
+          # echo $MD5_STORED
 
-          if [ "$MD5_CURRENT" == "$MD5_STORED" ]; then
-            echo "files are equal"
-            echo "files should not be stored"
-          else
-            echo "files are different"
-            echo "files should be stored again"
-          fi
+          # if [ "$MD5_CURRENT" == "$MD5_STORED" ]; then
+          #   echo "files are equal"
+          #   echo "files should not be stored"
+          # else
+          #   echo "files are different"
+          #   echo "files should be stored again"
+          # fi
         else
           echo "files should be stored"
         fi
 
-    - name: Store Plan
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
-      id: store-plan
-      with:
-        action: storePlan
-        planPath: ${{ steps.variables.outputs.plan_file_name }}
-        component: ${{ inputs.component }}
-        stack: ${{ inputs.stack }}
-        tableName: ${{ inputs.terraform-state-table }}
-        bucketName: ${{ inputs.terraform-state-bucket }}
+    - name: Prepare Artifacts
+      shell: bash
+      run: |
+        mkdir -p artifacts
+        PLAN_FILE="${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}"
+        PLAN_FILE_JSON="$PLAN_FILE.json"
+        PLAN_FILE_STORED="${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}.stored"
+        PLAN_FILE_STORED_JSON="$PLAN_FILE_STORED.json"
+        cp "$PLAN_FILE_JSON" artifacts/
+        cp "$PLAN_FILE_STORED_JSON" artifacts/
 
-    - name: Store Lockfile
-      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
       with:
-        action: storePlan
-        planPath: "${{ steps.variables.outputs.lock_file }}"
-        component: ${{ inputs.component }}
-        stack: "${{ inputs.stack }}-lockfile"
-        tableName: ${{ inputs.terraform-state-table }}
-        bucketName: ${{ inputs.terraform-state-bucket }}
+        name: plan-artifacts
+        path: artifacts
+
+
+    # - name: Store Plan
+    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+    #   uses: cloudposse/github-action-terraform-plan-storage@v1
+    #   id: store-plan
+    #   with:
+    #     action: storePlan
+    #     planPath: ${{ steps.variables.outputs.plan_file_name }}
+    #     component: ${{ inputs.component }}
+    #     stack: ${{ inputs.stack }}
+    #     tableName: ${{ inputs.terraform-state-table }}
+    #     bucketName: ${{ inputs.terraform-state-bucket }}
+
+    # - name: Store Lockfile
+    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+    #   uses: cloudposse/github-action-terraform-plan-storage@v1
+    #   with:
+    #     action: storePlan
+    #     planPath: "${{ steps.variables.outputs.lock_file }}"
+    #     component: ${{ inputs.component }}
+    #     stack: "${{ inputs.stack }}-lockfile"
+    #     tableName: ${{ inputs.terraform-state-table }}
+    #     bucketName: ${{ inputs.terraform-state-bucket }}
 
     # - name: Setup Infracost
     #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
@@ -332,9 +350,9 @@ runs:
     #     cp "${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_json }}" "${{ steps.variables.outputs.artifacts_path }}/${{ steps.variables.outputs.component_slug }}.terraform.json"
     #     cp "${{ steps.variables.outputs.lock_file }}" "${{ steps.variables.outputs.artifacts_path }}/${{ steps.variables.outputs.component_slug }}.terraform.lockfile"
 
-    # - name: Upload Artifacts
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: plan-artifacts
-    #     path: "${{ steps.variables.outputs.artifacts_path }}"
+    - name: Upload Artifacts
+      if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: plan-artifacts
+        path: "${{ steps.variables.outputs.artifacts_path }}"
