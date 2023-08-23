@@ -203,8 +203,8 @@ runs:
       if: env.HAS_CHANGES == 'true'
       shell: bash
       run: |
-        PLAN_FILE="${{ steps.vars.outputs.plan_file }}"
-        PLAN_FILE_STORED="${{ steps.vars.outputs.plan_file }}.stored"
+        PLAN_FILE="$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}"
+        PLAN_FILE_STORED="$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}.stored"
 
         if [ -f "$PLAN_FILE_STORED" ]; then
           cd "${{ inputs.component-path }}"
@@ -237,7 +237,7 @@ runs:
       id: store-plan
       with:
         action: storePlan
-        planPath: ${{ steps.vars.outputs.plan_file }}
+        planPath: "$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}"
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
         tableName: ${{ inputs.terraform-state-table }}
