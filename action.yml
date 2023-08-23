@@ -86,7 +86,7 @@ runs:
         token: ${{ inputs.token }}
         install-wrapper: false
 
-    - name: Initialize Job State
+    - name: Define Job Control State Variables
       shell: bash
       run: |
         echo "ACTIONS_ENABLED='false'" >> $GITHUB_ENV
@@ -100,127 +100,109 @@ runs:
         stack: ${{ inputs.stack }}
         settings-path: github.actions_enabled
     
-    - name: Check if Action is Enabled
+    - name: Check If GitHub Actions are Enabled For Component
       shell: bash
       run: |
-        [[ "${{ steps.atmos-settings.outputs.value }}" == "true" ]] && echo "ACTIONS_ENABLED='true'" >> $GITHUB_ENV || echo "ACTIONS_ENABLED='false'" >> $GITHUB_ENV
-
         if [[ "${{ steps.atmos-settings.outputs.value }}" == "true" ]]; then
           echo "ACTIONS_ENABLED=true" >> $GITHUB_ENV
         else
           echo "ACTIONS_ENABLED=false" >> $GITHUB_ENV
         fi
 
-    - name: Component Enabled
+    - name: Update Global Path for tfcmt
       if: env.ACTIONS_ENABLED == 'true'
       shell: bash
       run: |
-        echo "Component enabled"
+        # setup-tfcmt requires this PATH update when running on self-hosted (amazon linux) https://github.com/shmokmt/actions-setup-tfcmt/blob/main/action.yml#L11C1-L12C1
+        echo "/usr/local/bin" >> $GITHUB_PATH
 
-    - name: Component Disabled
-      if: env.ACTIONS_ENABLED == 'false'
+    - name: Setup tfcmt
+      if: env.ACTIONS_ENABLED == 'true'
+      uses: shmokmt/actions-setup-tfcmt@v2
+      with:
+        version: v4.4.1
+
+    - name: Define Job Variables
+      if: env.ACTIONS_ENABLED == 'true'
+      id: vars
       shell: bash
       run: |
-        echo "Component disabled"
+        STACK_NAME=$(echo "${{ inputs.stack }}" | sed 's#/#_#g')
+        COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
+        COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
+        PLAN_FILE_NAME="$COMPONENT_SLUG-${{ github.sha }}.planfile"
+        PLAN_FILE_PATH=$(pwd)
+        LOCK_FILE="${{ inputs.component-path}}/.terraform.lock.hcl"
 
-    - name: Print Env
+        echo "stack_name=$STACK_NAME" >> $GITHUB_OUTPUT
+        echo "component_name=$COMPONENT_NAME" >> $GITHUB_OUTPUT
+        echo "component_slug=$COMPONENT_SLUG" >> $GITHUB_OUTPUT
+        echo "plan_file_name=$PLAN_FILE_NAME" >> $GITHUB_OUTPUT
+        echo "plan_file_path=$PLAN_FILE_PATH" >> $GITHUB_OUTPUT
+        echo "lock_file=$LOCK_FILE" >> $GITHUB_OUTPUT
+
+    - name: Configure Plan AWS Credentials
+      if: env.ACTIONS_ENABLED == 'true'
+      uses: aws-actions/configure-aws-credentials@v2.2.0
+      with:
+        aws-region: ${{ inputs.aws-region }}
+        role-to-assume: ${{ inputs.terraform-plan-role }}
+        role-session-name: "atmos-terraform-plan-gitops"
+        mask-aws-account-id: "no"
+
+    - name: Atmos Terraform Plan
+      if: env.ACTIONS_ENABLED == 'true'
+      id: atmos-plan
       shell: bash
       run: |
-        echo "env.ACTIONS_ENABLED=${{ env.ACTIONS_ENABLED }}"
-        env
+        PLAN_FILE="${{ steps.vars.outputs.plan_file_path }}/${{ steps.vars.outputs.plan_file_name }}"
 
-    # - name: Variables
-    #   id: variables
-    #   shell: bash
-    #   run: |
-    #     STACK_NAME=$(echo "${{ inputs.stack }}" | sed 's#/#_#g')
-    #     COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
-    #     COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
-    #     PLAN_FILE_NAME="$STACK_NAME-$COMPONENT_NAME-${{ github.sha }}.planfile"
-    #     PLAN_FILE_PATH=$(pwd)
-    #     PLAN_FILE_JSON="$PLAN_FILE_NAME.json"
-    #     LOCK_FILE="${{ inputs.component-path}}/.terraform.lock.hcl"
-    #     ARTIFACTS_PATH="plan-artifacts/$STACK_NAME-$COMPONENT_NAME"
+        TERRAFORM_OUTPUT=$(ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
+          --stack ${{ inputs.stack }} \
+          -out=$PLAN_FILE \
+          -lock=false \
+          -input=false \
+          -no-color)
 
-    #     echo "stack=$STACK_NAME" >> $GITHUB_OUTPUT
-    #     echo "component=$COMPONENT_NAME" >> $GITHUB_OUTPUT
-    #     echo "component_slug=$COMPONENT_SLUG" >> $GITHUB_OUTPUT
-    #     echo "plan_file_name=$PLAN_FILE_NAME" >> $GITHUB_OUTPUT
-    #     echo "plan_file_path=$PLAN_FILE_PATH" >> $GITHUB_OUTPUT
-    #     echo "plan_file_json=$PLAN_FILE_JSON" >> $GITHUB_OUTPUT
-    #     echo "lock_file=$LOCK_FILE" >> $GITHUB_OUTPUT
-    #     echo "artifacts_path=$ARTIFACTS_PATH" >> $GITHUB_OUTPUT
+        if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
+          echo "HAS_CHANGES=false" >> $GITHUB_ENV
+          echo "No changes"
+        else
+          echo "HAS_CHANGES=true" >> $GITHUB_ENV
+          echo "Found changes"
+        fi
 
+    - name: Convert PLANFILE to JSON
+      if: env.HAS_CHANGES == 'true'
+      shell: bash
+      run: |
+        PLAN_FILE="${{ steps.vars.outputs.plan_file_path }}/${{ steps.vars.outputs.plan_file_name }}"
 
-    # # setup-tfcmt requires this PATH update when running on self-hosted (amazon linux)
-    # # https://github.com/shmokmt/actions-setup-tfcmt/blob/main/action.yml#L11C1-L12C1
-    # - name: Update path
-    #   shell: bash
-    #   run: |
-    #     echo "/usr/local/bin" >> $GITHUB_PATH
+        cd "${{ inputs.component-path }}"
+        terraform show -json "$PLAN_FILE" > "$PLAN_FILE.json"
 
-    # - name: Setup tfcmt
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
-    #   uses: shmokmt/actions-setup-tfcmt@v2
-    #   with:
-    #     version: v4.4.1
-    
-    # - name: Configure Plan AWS Credentials
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
-    #   uses: aws-actions/configure-aws-credentials@v2.2.0
-    #   with:
-    #     aws-region: ${{ inputs.aws-region }}
-    #     role-to-assume: ${{ inputs.terraform-plan-role }}
-    #     role-session-name: "atmos-terraform-plan-gitops"
-    #     mask-aws-account-id: "no"
+    - name: Configure State AWS Credentials
+      if: env.HAS_CHANGES == 'true'
+      uses: aws-actions/configure-aws-credentials@v2.2.0
+      with:
+        aws-region: ${{ inputs.aws-region }}
+        role-to-assume: ${{ inputs.terraform-state-role }}
+        role-session-name: "atmos-terraform-state-gitops"
+        mask-aws-account-id: "no"
 
-    # - name: Atmos Terraform Plan
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) }}
-    #   id: atmos-plan
-    #   shell: bash
-    #   run: |
-    #     PLAN_FILE="${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}"
-
-    #     TERRAFORM_OUTPUT=$(ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
-    #       --stack ${{ inputs.stack }} \
-    #       -out=$PLAN_FILE \
-    #       -lock=false \
-    #       -input=false \
-    #       -no-color)
-
-    #     if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
-    #       echo "has_changes=false" >> $GITHUB_OUTPUT
-    #       echo "No changes"
-    #     else
-    #       echo "has_changes=true" >> $GITHUB_OUTPUT
-    #       echo "Found changes"
-    #     fi
-
-    #     cd "${{ inputs.component-path }}"     # terraform show should be execute from component dir
-    #     terraform show -json "$PLAN_FILE" > "$PLAN_FILE.json" 2> error.log
-
-    # - name: Configure State AWS Credentials
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-    #   uses: aws-actions/configure-aws-credentials@v2.2.0
-    #   with:
-    #     aws-region: ${{ inputs.aws-region }}
-    #     role-to-assume: ${{ inputs.terraform-state-role }}
-    #     role-session-name: "atmos-terraform-state-gitops"
-    #     mask-aws-account-id: "no"
-
-    # - name: Retrieve Plan
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-    #   uses: cloudposse/github-action-terraform-plan-storage@added-commitsha-overwrite-input
-    #   id: retrieve-plan
-    #   continue-on-error: true
-    #   with:
-    #     action: getPlan
-    #     planPath: ./${{ steps.variables.outputs.plan_file_name }}.stored
-    #     commitSHA: ${{ github.sha }}
-    #     component: ${{ inputs.component }}
-    #     stack: ${{ inputs.stack }}
-    #     tableName: ${{ inputs.terraform-state-table }}
-    #     bucketName: ${{ inputs.terraform-state-bucket }}
+    - name: Retrieve Plan
+      if: env.HAS_CHANGES == 'true'
+      uses: cloudposse/github-action-terraform-plan-storage@added-commitsha-overwrite-input
+      id: retrieve-plan
+      continue-on-error: true
+      with:
+        action: getPlan
+        planPath: ./${{ steps.variables.outputs.plan_file_name }}.stored
+        commitSHA: ${{ github.sha }}
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        tableName: ${{ inputs.terraform-state-table }}
+        bucketName: ${{ inputs.terraform-state-bucket }}
 
     # - name: Check
     #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
