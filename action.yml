@@ -118,7 +118,7 @@ runs:
         echo "Component enabled"
 
     - name: Component Disabled
-      if: env.ACTIONS_ENABLED == 'false'
+      if: env.ACTIONS_ENABLED != 'false'
       shell: bash
       run: |
         echo "Component disabled"
@@ -126,6 +126,7 @@ runs:
     - name: Print Env
       shell: bash
       run: |
+        echo "env.ACTIONS_ENABLED=${{ env.ACTIONS_ENABLED }}"
         env
 
     # - name: Variables
