@@ -156,7 +156,7 @@ runs:
       run: |
         TERRAFORM_OUTPUT=$(ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
-          -out="${{ steps.vars.outputs.plan_file }}" \
+          -out="$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}" \
           -lock=false \
           -input=false \
           -no-color)
