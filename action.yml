@@ -105,6 +105,12 @@ runs:
       run: |
         [[ "${{ steps.atmos-settings.outputs.value }}" == "true" ]] && echo "ACTIONS_ENABLED='true'" >> $GITHUB_ENV || echo "ACTIONS_ENABLED='false'" >> $GITHUB_ENV
 
+        if [[ "${{ steps.atmos-settings.outputs.value }}" == "true" ]]; then
+          echo "ACTIONS_ENABLED='true'" >> $GITHUB_ENV
+        else
+          echo "ACTIONS_ENABLED='false'" >> $GITHUB_ENV
+        fi
+
     - name: Component Enabled
       if: env.ACTIONS_ENABLED == 'true'
       shell: bash
@@ -116,6 +122,11 @@ runs:
       shell: bash
       run: |
         echo "Component disabled"
+
+    - name: Print Env
+      shell: bash
+      run: |
+        env
 
     # - name: Variables
     #   id: variables
