@@ -337,14 +337,14 @@ runs:
           plan -- terraform show ${{ steps.vars.outputs.plan_file }}
 
     - name: Prepare Component Metadata
-      if: env.NEW_PLAN_FOUND == 'true' && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
+      if: env.HAS_CHANGES == 'true' && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
       shell: bash
       run: |
         mkdir -p plan-artifacts
         echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}" }' > "plan-artifacts/${{ steps.vars.outputs.component_slug }}.metadata.json"
 
     - name: Generate GitHub Issue Description for Drift Detection
-      if: env.NEW_PLAN_FOUND == 'true' && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
+      if: env.HAS_CHANGES == 'true' && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
       shell: bash
       run: |
         cd "${{ inputs.component-path }}"
@@ -366,7 +366,7 @@ runs:
           plan -- terraform show ${{ steps.vars.outputs.plan_file }}
 
     - name: Upload Artifacts
-      if: env.NEW_PLAN_FOUND == 'true' && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
+      if: env.HAS_CHANGES == 'true' && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
       uses: actions/upload-artifact@v3
       with:
         name: plan-artifacts
