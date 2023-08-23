@@ -89,8 +89,9 @@ runs:
     - name: Define Job Control State Variables
       shell: bash
       run: |
-        echo "ACTIONS_ENABLED='false'" >> $GITHUB_ENV
-        echo "HAS_CHANGES='false'" >> $GITHUB_ENV
+        echo "ACTIONS_ENABLED=false" >> $GITHUB_ENV
+        echo "HAS_CHANGES=false" >> $GITHUB_ENV
+        echo "NEW_PLAN_FOUND=false" >> $GITHUB_ENV
 
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v0
@@ -130,15 +131,13 @@ runs:
         STACK_NAME=$(echo "${{ inputs.stack }}" | sed 's#/#_#g')
         COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
         COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
-        PLAN_FILE_NAME="$COMPONENT_SLUG-${{ github.sha }}.planfile"
-        PLAN_FILE_PATH=$(pwd)
+        PLAN_FILE="$COMPONENT_SLUG-${{ github.sha }}.planfile"
         LOCK_FILE="${{ inputs.component-path}}/.terraform.lock.hcl"
 
         echo "stack_name=$STACK_NAME" >> $GITHUB_OUTPUT
         echo "component_name=$COMPONENT_NAME" >> $GITHUB_OUTPUT
         echo "component_slug=$COMPONENT_SLUG" >> $GITHUB_OUTPUT
-        echo "plan_file_name=$PLAN_FILE_NAME" >> $GITHUB_OUTPUT
-        echo "plan_file_path=$PLAN_FILE_PATH" >> $GITHUB_OUTPUT
+        echo "plan_file=$PLAN_FILE" >> $GITHUB_OUTPUT
         echo "lock_file=$LOCK_FILE" >> $GITHUB_OUTPUT
 
     - name: Configure Plan AWS Credentials
@@ -155,18 +154,16 @@ runs:
       id: atmos-plan
       shell: bash
       run: |
-        PLAN_FILE="${{ steps.vars.outputs.plan_file_path }}/${{ steps.vars.outputs.plan_file_name }}"
-
         TERRAFORM_OUTPUT=$(ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
-          -out=$PLAN_FILE \
+          -out="${{ steps.vars.outputs.plan_file }}" \
           -lock=false \
           -input=false \
           -no-color)
 
         if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
           echo "HAS_CHANGES=false" >> $GITHUB_ENV
-          echo "No changes"
+          echo "No changes found"
         else
           echo "HAS_CHANGES=true" >> $GITHUB_ENV
           echo "Found changes"
@@ -176,10 +173,8 @@ runs:
       if: env.HAS_CHANGES == 'true'
       shell: bash
       run: |
-        PLAN_FILE="${{ steps.vars.outputs.plan_file_path }}/${{ steps.vars.outputs.plan_file_name }}"
-
         cd "${{ inputs.component-path }}"
-        terraform show -json "$PLAN_FILE" > "$PLAN_FILE.json"
+        terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Configure State AWS Credentials
       if: env.HAS_CHANGES == 'true'
@@ -197,71 +192,67 @@ runs:
       continue-on-error: true
       with:
         action: getPlan
-        planPath: ./${{ steps.variables.outputs.plan_file_name }}.stored
+        planPath: "${{ steps.vars.outputs.plan_file }}.stored"
         commitSHA: ${{ github.sha }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
 
-    # - name: Check
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-    #   id: compare-plans
-    #   shell: bash
-    #   run: |
-    #     PLAN_FILE="${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}"
-    #     PLAN_FILE_JSON="$PLAN_FILE.json"
-    #     PLAN_FILE_STORED="${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}.stored"
-    #     PLAN_FILE_STORED_JSON="$PLAN_FILE_STORED.json"
+    - name: Compare Current and Stored PLANFILEs
+      if: env.HAS_CHANGES == 'true'
+      shell: bash
+      run: |
+        PLAN_FILE="${{ steps.vars.outputs.plan_file }}"
+        PLAN_FILE_STORED="${{ steps.vars.outputs.plan_file }}.stored"
 
-    #     if [ -f "$PLAN_FILE_STORED" ]; then
-    #       cd "${{ inputs.component-path }}"     # terraform show should be execute from component dir
+        if [ -f "$PLAN_FILE_STORED" ]; then
+          cd "${{ inputs.component-path }}"
 
-    #       terraform show -json "$PLAN_FILE_STORED" > "$PLAN_FILE_STORED_JSON" 2> error.log
+          terraform show -json "$PLAN_FILE_STORED" > "$PLAN_FILE_STORED.json"
 
-    #       jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_JSON" | jq 'del(.timestamp)' > current.json
-    #       jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_STORED_JSON" | jq 'del(.timestamp)' > stored.json
+          # sort and remove timestamp
+          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE.json" | jq 'del(.timestamp)' > current.json
+          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_STORED.json" | jq 'del(.timestamp)' > stored.json
 
-    #       MD5_CURRENT=$(md5sum current.json | awk '{ print $1 }')
-    #       MD5_STORED=$(md5sum stored.json | awk '{ print $1 }')
+          # calculate checksums of stored and current plans
+          MD5_CURRENT=$(md5sum current.json | awk '{ print $1 }')
+          MD5_STORED=$(md5sum stored.json | awk '{ print $1 }')
 
-    #       echo "MD5_CURRENT: $MD5_CURRENT"
-    #       echo "MD5_STORE: $MD5_STORED"
+          if [ "$MD5_CURRENT" == "$MD5_STORED" ]; then
+            echo "Current plan is equal to stored plan"
+            echo "NEW_PLAN_FOUND=false" >> $GITHUB_ENV
+          else
+            echo "Current plan is different from stored plan"
+            echo "NEW_PLAN_FOUND=true" >> $GITHUB_ENV
+          fi
+        else
+          echo "New plan found"
+          echo "NEW_PLAN_FOUND=true" >> $GITHUB_ENV
+        fi
 
-    #       if [ "$MD5_CURRENT" == "$MD5_STORED" ]; then
-    #         echo "Plans are equal"
-    #         echo "store_plans=false" >> $GITHUB_OUTPUT
-    #       else
-    #         echo "Plans changed"
-    #         echo "store_plans=true" >> $GITHUB_OUTPUT
-    #       fi
-    #     else
-    #       echo "New plan found"
-    #       echo "store_plans=true" >> $GITHUB_OUTPUT
-    #     fi
+    - name: Store New Plan
+      if: env.NEW_PLAN_FOUND == 'true'
+      uses: cloudposse/github-action-terraform-plan-storage@v1
+      id: store-plan
+      with:
+        action: storePlan
+        planPath: ${{ steps.vars.outputs.plan_file }}
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        tableName: ${{ inputs.terraform-state-table }}
+        bucketName: ${{ inputs.terraform-state-bucket }}
 
-    # - name: Store Plan
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(steps.compare-plans.outputs.store_plans) }}
-    #   uses: cloudposse/github-action-terraform-plan-storage@v1
-    #   id: store-plan
-    #   with:
-    #     action: storePlan
-    #     planPath: ${{ steps.variables.outputs.plan_file_name }}
-    #     component: ${{ inputs.component }}
-    #     stack: ${{ inputs.stack }}
-    #     tableName: ${{ inputs.terraform-state-table }}
-    #     bucketName: ${{ inputs.terraform-state-bucket }}
-
-    # - name: Store Lockfile
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(steps.compare-plans.outputs.store_plans) }}
-    #   uses: cloudposse/github-action-terraform-plan-storage@v1
-    #   with:
-    #     action: storePlan
-    #     planPath: "${{ steps.variables.outputs.lock_file }}"
-    #     component: ${{ inputs.component }}
-    #     stack: "${{ inputs.stack }}-lockfile"
-    #     tableName: ${{ inputs.terraform-state-table }}
-    #     bucketName: ${{ inputs.terraform-state-bucket }}
+    - name: Store Lockfile for New Plan
+      if: env.NEW_PLAN_FOUND == 'true'
+      uses: cloudposse/github-action-terraform-plan-storage@v1
+      with:
+        action: storePlan
+        planPath: "${{ steps.vars.outputs.lock_file }}"
+        component: ${{ inputs.component }}
+        stack: "${{ inputs.stack }}-lockfile"
+        tableName: ${{ inputs.terraform-state-table }}
+        bucketName: ${{ inputs.terraform-state-bucket }}
 
     # # - name: Prepare Artifacts
     # #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && !fromJSON(steps.compare-plans.outputs.store_plans) }}
