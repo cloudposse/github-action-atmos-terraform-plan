@@ -89,9 +89,11 @@ runs:
     - name: Define Job Control State Variables
       shell: bash
       run: |
+        echo "DEBUG_ENABLED=${{ inputs.debug }}" >> $GITHUB_ENV
         echo "ACTIONS_ENABLED=false" >> $GITHUB_ENV
         echo "HAS_CHANGES=false" >> $GITHUB_ENV
         echo "NEW_PLAN_FOUND=false" >> $GITHUB_ENV
+        echo "INFRACOST_ENABLED=false" >> $GITHUB_ENV
 
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v0
@@ -254,107 +256,91 @@ runs:
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
 
-    # # - name: Prepare Artifacts
-    # #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && !fromJSON(steps.compare-plans.outputs.store_plans) }}
-    # #   shell: bash
-    # #   run: |
-    # #     mkdir -p artifacts
-    # #     cp ${{ inputs.component-path }}/current.json artifacts/
-    # #     cp ${{ inputs.component-path }}/stored.json artifacts/
-    # #     PLAN_FILE="${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}"
-    # #     PLAN_FILE_JSON="$PLAN_FILE.json"
-    # #     PLAN_FILE_STORED="${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}.stored"
-    # #     PLAN_FILE_STORED_JSON="$PLAN_FILE_STORED.json"
-    # #     cp "$PLAN_FILE_JSON" artifacts/
-    # #     cp "$PLAN_FILE_STORED_JSON" artifacts/
+    - name: Enabled Infracost
+      if: env.HAS_CHANGES == 'true'
+      shell: bash
+      run: |
+        if [[ "${{ inputs.enable-infracost }}" == "true" ]]; then
+          echo "INFRACOST_ENABLED=true" >> $GITHUB_ENV
+        else
+          echo "INFRACOST_ENABLED=false" >> $GITHUB_ENV
+        fi
 
-    # # - name: Upload Artifacts
-    # #   uses: actions/upload-artifact@v3
-    # #   with:
-    # #     name: plan-artifacts
-    # #     path: artifacts
+    - name: Setup Infracost
+      if: env.INFRACOST_ENABLED == 'true'
+      uses: infracost/actions/setup@v2
+      with:
+        api-key: ${{ inputs.infracost-api-key }}
 
-    # - name: Setup Infracost
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
-    #   uses: infracost/actions/setup@v2
-    #   with:
-    #     api-key: ${{ inputs.infracost-api-key }}
+    - name: Generate Infracost Diff
+      if: env.INFRACOST_ENABLED == 'true'
+      shell: bash
+      run: |
+        infracost diff \
+          --path="$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}.json" \
+          --format=diff \
+          --project-name "${{ inputs.stack }}-${{ inputs.component }}" \
+          --out-file=/tmp/infracost.txt
+        infracost diff \
+          --path="$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}.json" \
+          --format=json \
+          --project-name "${{ inputs.stack }}-${{ inputs.component }}" \
+          --out-file=/tmp/infracost.json
 
-    # - name: Generate Infracost diff
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
-    #   shell: bash
-    #   run: |
-    #     PLAN_FILE_JSON="${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_json }}"
+    - name: Debug Infracost
+      if: env.INFRACOST_ENABLED == 'true' && env.DEBUG_ENABLED == 'true'
+      shell: bash
+      run: |
+        cat $GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}.json
+        cat /tmp/infracost.txt
+        cat /tmp/infracost.json
 
-    #     infracost diff \
-    #       --path=$PLAN_FILE_JSON \
-    #       --format=diff \
-    #       --project-name "${{ inputs.stack }}-${{ inputs.component }}" \
-    #       --out-file=/tmp/infracost.txt
-    #     infracost diff \
-    #       --path=$PLAN_FILE_JSON \
-    #       --format=json \
-    #       --project-name "${{ inputs.stack }}-${{ inputs.component }}" \
-    #       --out-file=/tmp/infracost.json
+    - name: Set Infracost Variables
+      if: env.INFRACOST_ENABLED == 'true'
+      id: infracost-diff
+      shell: bash
+      run: |
+        if [[ "${{ inputs.enable-infracost }}" == "true" ]]; then
+          INFRACOST_DIFF_TOTAL_MONTHLY_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
+          INFRACOST_DETAILS_DIFF_BREAKDOWN="$(cat /tmp/infracost.txt | base64 --wrap 0)"
+        else
+          INFRACOST_DIFF_TOTAL_MONTHLY_COST="0"
+          INFRACOST_DETAILS_DIFF_BREAKDOWN=""
+        fi
 
-    # - name: Debug
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) && fromJSON(inputs.debug) }}
-    #   shell: bash
-    #   run: |
-    #     cat ${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_json }}
-    #     cat /tmp/infracost.txt
-    #     cat /tmp/infracost.json
+        echo "infracost_details_diff_breakdown=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> "$GITHUB_OUTPUT"
+        echo "infracost_diff_total_monthly_cost=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> "$GITHUB_OUTPUT"
 
-    # - name: Set infracost variables
-    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) && fromJSON(inputs.enable-infracost) }}
-    #   id: infracost-diff
-    #   shell: bash
-    #   run: |
-    #     if [[ "${{ inputs.enable-infracost }}" == "true" ]]; then
-    #       INFRACOST_DIFF_TOTAL_MONTHLY_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
-    #       INFRACOST_DETAILS_DIFF_BREAKDOWN="$(cat /tmp/infracost.txt | base64 --wrap 0)"
-    #     else
-    #       INFRACOST_DIFF_TOTAL_MONTHLY_COST="0"
-    #       INFRACOST_DETAILS_DIFF_BREAKDOWN=""
-    #     fi
+    - name: Post Plan to Step Summary
+      if: env.HAS_CHANGES == 'true'
+      shell: bash
+      run: |
+        cd "${{ inputs.component-path }}"
 
-    #     echo "infracost_details_diff_breakdown=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> "$GITHUB_OUTPUT"
-    #     echo "infracost_diff_total_monthly_cost=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> "$GITHUB_OUTPUT"
+        tfcmt \
+          --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
+          -owner "${{ github.repository_owner }}" \
+          -repo "${{ github.event.repository.name }}" \
+          -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
+          -var "component:${{ inputs.component }}" \
+          -var "stack:${{ inputs.stack }}" \
+          -var "job:${{ github.job }}" \
+          -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
+          -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
+          --output $GITHUB_STEP_SUMMARY \
+          --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
+          plan -- terraform show $GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}
 
-    # - name: Post Plan to Step Summary
+    # - name: Prepare Artifacts
     #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-    #   id: post-plan
     #   shell: bash
     #   run: |
-    #     cd "${{ inputs.component-path }}"
+    #     mkdir -p "${{ steps.variables.outputs.artifacts_path }}"
+    #     echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}" }' > "${{ steps.variables.outputs.artifacts_path }}/${{ steps.variables.outputs.component_slug }}.metadata.json"
 
-    #     tfcmt \
-    #       --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
-    #       -owner "${{ github.repository_owner }}" \
-    #       -repo "${{ github.event.repository.name }}" \
-    #       -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
-    #       -var "component:${{ inputs.component }}" \
-    #       -var "stack:${{ inputs.stack }}" \
-    #       -var "job:${{ github.job }}" \
-    #       -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
-    #       -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
-    #       --output $GITHUB_STEP_SUMMARY \
-    #       --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
-    #       plan -- terraform show ${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}
-
-    # # - name: Prepare Artifacts
-    # #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-    # #   shell: bash
-    # #   run: |
-    # #     mkdir -p "${{ steps.variables.outputs.artifacts_path }}"
-    # #     echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}" }' > "${{ steps.variables.outputs.artifacts_path }}/${{ steps.variables.outputs.component_slug }}.metadata.json"
-    # #     cp "${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_name }}" "${{ steps.variables.outputs.artifacts_path }}/${{ steps.variables.outputs.component_slug }}.terraform.planfile"
-    # #     cp "${{ steps.variables.outputs.plan_file_path }}/${{ steps.variables.outputs.plan_file_json }}" "${{ steps.variables.outputs.artifacts_path }}/${{ steps.variables.outputs.component_slug }}.terraform.json"
-    # #     cp "${{ steps.variables.outputs.lock_file }}" "${{ steps.variables.outputs.artifacts_path }}/${{ steps.variables.outputs.component_slug }}.terraform.lockfile"
-
-    # # - name: Upload Artifacts
-    # #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
-    # #   uses: actions/upload-artifact@v3
-    # #   with:
-    # #     name: plan-artifacts
-    # #     path: "${{ steps.variables.outputs.artifacts_path }}"
+    # - name: Upload Artifacts
+    #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: plan-artifacts
+    #     path: "${{ steps.variables.outputs.artifacts_path }}"
