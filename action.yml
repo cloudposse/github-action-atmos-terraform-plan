@@ -133,8 +133,8 @@ runs:
         STACK_NAME=$(echo "${{ inputs.stack }}" | sed 's#/#_#g')
         COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
         COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
-        PLAN_FILE="$COMPONENT_SLUG-${{ github.sha }}.planfile"
-        LOCK_FILE="${{ inputs.component-path}}/.terraform.lock.hcl"
+        PLAN_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/$COMPONENT_SLUG-${{ github.sha }}.planfile"
+        LOCK_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/.terraform.lock.hcl"
 
         echo "stack_name=$STACK_NAME" >> $GITHUB_OUTPUT
         echo "component_name=$COMPONENT_NAME" >> $GITHUB_OUTPUT
@@ -158,7 +158,7 @@ runs:
       run: |
         TERRAFORM_OUTPUT=$(ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
-          -out="$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}" \
+          -out="${{ steps.vars.outputs.plan_file }}" \
           -lock=false \
           -input=false \
           -no-color)
@@ -176,7 +176,7 @@ runs:
       shell: bash
       run: |
         cd "${{ inputs.component-path }}"
-        terraform show -json "$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}" > "$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}.json"
+        terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Configure State AWS Credentials
       if: env.HAS_CHANGES == 'true'
@@ -205,8 +205,8 @@ runs:
       if: env.HAS_CHANGES == 'true'
       shell: bash
       run: |
-        PLAN_FILE="$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}"
-        PLAN_FILE_STORED="$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}.stored"
+        PLAN_FILE="${{ steps.vars.outputs.plan_file }}"
+        PLAN_FILE_STORED="${{ steps.vars.outputs.plan_file }}.stored"
 
         if [ -f "$PLAN_FILE_STORED" ]; then
           cd "${{ inputs.component-path }}"
@@ -239,7 +239,7 @@ runs:
       id: store-plan
       with:
         action: storePlan
-        planPath: "$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}"
+        planPath: ${{ steps.vars.outputs.plan_file }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
         tableName: ${{ inputs.terraform-state-table }}
@@ -250,9 +250,9 @@ runs:
       uses: cloudposse/github-action-terraform-plan-storage@v1
       with:
         action: storePlan
-        planPath: "${{ steps.vars.outputs.lock_file }}"
+        planPath: ${{ steps.vars.outputs.lock_file }}
         component: ${{ inputs.component }}
-        stack: "${{ inputs.stack }}-lockfile"
+        stack: ${{ inputs.stack }}-lockfile
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
 
@@ -277,12 +277,12 @@ runs:
       shell: bash
       run: |
         infracost diff \
-          --path="$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}.json" \
+          --path="${{ steps.vars.outputs.plan_file }}.json" \
           --format=diff \
           --project-name "${{ inputs.stack }}-${{ inputs.component }}" \
           --out-file=/tmp/infracost.txt
         infracost diff \
-          --path="$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}.json" \
+          --path="${{ steps.vars.outputs.plan_file }}.json" \
           --format=json \
           --project-name "${{ inputs.stack }}-${{ inputs.component }}" \
           --out-file=/tmp/infracost.json
@@ -291,7 +291,7 @@ runs:
       if: env.INFRACOST_ENABLED == 'true' && env.DEBUG_ENABLED == 'true'
       shell: bash
       run: |
-        cat $GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}.json
+        cat ${{ steps.vars.outputs.plan_file }}.json
         cat /tmp/infracost.txt
         cat /tmp/infracost.json
 
@@ -329,7 +329,7 @@ runs:
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
           --output $GITHUB_STEP_SUMMARY \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
-          plan -- terraform show $GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}
+          plan -- terraform show ${{ steps.vars.outputs.plan_file }}
 
     # - name: Prepare Artifacts
     #   if: ${{ fromJSON(steps.settings.outputs.actions_enabled) && fromJSON(steps.atmos-plan.outputs.has_changes) }}
