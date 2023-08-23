@@ -174,7 +174,7 @@ runs:
       shell: bash
       run: |
         cd "${{ inputs.component-path }}"
-        terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
+        terraform show -json "$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}" > "$GITHUB_WORKSPACE/${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Configure State AWS Credentials
       if: env.HAS_CHANGES == 'true'
