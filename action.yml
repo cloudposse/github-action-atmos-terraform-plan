@@ -108,7 +108,7 @@ runs:
         stack: ${{ inputs.stack }}
         settings-path: github.actions_enabled
     
-    - name: Check If GitHub Actions are Enabled For Component
+    - name: Check If GitHub Actions is Enabled For Component
       shell: bash
       run: |
         if [[ "${{ steps.atmos-settings.outputs.value }}" == "true" ]]; then
@@ -261,7 +261,7 @@ runs:
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
 
-    - name: Enabled Infracost
+    - name: Check Whether Infracost is Enabled
       if: env.HAS_CHANGES == 'true'
       shell: bash
       run: |
