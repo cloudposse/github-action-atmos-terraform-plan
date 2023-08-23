@@ -14,6 +14,10 @@ inputs:
   component-path:
     description: "The path to the base component. Atmos defines this value as component_path."
     required: true
+  drift-detection-mode-enabled:
+    description: "Indicate whether this action is used in drift detection workflow."
+    required: true
+    default: 'false'
   terraform-plan-role:
     description: "The AWS role to be used to plan Terraform."
     required: true
@@ -94,6 +98,7 @@ runs:
         echo "HAS_CHANGES=false" >> $GITHUB_ENV
         echo "NEW_PLAN_FOUND=false" >> $GITHUB_ENV
         echo "INFRACOST_ENABLED=false" >> $GITHUB_ENV
+        echo "DRIFT_DETECTION_MODE_ENABLED=${{ inputs.drift-detection-mode-enabled }}" >> $GITHUB_ENV
 
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v0
@@ -119,7 +124,7 @@ runs:
         # setup-tfcmt requires this PATH update when running on self-hosted (amazon linux) https://github.com/shmokmt/actions-setup-tfcmt/blob/main/action.yml#L11C1-L12C1
         echo "/usr/local/bin" >> $GITHUB_PATH
 
-    - name: Setup tfcmt
+    - name: Install tfcmt
       if: env.ACTIONS_ENABLED == 'true'
       uses: shmokmt/actions-setup-tfcmt@v2
       with:
@@ -311,7 +316,7 @@ runs:
         echo "infracost_details_diff_breakdown=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> "$GITHUB_OUTPUT"
         echo "infracost_diff_total_monthly_cost=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> "$GITHUB_OUTPUT"
 
-    - name: Post Plan to Step Summary
+    - name: Post Details to Step Summary
       if: env.HAS_CHANGES == 'true'
       shell: bash
       run: |
@@ -332,14 +337,36 @@ runs:
           plan -- terraform show ${{ steps.vars.outputs.plan_file }}
 
     - name: Prepare Artifacts
-      if: env.NEW_PLAN_FOUND == 'true'
+      if: env.NEW_PLAN_FOUND == 'true' && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
       shell: bash
       run: |
         mkdir -p plan-artifacts
         echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}" }' > "plan-artifacts/${{ steps.vars.outputs.component_slug }}.metadata.json"
 
+    - name: Prepare GitHub Issue Description for Drift Detection
+      if: env.NEW_PLAN_FOUND == 'true' && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
+      shell: bash
+      run: |
+        cd "${{ inputs.component-path }}"
+
+        tfcmt \
+          --config "${{ github.action_path }}/config/github_issue_description.yaml" \
+          -owner "${{ github.repository_owner }}" \
+          -repo "${{ github.event.repository.name }}" \
+          -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
+          -var "component:${{ inputs.component }}" \
+          -var "stack:${{ inputs.stack }}" \
+          -var "componentPath:${{ inputs.component-path }}" \
+          -var "commitSHA:${{ github.sha }}" \
+          -var "job:${{ github.job }}" \
+          -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
+          -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
+          --output "plan-artifacts/${{ steps.vars.outputs.component_slug }}.md" \
+          --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
+          plan -- terraform show ${{ steps.vars.outputs.plan_file }}
+
     - name: Upload Artifacts
-      if: env.NEW_PLAN_FOUND == 'true'
+      if: env.NEW_PLAN_FOUND == 'true' && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
       uses: actions/upload-artifact@v3
       with:
         name: plan-artifacts
