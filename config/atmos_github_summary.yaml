@@ -132,8 +132,6 @@ terraform:
       template: |
         {{template "plan_title" .}}
 
-        Failed to parse the result.
-
         <details><summary>Result</summary>
         {{wrapCode .CombinedOutput}}
         </details>
