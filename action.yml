@@ -18,6 +18,10 @@ inputs:
     description: "Indicate whether this action is used in drift detection workflow."
     required: true
     default: 'false'
+  default-branch:
+    description: The default branch to use for the base ref.
+    required: false
+    default: ${{ github.event.repository.default_branch }}
   terraform-plan-role:
     description: "The AWS role to be used to plan Terraform."
     required: true
@@ -69,6 +73,8 @@ runs:
   steps:
     - name: Checkout
       uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.default-branch }}
 
     - name: Install Terraform
       uses: hashicorp/setup-terraform@v2
