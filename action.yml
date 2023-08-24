@@ -18,10 +18,6 @@ inputs:
     description: "Indicate whether this action is used in drift detection workflow."
     required: true
     default: 'false'
-  default-branch:
-    description: The default branch to use for the base ref.
-    required: false
-    default: ${{ github.event.pull_request.head.ref }}
   terraform-plan-role:
     description: "The AWS role to be used to plan Terraform."
     required: true

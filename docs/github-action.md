@@ -10,7 +10,6 @@
 | component | The name of the component to plan. | N/A | true |
 | component-path | The path to the base component. Atmos defines this value as component\_path. | N/A | true |
 | debug | Enable action debug mode. Default: 'false' | false | false |
-| default-branch | The default branch to use for the base ref. | ${{ github.event.repository.default\_branch }} | false |
 | drift-detection-mode-enabled | Indicate whether this action is used in drift detection workflow. | false | true |
 | enable-infracost | Whether to enable infracost summary. Requires secret `infracost-api-key` to be specified. Default: 'false | false | false |
 | infracost-api-key | Infracost API key | N/A | false |
