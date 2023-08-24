@@ -205,6 +205,7 @@ runs:
         stack: ${{ inputs.stack }}
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
+        failOnMissingPlan: "false"
 
     - name: Compare Current and Stored PLANFILEs
       if: env.HAS_CHANGES == 'true'
