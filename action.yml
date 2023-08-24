@@ -371,4 +371,4 @@ runs:
       with:
         name: plan-artifacts
         path: plan-artifacts
-        retention-days: 7
+        retention-days: 5
