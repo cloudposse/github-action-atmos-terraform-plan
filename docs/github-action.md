@@ -13,6 +13,7 @@
 | drift-detection-mode-enabled | Indicate whether this action is used in drift detection workflow. | false | true |
 | enable-infracost | Whether to enable infracost summary. Requires secret `infracost-api-key` to be specified. Default: 'false | false | false |
 | infracost-api-key | Infracost API key | N/A | false |
+| metadata-retention-days | Infracost API key | 1 | false |
 | stack | The stack name for the given component. | N/A | true |
 | terraform-plan-role | The AWS role to be used to plan Terraform. | N/A | true |
 | terraform-state-bucket | The S3 Bucket where the planfiles are stored. | N/A | true |
