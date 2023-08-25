@@ -58,7 +58,7 @@ inputs:
     required: false
     default: "1"
   logo:
-    description: "Branding logo image"
+    description: "Branding logo image url"
     required: false
     default: "https://cloudposse.com/logo-300x69.svg"
   debug:
