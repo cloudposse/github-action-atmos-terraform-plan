@@ -99,6 +99,8 @@ templates:
     }
     ```
     </details>
+  branding: |
+    [![logo](https://cloudposse.com/logo-300x69.svg)](https://cloudposse.com/)
 terraform:
   plan:
     disable_label: false
@@ -120,6 +122,7 @@ terraform:
       {{template "warning" .}}
       {{template "error_messages" .}}
       {{template "metadata" .}}
+      {{template "branding" .}}
     when_parse_error:
       template: |
         {{template "plan_title" .}}
