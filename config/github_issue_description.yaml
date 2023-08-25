@@ -101,7 +101,7 @@ templates:
     </details>
   branding: |
     {{- if ne .Vars.logo "" }}
-    ![Logo](.Vars.logo)
+    ![Logo]({{.Vars.logo}})
     {{- end }}
 terraform:
   plan:
