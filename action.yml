@@ -325,11 +325,24 @@ runs:
         echo "infracost_details_diff_breakdown=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> "$GITHUB_OUTPUT"
         echo "infracost_diff_total_monthly_cost=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> "$GITHUB_OUTPUT"
 
+    - name: Prepare Artifacts Directory
+      shell: bash
+      run: |
+        mkdir -p metadata
+
+    - name: Store Component Metadata to Artifacts
+      if: env.DRIFT_DETECTION_MODE_ENABLED == 'true'
+      shell: bash
+      run: |
+        echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}", "drifted": $HAS_CHANGES }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
+
     - name: Post Details to Step Summary
       if: env.HAS_CHANGES == 'true'
       shell: bash
       run: |
         cd "${{ inputs.component-path }}"
+
+        STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${{ steps.vars.outputs.component_slug }}.md"
 
         tfcmt \
           --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
@@ -342,16 +355,13 @@ runs:
           -var "logo:${{ inputs.logo }}" \
           -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
-          --output $GITHUB_STEP_SUMMARY \
+          --output "$STEP_SUMMARY_FILE" \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
           plan -- terraform show ${{ steps.vars.outputs.plan_file }}
 
-    - name: Prepare Component Metadata
-      if: env.HAS_CHANGES == 'true' && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
-      shell: bash
-      run: |
-        mkdir -p metadata
-        echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}" }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
+          if [[ "$DRIFT_DETECTION_MODE_ENABLED" == "false" ]]; then
+            cat $STEP_SUMMARY_FILE >> $GITHUB_STEP_SUMMARY
+          fi
 
     - name: Generate GitHub Issue Description for Drift Detection
       if: env.HAS_CHANGES == 'true' && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
@@ -372,12 +382,12 @@ runs:
           -var "logo:${{ inputs.logo }}" \
           -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
-          --output "$GITHUB_WORKSPACE/metadata/${{ steps.vars.outputs.component_slug }}.md" \
+          --output "$GITHUB_WORKSPACE/metadata/issue-description-${{ steps.vars.outputs.component_slug }}.md" \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
           plan -- terraform show ${{ steps.vars.outputs.plan_file }}
 
     - name: Upload Artifacts
-      if: env.HAS_CHANGES == 'true' && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
+      if: env.DRIFT_DETECTION_MODE_ENABLED == 'true'
       uses: actions/upload-artifact@v3
       with:
         name: metadata
