@@ -57,6 +57,10 @@ inputs:
     description: "Infracost API key"
     required: false
     default: "1"
+  logo:
+    description: "Branding logo image"
+    required: false
+    default: "https://cloudposse.com/logo-300x69.svg"
   debug:
     description: "Enable action debug mode. Default: 'false'"
     default: 'false'
@@ -335,6 +339,7 @@ runs:
           -var "component:${{ inputs.component }}" \
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
+          -var "logo:${{ inputs.logo }}" \
           -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
           --output $GITHUB_STEP_SUMMARY \
@@ -364,6 +369,7 @@ runs:
           -var "componentPath:${{ inputs.component-path }}" \
           -var "commitSHA:${{ github.sha }}" \
           -var "job:${{ github.job }}" \
+          -var "logo:${{ inputs.logo }}" \
           -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
           --output "$GITHUB_WORKSPACE/metadata/${{ steps.vars.outputs.component_slug }}.md" \

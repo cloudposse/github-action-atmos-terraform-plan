@@ -106,7 +106,9 @@ templates:
 
     </details>
   branding: |
-    [![logo](https://cloudposse.com/logo-300x69.svg)](https://cloudposse.com/)
+    {{- if ne .Vars.logo "" }}
+    ![Logo](.Vars.logo)
+    {{- end }}
 terraform:
   plan:
     disable_label: false
