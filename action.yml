@@ -356,7 +356,7 @@ runs:
           -var "component:${{ inputs.component }}" \
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
-          -var "logo:$LOGO" \
+          -var "logo:${{ inputs.logo }}" \
           -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
           --output "$STEP_SUMMARY_FILE" \
