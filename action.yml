@@ -345,7 +345,7 @@ runs:
         LOGO="${{ inputs.logo }}"
 
         if [[ "$DRIFT_DETECTION_MODE_ENABLED" == "true" ]]; then
-          LOGO=""
+          LOGO=''
         fi
 
         tfcmt \
