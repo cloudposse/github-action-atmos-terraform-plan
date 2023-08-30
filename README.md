@@ -133,13 +133,14 @@ this action. For more on setting up those components, see the `gitops` component
 | atmos-config-path | The path to the atmos.yaml file | atmos.yaml | false |
 | atmos-version | Atmos version to use for vendoring. Default 'latest' | latest | false |
 | aws-region | AWS region for assuming identity. | us-east-1 | false |
+| branding-logo-image | Branding logo image url | https://cloudposse.com/logo-300x69.svg | false |
+| branding-logo-url | Branding logo url | https://cloudposse.com/ | false |
 | component | The name of the component to plan. | N/A | true |
 | component-path | The path to the base component. Atmos defines this value as component\_path. | N/A | true |
 | debug | Enable action debug mode. Default: 'false' | false | false |
 | drift-detection-mode-enabled | Indicate whether this action is used in drift detection workflow. | false | true |
 | enable-infracost | Whether to enable infracost summary. Requires secret `infracost-api-key` to be specified. Default: 'false | false | false |
 | infracost-api-key | Infracost API key | N/A | false |
-| logo | Branding logo image | https://cloudposse.com/logo-300x69.svg | false |
 | metadata-retention-days | Infracost API key | 1 | false |
 | stack | The stack name for the given component. | N/A | true |
 | terraform-plan-role | The AWS role to be used to plan Terraform. | N/A | true |
