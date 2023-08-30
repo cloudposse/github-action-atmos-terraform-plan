@@ -348,12 +348,6 @@ runs:
 
         STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${{ steps.vars.outputs.component_slug }}.md"
 
-        [[ "$DRIFT_DETECTION_MODE_ENABLED" == "true" ]] && LOGO_IMAGE="" || LOGO_IMAGE="${{ inputs.branding-logo-image }}"
-        [[ "$DRIFT_DETECTION_MODE_ENABLED" == "true" ]] && LOGO_URL="" || LOGO_URL="${{ inputs.branding-logo-url }}"
-
-        echo "LOGO_IMAGE=$LOGO_IMAGE"
-        echo "LOGO_URL=$LOGO_URL"
-
         tfcmt \
           --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
           -owner "${{ github.repository_owner }}" \
@@ -362,8 +356,8 @@ runs:
           -var "component:${{ inputs.component }}" \
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
-          -var "logoImage:$LOGO_IMAGE" \
-          -var "logoUrl:$LOGO_URL" \
+          -var "logoImage:${{ inputs.branding-logo-image }}" \
+          -var "logoUrl:${{ inputs.branding-logo-url }}" \
           -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
           --output "$STEP_SUMMARY_FILE" \
@@ -380,9 +374,6 @@ runs:
       run: |
         cd "${{ inputs.component-path }}"
 
-        [[ "$DRIFT_DETECTION_MODE_ENABLED" == "true" ]] && LOGO_IMAGE="" || LOGO_IMAGE="${{ inputs.branding-logo-image }}"
-        [[ "$DRIFT_DETECTION_MODE_ENABLED" == "true" ]] && LOGO_URL="" || LOGO_URL="${{ inputs.branding-logo-url }}"
-
         tfcmt \
           --config "${{ github.action_path }}/config/github_issue_description.yaml" \
           -owner "${{ github.repository_owner }}" \
@@ -393,8 +384,8 @@ runs:
           -var "componentPath:${{ inputs.component-path }}" \
           -var "commitSHA:${{ github.sha }}" \
           -var "job:${{ github.job }}" \
-          -var "logoImage:$LOGO_IMAGE" \
-          -var "logoUrl:$LOGO_URL" \
+          -var "logoImage:${{ inputs.branding-logo-image }}" \
+          -var "logoUrl:${{ inputs.branding-logo-url }}" \
           -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
           --output "$GITHUB_WORKSPACE/metadata/issue-description-${{ steps.vars.outputs.component_slug }}.md" \
