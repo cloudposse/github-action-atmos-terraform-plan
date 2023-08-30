@@ -57,10 +57,14 @@ inputs:
     description: "Infracost API key"
     required: false
     default: "1"
-  logo:
+  branding-logo-image:
     description: "Branding logo image url"
     required: false
     default: "https://cloudposse.com/logo-300x69.svg"
+  branding-logo-url:
+    description: "Branding logo url"
+    required: false
+    default: "https://cloudposse.com/"
   debug:
     description: "Enable action debug mode. Default: 'false'"
     default: 'false'
@@ -343,11 +347,9 @@ runs:
         cd "${{ inputs.component-path }}"
 
         STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${{ steps.vars.outputs.component_slug }}.md"
-        LOGO="${{ inputs.logo }}"
 
-        if [[ "$DRIFT_DETECTION_MODE_ENABLED" == "true" ]]; then
-          LOGO=""
-        fi
+        [[ "$DRIFT_DETECTION_MODE_ENABLED" == "true" ]] && LOGO_IMAGE="" || LOGO_IMAGE="${{ inputs.branding-logo-image }}"
+        [[ "$DRIFT_DETECTION_MODE_ENABLED" == "true" ]] && LOGO_URL="" || LOGO_URL="${{ inputs.branding-logo-url }}"
 
         tfcmt \
           --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
@@ -357,7 +359,8 @@ runs:
           -var "component:${{ inputs.component }}" \
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
-          -var "logo:$LOGO" \
+          -var "logoImage:$LOGO_IMAGE" \
+          -var "logoUrl:$LOGO_URL" \
           -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
           --output "$STEP_SUMMARY_FILE" \
@@ -374,6 +377,9 @@ runs:
       run: |
         cd "${{ inputs.component-path }}"
 
+        [[ "$DRIFT_DETECTION_MODE_ENABLED" == "true" ]] && LOGO_IMAGE="" || LOGO_IMAGE="${{ inputs.branding-logo-image }}"
+        [[ "$DRIFT_DETECTION_MODE_ENABLED" == "true" ]] && LOGO_URL="" || LOGO_URL="${{ inputs.branding-logo-url }}"
+
         tfcmt \
           --config "${{ github.action_path }}/config/github_issue_description.yaml" \
           -owner "${{ github.repository_owner }}" \
@@ -384,7 +390,8 @@ runs:
           -var "componentPath:${{ inputs.component-path }}" \
           -var "commitSHA:${{ github.sha }}" \
           -var "job:${{ github.job }}" \
-          -var "logo:${{ inputs.logo }}" \
+          -var "logoImage:$LOGO_IMAGE" \
+          -var "logoUrl:$LOGO_URL" \
           -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
           --output "$GITHUB_WORKSPACE/metadata/issue-description-${{ steps.vars.outputs.component_slug }}.md" \

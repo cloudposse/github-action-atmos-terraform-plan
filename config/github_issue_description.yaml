@@ -100,8 +100,8 @@ templates:
     ```
     </details>
   branding: |
-    {{- if ne .Vars.logo "" }}
-    ![Logo]({{.Vars.logo}})
+    {{- if ne .Vars.logoImage "" }}
+    <a href="{{.Vars.logoUrl}}"><img src="{{.Vars.logoImage}}" width="100px" align="right"/></a>
     {{- end }}
 terraform:
   plan:
