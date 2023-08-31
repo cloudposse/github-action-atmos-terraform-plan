@@ -108,7 +108,7 @@ terraform:
     disable_label: false
     template: |
       {{template "plan_title" .}}
-
+      {{template "branding" .}}
       {{template "deletion_warning" .}}
       {{template "result" .}}
       ```shell
@@ -124,7 +124,6 @@ terraform:
       {{template "warning" .}}
       {{template "error_messages" .}}
       {{template "metadata" .}}
-      {{template "branding" .}}
     when_parse_error:
       template: |
         {{template "plan_title" .}}

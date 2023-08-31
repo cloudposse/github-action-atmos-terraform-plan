@@ -114,7 +114,7 @@ terraform:
     disable_label: false
     template: |
       {{template "plan_title" .}}
-
+      {{template "branding" .}}
       {{template "deletion_warning" .}}
       {{template "result" .}}
       ```shell
@@ -132,7 +132,6 @@ terraform:
       {{if ne .Vars.infracost_details_diff_breakdown ""}}
       {{template "infracost" .}}
       {{end}}
-      {{template "branding" .}}
     when_parse_error:
       template: |
         {{template "plan_title" .}}
