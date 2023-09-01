@@ -206,7 +206,7 @@ runs:
 
     - name: Retrieve Plan
       if: env.HAS_CHANGES == 'true'
-      uses: cloudposse/github-action-terraform-plan-storage@added-commitsha-overwrite-input
+      uses: cloudposse/github-action-terraform-plan-storage@v1
       id: retrieve-plan
       continue-on-error: true
       with:
