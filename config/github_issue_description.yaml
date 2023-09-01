@@ -10,12 +10,12 @@ ci:
 templates:
   plan_title: |
     {{ if eq .ExitCode 1 }}
-    ## :x: Plan Failed for `{{.Vars.component}}` in `{{.Vars.stack}}`!
+    ## :x: Drift Detection Failed for `{{.Vars.component}}` in `{{.Vars.stack}}`!
     {{ end }}
     {{- if eq .ExitCode 0 }}
-    ## Changes Found for `{{.Vars.component}}` in `{{.Vars.stack}}`
+    ## Drift Detected for `{{.Vars.component}}` in `{{.Vars.stack}}`
     {{ end }}
-    
+
   badge: |
     {{- if eq .ExitCode 0 }}
     {{ if .CreatedResources}}[![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
@@ -91,23 +91,17 @@ templates:
     {{range .ErrorMessages}}
     * {{. -}}
     {{- end}}{{end}}
-  infracost: |
-    <details><summary>
-    {{- $cost := .Vars.infracost_total_monthly_cost | float64 }}
-    {{- $roundedCost := printf "%.2f" $cost }}
-    {{- if eq $cost 0.0 }}
-    Infracost Estimate: monthly cost will not change
-    {{- else if gt $cost 0.0 }}
-    Infracost Estimate: monthly cost will increase by ${{ $roundedCost }} 📈
-    {{- else }}
-    Infracost Estimate: monthly cost will decrease by ${{ $roundedCost }} 📉
-    {{- end }}
-    </summary>
+  metadata: |
+    <details><summary>Metadata</summary>
 
-      ```
-      {{- b64dec .Vars.infracost_details_diff_breakdown | html }}
-      ```
-
+    ```json
+    {
+      "component": "{{.Vars.component}}",
+      "stack": "{{.Vars.stack}}",
+      "componentPath": "{{.Vars.componentPath}}",
+      "commitSHA": "{{.Vars.commitSHA}}"
+    }
+    ```
     </details>
   branding: |
     {{- if ne .Vars.logoImage "" }}
@@ -134,9 +128,7 @@ terraform:
       {{template "change_outside_terraform" .}}
       {{template "warning" .}}
       {{template "error_messages" .}}
-      {{if ne .Vars.infracost_details_diff_breakdown ""}}
-      {{template "infracost" .}}
-      {{end}}
+      {{template "metadata" .}}
     when_parse_error:
       template: |
         {{template "plan_title" .}}
