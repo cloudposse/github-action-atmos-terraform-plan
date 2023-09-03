@@ -14,6 +14,10 @@ inputs:
   component-path:
     description: "The path to the base component. Atmos defines this value as component_path."
     required: true
+  commit-sha:
+    description: "SHA of the commit to use"
+    required: true
+    default: "${{ github.sha }}"
   drift-detection-mode-enabled:
     description: "Indicate whether this action is used in drift detection workflow."
     required: true
@@ -212,7 +216,7 @@ runs:
       with:
         action: getPlan
         planPath: "${{ steps.vars.outputs.plan_file }}.stored"
-        commitSHA: ${{ github.sha }}
+        commitSHA: ${{ inputs.commit-sha }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
         tableName: ${{ inputs.terraform-state-table }}
@@ -257,6 +261,7 @@ runs:
       id: store-plan
       with:
         action: storePlan
+        commitSHA: ${{ inputs.commit-sha }}
         planPath: ${{ steps.vars.outputs.plan_file }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
@@ -268,6 +273,7 @@ runs:
       uses: cloudposse/github-action-terraform-plan-storage@zinovii-debugging
       with:
         action: storePlan
+        commitSHA: ${{ inputs.commit-sha }}
         planPath: ${{ steps.vars.outputs.lock_file }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}-lockfile
