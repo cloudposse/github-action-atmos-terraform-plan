@@ -199,15 +199,6 @@ runs:
         cd "${{ inputs.component-path }}"
         terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
-    - name: Configure Plan AWS Credentials
-      if: env.ACTIONS_ENABLED == 'true'
-      uses: aws-actions/configure-aws-credentials@v2.2.0
-      with:
-        aws-region: ${{ inputs.aws-region }}
-        role-to-assume: ${{ inputs.terraform-plan-role }}
-        role-session-name: "atmos-terraform-plan-gitops"
-        mask-aws-account-id: "no"
-
     - name: Retrieve Plan
       if: env.HAS_CHANGES == 'true'
       uses: cloudposse/github-action-terraform-plan-storage@v1
