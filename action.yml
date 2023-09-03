@@ -253,7 +253,7 @@ runs:
 
     - name: Store New Plan
       if: env.NEW_PLAN_FOUND == 'true'
-      uses: cloudposse/github-action-terraform-plan-storage@v1
+      uses: cloudposse/github-action-terraform-plan-storage@zinovii-debugging
       id: store-plan
       with:
         action: storePlan
@@ -265,7 +265,7 @@ runs:
 
     - name: Store Lockfile for New Plan
       if: env.NEW_PLAN_FOUND == 'true'
-      uses: cloudposse/github-action-terraform-plan-storage@v1
+      uses: cloudposse/github-action-terraform-plan-storage@zinovii-debugging
       with:
         action: storePlan
         planPath: ${{ steps.vars.outputs.lock_file }}
