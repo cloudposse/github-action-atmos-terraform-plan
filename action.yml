@@ -163,13 +163,13 @@ runs:
         echo "plan_file=$PLAN_FILE" >> $GITHUB_OUTPUT
         echo "lock_file=$LOCK_FILE" >> $GITHUB_OUTPUT
 
-    - name: Configure State AWS Credentials
-      if: env.HAS_CHANGES == 'true'
+    - name: Configure Plan AWS Credentials
+      if: env.ACTIONS_ENABLED == 'true'
       uses: aws-actions/configure-aws-credentials@v2.2.0
       with:
         aws-region: ${{ inputs.aws-region }}
-        role-to-assume: ${{ inputs.terraform-state-role }}
-        role-session-name: "atmos-terraform-state-gitops"
+        role-to-assume: ${{ inputs.terraform-plan-role }}
+        role-session-name: "atmos-terraform-plan-gitops"
         mask-aws-account-id: "no"
 
     - name: Atmos Terraform Plan
