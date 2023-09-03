@@ -200,7 +200,7 @@ runs:
         terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Configure State AWS Credentials
-      if: env.ACTIONS_ENABLED == 'true'
+      if: env.HAS_CHANGES == 'true'
       uses: aws-actions/configure-aws-credentials@v2.2.0
       with:
         aws-region: ${{ inputs.aws-region }}
