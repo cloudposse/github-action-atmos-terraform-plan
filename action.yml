@@ -17,7 +17,7 @@ inputs:
   commit-sha:
     description: "SHA of the commit to use"
     required: true
-    default: "${{ github.sha }}"
+    default: "${{ github.event.pull_request.head.sha }}"
   drift-detection-mode-enabled:
     description: "Indicate whether this action is used in drift detection workflow."
     required: true
