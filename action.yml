@@ -14,8 +14,8 @@ inputs:
   component-path:
     description: "The path to the base component. Atmos defines this value as component_path."
     required: true
-  commit-sha:
-    description: "SHA of the commit to use"
+  sha:
+    description: "SHA to use"
     required: true
     default: "${{ github.event.pull_request.head.sha }}"
   drift-detection-mode-enabled:
@@ -86,12 +86,6 @@ runs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Echo
-      shell: bash
-      run: |
-        echo "github.event.pull_request.head.sha=${{ github.event.pull_request.head.sha }}"
-        echo "github.sha=${{ github.sha }}"
-
     - name: Install Terraform
       uses: hashicorp/setup-terraform@v2
       with:
@@ -160,7 +154,7 @@ runs:
         STACK_NAME=$(echo "${{ inputs.stack }}" | sed 's#/#_#g')
         COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
         COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
-        PLAN_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/$COMPONENT_SLUG-${{ github.sha }}.planfile"
+        PLAN_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/$COMPONENT_SLUG-${{ inputs.sha }}.planfile"
         LOCK_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/.terraform.lock.hcl"
 
         echo "stack_name=$STACK_NAME" >> $GITHUB_OUTPUT
@@ -222,7 +216,7 @@ runs:
       with:
         action: getPlan
         planPath: "${{ steps.vars.outputs.plan_file }}.stored"
-        commitSHA: ${{ inputs.commit-sha }}
+        commitSHA: ${{ inputs.sha }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
         tableName: ${{ inputs.terraform-state-table }}
@@ -267,7 +261,7 @@ runs:
       id: store-plan
       with:
         action: storePlan
-        commitSHA: ${{ inputs.commit-sha }}
+        commitSHA: ${{ inputs.sha }}
         planPath: ${{ steps.vars.outputs.plan_file }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
@@ -279,7 +273,7 @@ runs:
       uses: cloudposse/github-action-terraform-plan-storage@zinovii-debugging
       with:
         action: storePlan
-        commitSHA: ${{ inputs.commit-sha }}
+        commitSHA: ${{ inputs.sha }}
         planPath: ${{ steps.vars.outputs.lock_file }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}-lockfile
@@ -394,7 +388,7 @@ runs:
           -var "component:${{ inputs.component }}" \
           -var "stack:${{ inputs.stack }}" \
           -var "componentPath:${{ inputs.component-path }}" \
-          -var "commitSHA:${{ github.sha }}" \
+          -var "commitSHA:${{ inputs.sha }}" \
           -var "job:${{ github.job }}" \
           -var "logoImage:${{ inputs.branding-logo-image }}" \
           -var "logoUrl:${{ inputs.branding-logo-url }}" \
