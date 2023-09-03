@@ -117,7 +117,7 @@ runs:
         echo "DRIFT_DETECTION_MODE_ENABLED=${{ inputs.drift-detection-mode-enabled }}" >> $GITHUB_ENV
 
     - name: Filter Atmos Settings Value
-      uses: cloudposse/github-action-atmos-get-setting@zinovii-debugging
+      uses: cloudposse/github-action-atmos-get-setting@do-not-fail-on-missing-component
       id: atmos-settings
       with:
         component: ${{ inputs.component }}
