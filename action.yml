@@ -188,6 +188,15 @@ runs:
         TERRAFORM_RESULT=$?
         set -e
         
+        if [[${TERRAFORM_RESULT} == 0]]; then
+          echo "HAS_CHANGES=false" >> $GITHUB_ENV
+        else
+          echo "HAS_CHANGES=false" >> $GITHUB_ENV
+          echo "HAS_ERROR=true" >> $GITHUB_ENV
+          echo "TERRAFORM_OUTPUT=${TERRAFORM_OUTPUT}" >> $GITHUB_ENV
+          exit ${TERRAFORM_RESULT}
+        fi
+        
         if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
           echo "HAS_CHANGES=false" >> $GITHUB_ENV
           echo "No changes found"
@@ -195,8 +204,6 @@ runs:
           echo "HAS_CHANGES=true" >> $GITHUB_ENV
           echo "Found changes"
         fi
-        
-        exit $TERRAFORM_RESULT
 
     - name: Convert PLANFILE to JSON
       if: env.HAS_CHANGES == 'true'
@@ -340,6 +347,7 @@ runs:
 
         echo "infracost_details_diff_breakdown=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> "$GITHUB_OUTPUT"
         echo "infracost_diff_total_monthly_cost=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> "$GITHUB_OUTPUT"
+
 
     - name: Prepare Artifacts Directory
       shell: bash
