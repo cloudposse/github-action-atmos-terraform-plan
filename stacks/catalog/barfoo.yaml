@@ -6,4 +6,5 @@ components:
         github:
           actions_enabled: true
       vars:
-        example: green
+        example: blue
+        enable_failure: true

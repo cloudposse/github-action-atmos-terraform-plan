@@ -3,3 +3,8 @@ variable "example" {
   description = "testing variable"
 }
 
+variable "enable_failure" {
+  type        = bool
+  default     = false
+  description = "Always fail"
+}
