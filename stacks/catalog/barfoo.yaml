@@ -1,8 +1,8 @@
 components:
   terraform:
     barfoo:
+      component: foobar
       settings:
-        component: foobar
         github:
           actions_enabled: true
       vars:
