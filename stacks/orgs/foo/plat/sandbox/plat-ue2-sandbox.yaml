@@ -1,5 +1,6 @@
 import:
   - catalog/foobar
+  - catalog/barfoo
 
 terraform:
   backend_type: s3
