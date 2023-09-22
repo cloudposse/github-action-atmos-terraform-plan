@@ -177,13 +177,14 @@ runs:
       id: atmos-plan
       shell: bash
       run: |
+        set +e
         TERRAFORM_OUTPUT=$(ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
           -out="${{ steps.vars.outputs.plan_file }}" \
           -lock=false \
           -input=false \
           -no-color)
-
+        set -e
         if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
           echo "HAS_CHANGES=false" >> $GITHUB_ENV
           echo "No changes found"
