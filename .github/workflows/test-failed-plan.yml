@@ -41,7 +41,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
     outputs:
-      result: ${{ steps.current.conclusion }}
+      result: ${{ steps.current.outcome }}
 
   assert:
     runs-on: ubuntu-latest
