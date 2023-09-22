@@ -178,13 +178,16 @@ runs:
       shell: bash
       run: |
         set +e
+        
         TERRAFORM_OUTPUT=$(ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
           -out="${{ steps.vars.outputs.plan_file }}" \
           -lock=false \
           -input=false \
           -no-color)
+        TERRAFORM_RESULT=$?
         set -e
+        
         if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
           echo "HAS_CHANGES=false" >> $GITHUB_ENV
           echo "No changes found"
@@ -192,6 +195,8 @@ runs:
           echo "HAS_CHANGES=true" >> $GITHUB_ENV
           echo "Found changes"
         fi
+        
+        exit $TERRAFORM_RESULT
 
     - name: Convert PLANFILE to JSON
       if: env.HAS_CHANGES == 'true'
