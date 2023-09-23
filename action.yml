@@ -188,7 +188,7 @@ runs:
         TERRAFORM_RESULT=$?
         set -e
         
-        if [["${TERRAFORM_RESULT}" == "0"]]; then
+        if [[ "${TERRAFORM_RESULT}" == "0" ]]; then
           echo "HAS_CHANGES=false" >> $GITHUB_ENV
         else
           echo "HAS_CHANGES=false" >> $GITHUB_ENV
