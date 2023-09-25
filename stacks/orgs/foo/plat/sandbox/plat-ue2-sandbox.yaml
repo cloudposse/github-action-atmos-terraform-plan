@@ -1,7 +1,8 @@
 import:
   - catalog/barbar-changes
+  - catalog/foobar
   - catalog/foobar-fail
-  - catalog/barfoo
+  - catalog/foobar-changes
 
 terraform:
   backend_type: s3
