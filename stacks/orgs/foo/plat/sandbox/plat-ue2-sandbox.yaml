@@ -1,5 +1,4 @@
 import:
-  - catalog/barbar-changes
   - catalog/foobar
   - catalog/foobar-fail
   - catalog/foobar-changes
