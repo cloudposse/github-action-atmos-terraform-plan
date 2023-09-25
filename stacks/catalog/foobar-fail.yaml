@@ -1,6 +1,6 @@
 components:
   terraform:
-    foobar/fail:
+    foobar-fail:
       component: foobar
       settings:
         github:
