@@ -411,7 +411,7 @@ runs:
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
           --output "$STEP_SUMMARY_FILE" \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
-          plan -- $( >&2 echo "test error" && exit 1 )
+          plan -- $( >&2 echo "test error" )
 
 
     - name: Publish Step Summary
@@ -438,8 +438,6 @@ runs:
           echo "${STEP_SUMMARY_FILE} not found"
           echo "result=\"\"" >> $GITHUB_OUTPUT
         fi
-        
-
 
     - name: Generate GitHub Issue Description for Drift Detection
       if: env.HAS_CHANGES == 'true' && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
