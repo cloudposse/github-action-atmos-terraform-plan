@@ -419,3 +419,8 @@ runs:
         name: metadata
         path: metadata
         retention-days: ${{ inputs.metadata-retention-days }}
+
+    - name: Outputs
+      shell: bash
+      run: |
+        echo "summary=test" >> $GITHUB_OUTPUTS
