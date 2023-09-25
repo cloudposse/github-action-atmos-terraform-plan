@@ -82,7 +82,7 @@ inputs:
 outputs:
   summary:
     description: "Summary"
-    value: "${{ steps.outputs.outputs.summary }}"
+    value: "${{ steps.summary.outputs.result }}"
 
 
 runs:
@@ -367,6 +367,7 @@ runs:
 
     - name: Post Details to Step Summary
       if: env.HAS_CHANGES == 'true'
+      id: summary
       shell: bash
       run: |
         cd "${{ inputs.component-path }}"
@@ -391,6 +392,7 @@ runs:
 
         if [[ "$DRIFT_DETECTION_MODE_ENABLED" == "false" ]]; then
           cat $STEP_SUMMARY_FILE >> $GITHUB_STEP_SUMMARY
+          echo "result=$(cat ${STEP_SUMMARY_FILE})" >> $GITHUB_OUTPUT          
         fi
 
     - name: Generate GitHub Issue Description for Drift Detection
@@ -425,8 +427,3 @@ runs:
         path: metadata
         retention-days: ${{ inputs.metadata-retention-days }}
 
-    - name: Outputs
-      id: outputs
-      shell: bash
-      run: |
-        echo "summary=${GITHUB_STEP_SUMMARY}" >> $GITHUB_OUTPUT
