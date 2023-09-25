@@ -396,7 +396,9 @@ runs:
           STEP_SUMMARY="${STEP_SUMMARY//'%'/'%25'}"
           STEP_SUMMARY="${STEP_SUMMARY//$'\n'/'%0A'}"
           STEP_SUMMARY="${STEP_SUMMARY//$'\r'/'%0D'}"
+          echo "-------------------------------------"
           echo "result=${STEP_SUMMARY}"
+          echo "-------------------------------------"        
           echo "result=${STEP_SUMMARY}" >> $GITHUB_OUTPUT          
         fi
 
