@@ -393,6 +393,11 @@ runs:
         if [[ "$DRIFT_DETECTION_MODE_ENABLED" == "false" ]]; then
           cat $STEP_SUMMARY_FILE >> $GITHUB_STEP_SUMMARY
           STEP_SUMMARY=$(cat ${STEP_SUMMARY_FILE})
+          STEP_SUMMARY="${STEP_SUMMARY//$'\n'/\n}"
+          STEP_SUMMARY="${STEP_SUMMARY//$'\r'/\r}"
+          echo "-------------------------------------"
+          echo "result=${STEP_SUMMARY}"
+          echo "-------------------------------------"        
           echo "result=${STEP_SUMMARY}" >> $GITHUB_OUTPUT          
         fi
 
