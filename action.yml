@@ -354,6 +354,7 @@ runs:
 
 
     - name: Prepare Artifacts Directory
+      if: always()
       shell: bash
       run: |
         mkdir -p metadata
