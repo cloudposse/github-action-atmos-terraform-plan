@@ -410,7 +410,7 @@ runs:
         
         else 
           echo "${STEP_SUMMARY_FILE} not found"
-          echo "result=" >> $GITHUB_OUTPUT
+          echo "result=\"\"" >> $GITHUB_OUTPUT
         fi
         
 
