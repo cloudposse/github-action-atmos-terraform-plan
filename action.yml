@@ -389,7 +389,7 @@ runs:
           plan -- terraform show ${{ steps.vars.outputs.plan_file }}
 
     - name: Generate Failed Summary
-      if: ( env.HAS_ERROR == 'true' ) and always()
+      if: ( env.HAS_ERROR == 'true' ) && always()
       shell: bash
       run: |
         cd "${{ inputs.component-path }}"
