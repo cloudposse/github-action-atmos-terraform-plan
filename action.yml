@@ -364,9 +364,8 @@ runs:
       run: |
         echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}", "drifted": '"$HAS_CHANGES"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
 
-    - name: Post Details to Step Summary
+    - name: Generate Summary
       if: env.HAS_CHANGES == 'true'
-      id: summary
       shell: bash
       run: |
         cd "${{ inputs.component-path }}"
@@ -389,13 +388,25 @@ runs:
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
           plan -- terraform show ${{ steps.vars.outputs.plan_file }}
 
-        if [[ "$DRIFT_DETECTION_MODE_ENABLED" == "false" ]]; then
-          cat $STEP_SUMMARY_FILE >> $GITHUB_STEP_SUMMARY
-          STEP_SUMMARY=$(cat ${STEP_SUMMARY_FILE} | jq -Rs .)
-          echo "result=${STEP_SUMMARY}" >> $GITHUB_OUTPUT
-        else
+
+    - name: Publish Step Summary
+      id: summary
+      shell: bash
+      run: |
+        cd "${{ inputs.component-path }}"
+
+        STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${{ steps.vars.outputs.component_slug }}.md"
+      
+        if [ -f ${STEP_SUMMARY_FILE} ]; then
+          if [[ "$DRIFT_DETECTION_MODE_ENABLED" == "false" ]]; then
+            cat $STEP_SUMMARY_FILE >> $GITHUB_STEP_SUMMARY
+            STEP_SUMMARY=$(cat ${STEP_SUMMARY_FILE} | jq -Rs .)
+            echo "result=${STEP_SUMMARY}" >> $GITHUB_OUTPUT
+          fi
+        else 
           echo "result=" >> $GITHUB_OUTPUT
         fi
+        
 
 
     - name: Generate GitHub Issue Description for Drift Detection
