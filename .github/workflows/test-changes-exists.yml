@@ -34,7 +34,7 @@ jobs:
         id: current
         uses: ./
         with:
-          component: "foobar"
+          component: "foobar/changes"
           stack: "plat-ue2-sandbox"
           component-path: "components/terraform/foobar"
           terraform-plan-role: ${{ secrets.TERRAFORM_PLAN_ROLE }}

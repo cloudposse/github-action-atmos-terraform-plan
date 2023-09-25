@@ -1,5 +1,6 @@
 import:
-  - catalog/foobar
+  - catalog/barbar-changes
+  - catalog/foobar-fail
   - catalog/barfoo
 
 terraform:

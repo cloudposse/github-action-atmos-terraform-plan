@@ -1,10 +1,10 @@
 components:
   terraform:
-    barfoo:
+    foobar/changes:
       component: foobar
       settings:
         github:
           actions_enabled: true
       vars:
         example: blue
-        enable_failure: true
+        enable_failure: false
