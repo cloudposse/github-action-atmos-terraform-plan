@@ -402,6 +402,7 @@ runs:
           echo "result=${STEP_SUMMARY}" >> $GITHUB_OUTPUT          
         fi
 
+
     - name: Generate GitHub Issue Description for Drift Detection
       if: env.HAS_CHANGES == 'true' && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
       shell: bash
