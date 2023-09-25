@@ -423,4 +423,4 @@ runs:
     - name: Outputs
       shell: bash
       run: |
-        echo "summary=test" >> $GITHUB_OUTPUTS
+        echo "summary=test" >> $GITHUB_OUTPUT
