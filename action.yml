@@ -398,12 +398,18 @@ runs:
         STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${{ steps.vars.outputs.component_slug }}.md"
       
         if [ -f ${STEP_SUMMARY_FILE} ]; then
+          echo "${STEP_SUMMARY_FILE} found"
+
           if [[ "$DRIFT_DETECTION_MODE_ENABLED" == "false" ]]; then
+            echo "Drift detection mode disabled"
+            
             cat $STEP_SUMMARY_FILE >> $GITHUB_STEP_SUMMARY
             STEP_SUMMARY=$(cat ${STEP_SUMMARY_FILE} | jq -Rs .)
             echo "result=${STEP_SUMMARY}" >> $GITHUB_OUTPUT
           fi
+        
         else 
+          echo "${STEP_SUMMARY_FILE} not found"
           echo "result=" >> $GITHUB_OUTPUT
         fi
         
