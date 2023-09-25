@@ -411,7 +411,7 @@ runs:
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
           --output "$STEP_SUMMARY_FILE" \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
-          plan -- $( >&2 echo "test error" )
+          plan -- echo "test error"
 
 
     - name: Publish Step Summary
