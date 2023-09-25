@@ -429,4 +429,4 @@ runs:
       id: outputs
       shell: bash
       run: |
-        echo "summary=test" >> $GITHUB_OUTPUT
+        echo "summary=${GITHUB_STEP_SUMMARY}" >> $GITHUB_OUTPUT
