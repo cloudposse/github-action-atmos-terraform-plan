@@ -197,7 +197,7 @@ runs:
         else
           echo "HAS_CHANGES=false" >> $GITHUB_ENV
           echo "HAS_ERROR=true" >> $GITHUB_ENV
-          echo "TERRAFORM_OUTPUT=$(echo ${TERRAFORM_OUTPUT} | iconv -f utf-16be | jq -Rs .)" >> $GITHUB_ENV
+          echo "TERRAFORM_OUTPUT=$(echo -ne ${TERRAFORM_OUTPUT} | iconv | jq -Rs .)" >> $GITHUB_ENV
           exit ${TERRAFORM_RESULT}
         fi
         
