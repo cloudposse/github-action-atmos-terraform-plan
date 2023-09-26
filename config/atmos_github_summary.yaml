@@ -30,9 +30,11 @@ templates:
     {{- if .Result }}
     {{- if eq .ExitCode 1 }}
     Error
+
     ```shell
-    {{- .Result }}
+    {{ .Result }}
     ```
+
     {{- end }}
     {{- if eq .ExitCode 0 }}
     {{- .Result }}
