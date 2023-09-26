@@ -26,10 +26,11 @@ templates:
     {{ end }}
 
   result: |
+    {{- if eq .ExitCode 0 }}
     <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />{{if .Result}}{{ .Result }}{{end}}</summary>
 
     <br/>
-
+    {{- end }}
   updated_resources: |
     ---
     {{- if .CreatedResources}}
