@@ -126,6 +126,7 @@ terraform:
       {{template "branding" .}}
       {{template "badge" .}}
       {{template "deletion_warning" .}}
+      {{template "error_messages" .}}
       {{template "result" .}}
       To reproduce this locally, run:<br/><br/>
       
@@ -142,7 +143,6 @@ terraform:
       {{template "change_outside_terraform" .}}
       {{template "warning" .}}
       {{end}}
-      {{template "error_messages" .}}
       {{if ne .Vars.infracost_details_diff_breakdown ""}}
       {{template "infracost" .}}
       {{end}}
