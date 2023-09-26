@@ -57,7 +57,6 @@ jobs:
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
-
             ## Changes Found for `foobar-changes` in `plat-ue2-sandbox`
             
             
@@ -107,6 +106,24 @@ jobs:
             ```
             
             </details>
+            
+            
+            
+            
+            ## :warning: Warnings :warning:
+            
+            ```hcl
+            Warning: Value for undeclared variable
+            
+            The root module does not declare a variable named "region" but a value was
+            found in file "plat-ue2-sandbox-foobar-changes.terraform.tfvars.json". If you
+            meant to use this value, add a "variable" block to the configuration.
+            
+            To silence these warnings, use TF_VAR_... environment variables to provide
+            certain "global" settings to all configurations in your organization. To
+            reduce the verbosity of these warnings, use the -compact-warnings option.
+
+```
 
   teardown:
     runs-on: ubuntu-latest
