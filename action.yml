@@ -148,7 +148,7 @@ runs:
       if: env.ACTIONS_ENABLED == 'true'
       uses: shmokmt/actions-setup-tfcmt@v2
       with:
-        version: v4.4.1
+        version: v4.6.0
 
     - name: Define Job Variables
       if: env.ACTIONS_ENABLED == 'true'
