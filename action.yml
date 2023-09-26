@@ -207,19 +207,20 @@ runs:
   
         TERRAFORM_RESULT=$?
 
-        #        if [[ "${TERRAFORM_RESULT}" == "0" ]]; then
-        #          echo "HAS_CHANGES=false" >> $GITHUB_ENV
-        #        else
-        #          echo "HAS_CHANGES=false" >> $GITHUB_ENV
-        #          echo "HAS_ERROR=true" >> $GITHUB_ENV
-        #          echo "TERRAFORM_OUTPUT=$(echo "${TERRAFORM_OUTPUT}" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]//g" | jq -Rs . )" >> $GITHUB_ENV
-        #          exit ${TERRAFORM_RESULT}
-        #        fi
-        #
+        #if [[ "${TERRAFORM_RESULT}" == "0" ]]; then
+        #  echo "HAS_CHANGES=false" >> $GITHUB_ENV
+        #else
+        #  echo "HAS_CHANGES=false" >> $GITHUB_ENV
+        #  echo "HAS_ERROR=true" >> $GITHUB_ENV
+        #  echo "TERRAFORM_OUTPUT=$(echo "${TERRAFORM_OUTPUT}" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]//g" | jq -Rs . )" >> $GITHUB_ENV
+        #  exit ${TERRAFORM_RESULT}
+        #fi
+
 
         if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
           echo "HAS_CHANGES=false" >> $GITHUB_ENV
           echo "No changes found"
+          rm -f ${STEP_SUMMARY_FILE}
         else
           echo "HAS_CHANGES=true" >> $GITHUB_ENV
           echo "Found changes"
