@@ -26,10 +26,9 @@ templates:
     {{ end }}
 
   result: |
-    <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />{{if .Result}}{{ if eq .ExitCode 0 }}{{ .Result }}{{else}}Error{{end}}{{end}}</summary>
+    <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />{{if .Result}}{{ .Result }}{{end}}</summary>
 
     <br/>
-    To reproduce this locally, run:<br/><br/>
 
   updated_resources: |
     ---
@@ -127,9 +126,12 @@ terraform:
       {{template "badge" .}}
       {{template "deletion_warning" .}}
       {{template "result" .}}
+      To reproduce this locally, run:<br/><br/>
+      
       ```shell
       atmos terraform plan {{.Vars.component}} -s {{.Vars.stack}}
       ```
+      {{ if eq .ExitCode 0 }}
       {{template "updated_resources" .}}
       {{if .ChangedResult}}
       <details><summary>Terraform <strong>Plan</strong> Summary</summary>
@@ -138,6 +140,7 @@ terraform:
       {{end}}
       {{template "change_outside_terraform" .}}
       {{template "warning" .}}
+      {{end}}
       {{template "error_messages" .}}
       {{if ne .Vars.infracost_details_diff_breakdown ""}}
       {{template "infracost" .}}
