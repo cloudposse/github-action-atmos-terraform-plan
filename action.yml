@@ -181,6 +181,7 @@ runs:
       id: atmos-plan
       shell: bash
       run: |
+        mkdir -p metadata
         STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${{ steps.vars.outputs.component_slug }}.md"
   
         tfcmt \
@@ -197,12 +198,12 @@ runs:
           -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
           --output "$STEP_SUMMARY_FILE" \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
-          plan -- ATMOS_BASE_PATH=$GITHUB_WORKSPACE atmos terraform plan ${{ inputs.component }} \
-                    --stack ${{ inputs.stack }} \
-                    -out="${{ steps.vars.outputs.plan_file }}" \
-                    -lock=false \
-                    -input=false \
-                    -no-color 
+          plan -- atmos terraform plan ${{ inputs.component }} \
+                  --stack ${{ inputs.stack }} \
+                  -out="${{ steps.vars.outputs.plan_file }}" \
+                  -lock=false \
+                  -input=false \
+                  -no-color 
   
         TERRAFORM_RESULT=$?
 
