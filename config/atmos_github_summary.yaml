@@ -26,21 +26,7 @@ templates:
     {{ end }}
 
   result: |
-    <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />
-    {{- if .Result }}
-    {{- if eq .ExitCode 1 }}
-    Error
-
-    ```shell
-    {{ .Result }}
-    ```
-
-    {{- end }}
-    {{- if eq .ExitCode 0 }}
-    {{- .Result }}
-    {{- end }}
-    {{ end -}}
-    </summary>
+    <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />{{if .Result}}{{ if eq .ExitCode 0 }}{{ .Result }}{{else}}Error{{end}}{{end}}</summary>
 
     <br/>
     To reproduce this locally, run:<br/><br/>
@@ -100,6 +86,11 @@ templates:
     {{wrapCode .Warning}}
     {{end}}
   error_messages: |
+    {{ if eq .ExitCode 1 }}
+    ```shell
+    {{ .Result }}
+    ```
+    {{end}}
     {{if .ErrorMessages}}
     ## :warning: Errors
     {{range .ErrorMessages}}
