@@ -212,8 +212,6 @@ runs:
 
         set -e
         
-        echo "${TERRAFORM_OUTPUT}"
-        
         if [[ "${TERRAFORM_RESULT}" == "0" ]]; then
           echo "HAS_ERROR=false" >> $GITHUB_ENV
         
