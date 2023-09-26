@@ -27,17 +27,17 @@ templates:
 
   result: |
     <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />
-    {{-if .Result}}
+    {{- if .Result }}
     {{- if eq .ExitCode 1 }}
     Error
     ```shell
     {{- .Result }}
     ```
-    {{-end}}
+    {{- end }}
     {{- if eq .ExitCode 0 }}
     {{- .Result }}
-    {{-end}}
-    {{end-}}
+    {{- end }}
+    {{ end -}}
     </summary>
 
     <br/>
