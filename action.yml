@@ -186,7 +186,7 @@ runs:
         
         set +e 
         
-        TERRAFORM_OUTPUT= $( \
+        TERRAFORM_OUTPUT=$( \
           tfcmt \
           --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
           -owner "${{ github.repository_owner }}" \
@@ -211,7 +211,6 @@ runs:
         TERRAFORM_RESULT=$?
 
         set -e
-
         
         if [[ "${TERRAFORM_RESULT}" == "0" ]]; then
           echo "HAS_ERROR=false" >> $GITHUB_ENV
@@ -229,7 +228,6 @@ runs:
           echo "HAS_ERROR=true" >> $GITHUB_ENV
           exit ${TERRAFORM_RESULT}
         fi
-        
 
     - name: Convert PLANFILE to JSON
       if: env.HAS_CHANGES == 'true'
@@ -376,7 +374,6 @@ runs:
 
 
     - name: Prepare Artifacts Directory
-      if: always()
       shell: bash
       run: |
         mkdir -p metadata
