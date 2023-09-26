@@ -186,7 +186,8 @@ runs:
         
         set +e 
         
-        tfcmt \
+        TERRAFORM_OUTPUT= $( \
+          tfcmt \
           --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
           -owner "${{ github.repository_owner }}" \
           -repo "${{ github.event.repository.name }}" \
@@ -205,8 +206,8 @@ runs:
                   -out="${{ steps.vars.outputs.plan_file }}" \
                   -lock=false \
                   -input=false \
-                  -no-color 
-  
+                  -no-color \ 
+        )
         TERRAFORM_RESULT=$?
 
         set -e
