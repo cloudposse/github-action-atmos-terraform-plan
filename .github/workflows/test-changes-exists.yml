@@ -121,7 +121,8 @@ jobs:
             
             To silence these warnings, use TF_VAR_... environment variables to provide
             certain "global" settings to all configurations in your organization. To
-            reduce the verbosity of these warnings, use the -compact-warnings option.            
+            reduce the verbosity of these warnings, use the -compact-warnings option.
+            
             ```
 
   teardown:
