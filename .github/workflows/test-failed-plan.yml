@@ -93,9 +93,6 @@ jobs:
             ```shell
             atmos terraform plan foobar-fail -s plat-ue2-sandbox
             ```
-            
-            
-
 
   teardown:
     runs-on: ubuntu-latest
