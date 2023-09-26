@@ -18,6 +18,7 @@ terraform:
   vars:
     environment: ue2
     namespace: foo
+    region: us-east-2
     stage: sandbox
     tenant: plat
     label_order:
