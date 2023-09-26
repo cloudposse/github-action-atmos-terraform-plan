@@ -206,7 +206,8 @@ runs:
                   -out="${{ steps.vars.outputs.plan_file }}" \
                   -lock=false \
                   -input=false \
-                  -no-color
+                  -no-color \
+                  -detailed-exitcode
         )
         TERRAFORM_RESULT=$?
 

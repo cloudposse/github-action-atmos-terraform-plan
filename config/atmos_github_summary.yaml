@@ -24,12 +24,21 @@ templates:
     {{- if .DeletedResources }} [![destroy](https://shields.io/badge/PLAN-DESTROY-critical?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
     {{- if not (or .CreatedResources .UpdatedResources .ReplacedResources .DeletedResources) }} [![no changes](https://shields.io/badge/-NO_CHANGE-inactive?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
     {{ end }}
-    {{ if eq .ExitCode 1 }}
-    [![failed](https://shields.io/badge/PLAN-FAILED-red?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}})
-    {{ end }}
 
   result: |
-    <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />{{if .Result}}{{ .Result }}{{end}}</summary>
+    <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />
+    {{-if .Result}}
+    {{- if eq .ExitCode 1 }}
+    Error
+    ```shell
+    {{- .Result }}
+    ```
+    {{-end}}
+    {{- if eq .ExitCode 0 }}
+    {{- .Result }}
+    {{-end}}
+    {{end-}}
+    </summary>
 
     <br/>
     To reproduce this locally, run:<br/><br/>
