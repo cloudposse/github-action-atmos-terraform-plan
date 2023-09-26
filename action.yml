@@ -188,7 +188,7 @@ runs:
           -out="${{ steps.vars.outputs.plan_file }}" \
           -lock=false \
           -input=false \
-          -no-color 2>&1)
+          -no-color | jq -Rs . 2>&1)
         TERRAFORM_RESULT=$?
         set -e
         
@@ -197,7 +197,7 @@ runs:
         else
           echo "HAS_CHANGES=false" >> $GITHUB_ENV
           echo "HAS_ERROR=true" >> $GITHUB_ENV
-          echo "TERRAFORM_OUTPUT=$(echo -ne ${TERRAFORM_OUTPUT} | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]//g" | jq -Rs .)" >> $GITHUB_ENV
+          echo "TERRAFORM_OUTPUT=$(echo ${TERRAFORM_OUTPUT} | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]//g" )" >> $GITHUB_ENV
           exit ${TERRAFORM_RESULT}
         fi
         
