@@ -119,9 +119,7 @@ templates:
   infracost: |
     {{- if eq .ExitCode 0 }}
     {{- if eq .Vars.infracost_enabled "true" }}    
-    <details><summary>
-      %INFRACOST_SUMMARY%
-    </summary>
+    <details><summary>%INFRACOST_SUMMARY%</summary>
 
       ```
       %INFRACOST_DIFF%
