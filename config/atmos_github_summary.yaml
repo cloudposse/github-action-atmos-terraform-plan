@@ -33,7 +33,7 @@ templates:
     {{- end }}
 
     {{- if eq .ExitCode 1 }}
-    <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />## :warning: Errors</summary>
+    <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />:warning: Error summary</summary>
 
     <br/>
     {{- end }}
