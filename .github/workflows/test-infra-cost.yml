@@ -42,6 +42,7 @@ jobs:
           sha: 55bfef95601890afd80709da39a3ee5e6b4b0d32
           enable-infracost: true
           infracost-api-key: ${{ secrets.INFRACOST_API_KEY }}
+          debug: true
 
     outputs:
       result: ${{ steps.current.outcome }}
