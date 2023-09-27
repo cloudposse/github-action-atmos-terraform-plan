@@ -241,8 +241,6 @@ runs:
       run: |
         cd "${{ inputs.component-path }}"
         terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
-        cat ${{ steps.vars.outputs.plan_file }}
-        cat ${{ steps.vars.outputs.plan_file }}.json
 
     - name: Configure State AWS Credentials
       if: env.HAS_CHANGES == 'true'
