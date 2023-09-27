@@ -57,7 +57,7 @@ jobs:
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
-            ## :x: Plan Failed for `foobar-fail` in `plat-ue2-sandbox`!
+            ## :x: Plan Failed for `foobar-fail` in `plat-ue2-sandbox`
             
             
             
