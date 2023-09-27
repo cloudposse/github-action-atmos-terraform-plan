@@ -39,6 +39,7 @@ templates:
     {{- end }}
 
   updated_resources: |
+    {{- if eq .ExitCode 0 }}    
     ---
     {{- if .CreatedResources}}
     ### <a id="create-{{.Vars.stack}}-{{.Vars.component}}" />Create
@@ -73,7 +74,8 @@ templates:
     {{- end}}
     ```
     {{ end}}
-    </details>
+    {{- end }}
+    
   deletion_warning: |
     {{if .HasDestroy}}
     ### :warning: Resource Deletion will happen :warning:
@@ -141,6 +143,7 @@ terraform:
       atmos terraform plan {{.Vars.component}} -s {{.Vars.stack}}
       ```
       {{template "updated_resources" .}}
+      </details>
       {{if .ChangedResult}}
       <details><summary>Terraform <strong>Plan</strong> Summary</summary>
       {{wrapCode .ChangedResult}}
