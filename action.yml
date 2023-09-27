@@ -276,14 +276,11 @@ runs:
         if [ -f "$PLAN_FILE_STORED" ]; then
           cd "${{ inputs.component-path }}"
           
-          cat $PLAN_FILE_STORED
           terraform show -json "$PLAN_FILE_STORED" > "$PLAN_FILE_STORED.json"
         
-          cat $PLAN_FILE_STORED.json
-
-          # sort and remove timestamp
-          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE.json" | jq 'del(.timestamp)' > current.json
-          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_STORED.json" | jq 'del(.timestamp)' > stored.json
+          #          # sort and remove timestamp
+          #          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE.json" | jq 'del(.timestamp)' > current.json
+          #          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_STORED.json" | jq 'del(.timestamp)' > stored.json
 
           # calculate checksums of stored and current plans
           MD5_CURRENT=$(md5sum current.json | awk '{ print $1 }')
