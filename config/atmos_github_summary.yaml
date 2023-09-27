@@ -32,6 +32,16 @@ templates:
     {{- if eq .ExitCode 1 }}
     <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />:warning: Error summary</summary>
     {{- end }}
+    
+    <br/>      
+    {{- template "error_messages" .}}      
+    To reproduce this locally, run:<br/><br/>
+    
+    ```shell
+    atmos terraform plan {{.Vars.component}} -s {{.Vars.stack}}
+    ```
+    {{- template "updated_resources" .}}
+    </details>
 
   updated_resources: |
     {{- if eq .ExitCode 0 }}    
