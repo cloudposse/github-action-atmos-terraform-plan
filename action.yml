@@ -197,6 +197,7 @@ runs:
           -repo "${{ github.event.repository.name }}" \
           -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
           -var "component:${{ inputs.component }}" \
+          -var "commitSHA:${{ inputs.sha }}" \        
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
           -var "logoImage:${{ inputs.branding-logo-image }}" \
