@@ -31,6 +31,13 @@ templates:
 
     <br/>
     {{- end }}
+
+    {{- if eq .ExitCode 1 }}
+    <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />## :warning: Errors</summary>
+
+    <br/>
+    {{- end }}
+
   updated_resources: |
     ---
     {{- if .CreatedResources}}
@@ -133,7 +140,6 @@ terraform:
       ```shell
       atmos terraform plan {{.Vars.component}} -s {{.Vars.stack}}
       ```
-      {{ if eq .ExitCode 0 }}
       {{template "updated_resources" .}}
       {{if .ChangedResult}}
       <details><summary>Terraform <strong>Plan</strong> Summary</summary>
@@ -142,7 +148,6 @@ terraform:
       {{end}}
       {{template "change_outside_terraform" .}}
       {{template "warning" .}}
-      {{end}}
       {{if ne .Vars.infracost_details_diff_breakdown ""}}
       {{template "infracost" .}}
       {{end}}
