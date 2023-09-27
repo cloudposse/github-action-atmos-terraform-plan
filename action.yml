@@ -176,12 +176,16 @@ runs:
         role-session-name: "atmos-terraform-plan-gitops"
         mask-aws-account-id: "no"
 
+    - name: Prepare Artifacts Directory
+      shell: bash
+      run: |
+        mkdir -p metadata
+
     - name: Atmos Terraform Plan
       if: env.ACTIONS_ENABLED == 'true'
       id: atmos-plan
       shell: bash
       run: |
-        mkdir -p metadata
         STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${{ steps.vars.outputs.component_slug }}.md"
         
         set +e 
@@ -375,66 +379,12 @@ runs:
         echo "infracost_diff_total_monthly_cost=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> "$GITHUB_OUTPUT"
 
 
-    - name: Prepare Artifacts Directory
-      shell: bash
-      run: |
-        mkdir -p metadata
-
     - name: Store Component Metadata to Artifacts
       if: env.DRIFT_DETECTION_MODE_ENABLED == 'true'
       shell: bash
       run: |
         echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}", "drifted": '"$HAS_CHANGES"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
 
-    - name: Generate Changes Summary
-      if: env.HAS_CHANGES == 'true'
-      shell: bash
-      run: |
-        cd "${{ inputs.component-path }}"
-
-        STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${{ steps.vars.outputs.component_slug }}.md"
-
-#        tfcmt \
-#          --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
-#          -owner "${{ github.repository_owner }}" \
-#          -repo "${{ github.event.repository.name }}" \
-#          -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
-#          -var "component:${{ inputs.component }}" \
-#          -var "stack:${{ inputs.stack }}" \
-#          -var "job:${{ github.job }}" \
-#          -var "logoImage:${{ inputs.branding-logo-image }}" \
-#          -var "logoUrl:${{ inputs.branding-logo-url }}" \
-#          -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
-#          -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
-#          --output "$STEP_SUMMARY_FILE" \
-#          --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
-#          plan -- terraform show ${{ steps.vars.outputs.plan_file }}
-
-#    - name: Generate Failed Summary
-#      if: ( env.HAS_ERROR == 'true' ) && always()
-#      shell: bash
-#      run: |
-#        cd "${{ inputs.component-path }}"
-#
-#        STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${{ steps.vars.outputs.component_slug }}.md"
-#
-#        tfcmt \
-#          --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
-#          -owner "${{ github.repository_owner }}" \
-#          -repo "${{ github.event.repository.name }}" \
-#          -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
-#          -var "component:${{ inputs.component }}" \
-#          -var "stack:${{ inputs.stack }}" \
-#          -var "job:${{ github.job }}" \
-#          -var "logoImage:${{ inputs.branding-logo-image }}" \
-#          -var "logoUrl:${{ inputs.branding-logo-url }}" \
-#          -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
-#          -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
-#          --output "$STEP_SUMMARY_FILE" \
-#          --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
-#          plan -- echo "${TERRAFORM_OUTPUT//\\n/$'\n'}"
-#
-#
     - name: Publish Step Summary
       id: summary
       if: always()
