@@ -9,12 +9,12 @@ ci:
   vars: {}
 templates:
   plan_title: |
-    {{ if eq .ExitCode 1 }}
+    {{- if eq .ExitCode 1 }}
     ## :x: Plan Failed for `{{.Vars.component}}` in `{{.Vars.stack}}`
-    {{ end }}
+    {{- end }}
     {{- if eq .ExitCode 0 }}
     ## Changes Found for `{{.Vars.component}}` in `{{.Vars.stack}}`
-    {{ end }}
+    {{- end }}
     
   badge: |
     {{- if eq .ExitCode 0 }}
@@ -23,7 +23,7 @@ templates:
     {{- if .ReplacedResources }} [![replace](https://shields.io/badge/PLAN-REPLACE-critical?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
     {{- if .DeletedResources }} [![destroy](https://shields.io/badge/PLAN-DESTROY-critical?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
     {{- if not (or .CreatedResources .UpdatedResources .ReplacedResources .DeletedResources) }} [![no changes](https://shields.io/badge/-NO_CHANGE-inactive?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
-    {{ end }}
+    {{- end }}
 
   result: |
     {{- if eq .ExitCode 0 }}
