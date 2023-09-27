@@ -378,7 +378,6 @@ runs:
         echo "infracost_details_diff_breakdown=$INFRACOST_DETAILS_DIFF_BREAKDOWN" >> "$GITHUB_OUTPUT"
         echo "infracost_diff_total_monthly_cost=$INFRACOST_DIFF_TOTAL_MONTHLY_COST" >> "$GITHUB_OUTPUT"
 
-
     - name: Store Component Metadata to Artifacts
       if: env.DRIFT_DETECTION_MODE_ENABLED == 'true'
       shell: bash
