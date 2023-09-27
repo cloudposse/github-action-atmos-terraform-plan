@@ -188,11 +188,17 @@ runs:
       run: |
         STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${{ steps.vars.outputs.component_slug }}.md"
         
+        if [[ "$DRIFT_DETECTION_MODE_ENABLED" == "true" ]]; then
+          TEMPLATE_FILE="${{ github.action_path }}/config/atmos_github_summary.yaml"
+        else 
+          TEMPLATE_FILE="${{ github.action_path }}/config/github_issue_description.yaml"
+        fi
+        
         set +e 
         
         TERRAFORM_OUTPUT=$( \
           tfcmt \
-          --config "${{ github.action_path }}/config/atmos_github_summary.yaml" \
+          --config ${TEMPLATE_FILE} \
           -owner "${{ github.repository_owner }}" \
           -repo "${{ github.event.repository.name }}" \
           -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
@@ -384,7 +390,7 @@ runs:
       run: |
         echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}", "drifted": '"$HAS_CHANGES"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
 
-    - name: Publish Step Summary
+    - name: Publish Summary or Generate GitHub Issue Description for Drift Detection
       id: summary
       if: always()
       shell: bash
@@ -396,45 +402,23 @@ runs:
         if [ -f ${STEP_SUMMARY_FILE} ]; then
           echo "${STEP_SUMMARY_FILE} found"
 
+          STEP_SUMMARY=$(cat ${STEP_SUMMARY_FILE} | jq -Rs .)
+          echo "result=${STEP_SUMMARY}" >> $GITHUB_OUTPUT
+
           if [[ "$DRIFT_DETECTION_MODE_ENABLED" == "false" ]]; then
             echo "Drift detection mode disabled"
-            
             cat $STEP_SUMMARY_FILE >> $GITHUB_STEP_SUMMARY
-            STEP_SUMMARY=$(cat ${STEP_SUMMARY_FILE} | jq -Rs .)
-            echo "result=${STEP_SUMMARY}" >> $GITHUB_OUTPUT
+          else
+            echo "Drift detection mode enabled"
+            cp $STEP_SUMMARY_FILE $GITHUB_WORKSPACE/metadata/issue-description-${{ steps.vars.outputs.component_slug }}.md
           fi
-        
         else 
           echo "${STEP_SUMMARY_FILE} not found"
           echo "result=\"\"" >> $GITHUB_OUTPUT
         fi
 
-    - name: Generate GitHub Issue Description for Drift Detection
-      if: env.HAS_CHANGES == 'true' && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
-      shell: bash
-      run: |
-        cd "${{ inputs.component-path }}"
-
-        tfcmt \
-          --config "${{ github.action_path }}/config/github_issue_description.yaml" \
-          -owner "${{ github.repository_owner }}" \
-          -repo "${{ github.event.repository.name }}" \
-          -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
-          -var "component:${{ inputs.component }}" \
-          -var "stack:${{ inputs.stack }}" \
-          -var "componentPath:${{ inputs.component-path }}" \
-          -var "commitSHA:${{ inputs.sha }}" \
-          -var "job:${{ github.job }}" \
-          -var "logoImage:${{ inputs.branding-logo-image }}" \
-          -var "logoUrl:${{ inputs.branding-logo-url }}" \
-          -var "infracost_details_diff_breakdown:${{ steps.infracost-diff.outputs.infracost_details_diff_breakdown }}" \
-          -var "infracost_total_monthly_cost:${{ steps.infracost-diff.outputs.infracost_diff_total_monthly_cost }}" \
-          --output "$GITHUB_WORKSPACE/metadata/issue-description-${{ steps.vars.outputs.component_slug }}.md" \
-          --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
-          plan -- terraform show ${{ steps.vars.outputs.plan_file }}
-
     - name: Upload Artifacts
-      if: env.DRIFT_DETECTION_MODE_ENABLED == 'true'
+      if: always() && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
       uses: actions/upload-artifact@v3
       with:
         name: metadata

@@ -41,6 +41,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           sha: 55bfef95601890afd80709da39a3ee5e6b4b0d32
           enable-infracost: true
+          infracost-api-key: ${{ secrets. }}
 
     outputs:
       result: ${{ steps.current.outcome }}
