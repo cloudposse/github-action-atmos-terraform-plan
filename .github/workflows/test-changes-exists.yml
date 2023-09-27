@@ -66,14 +66,17 @@ jobs:
             
             <details><summary><a id="result-plat-ue2-sandbox-foobar-changes" />Plan: 1 to add, 0 to change, 0 to destroy.</summary>
             
-            <br/>
+            <br/>      
+            
             
                   
             To reproduce this locally, run:<br/><br/>
             
             ```shell
             atmos terraform plan foobar-changes -s plat-ue2-sandbox
-            ```---
+            ```
+                
+            ---
             ### <a id="create-plat-ue2-sandbox-foobar-changes" />Create
             ```diff
             + random_id.foo
