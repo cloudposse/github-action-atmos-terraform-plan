@@ -189,9 +189,9 @@ runs:
         STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${{ steps.vars.outputs.component_slug }}.md"
         
         if [[ "$DRIFT_DETECTION_MODE_ENABLED" == "true" ]]; then
-          TEMPLATE_FILE="${{ github.action_path }}/config/atmos_github_summary.yaml"
-        else 
           TEMPLATE_FILE="${{ github.action_path }}/config/github_issue_description.yaml"
+        else 
+          TEMPLATE_FILE="${{ github.action_path }}/config/atmos_github_summary.yaml"
         fi
         
         set +e 
