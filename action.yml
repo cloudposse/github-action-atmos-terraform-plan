@@ -209,7 +209,7 @@ runs:
           -var "job:${{ github.job }}" \
           -var "logoImage:${{ inputs.branding-logo-image }}" \
           -var "logoUrl:${{ inputs.branding-logo-url }}" \
-          -var "infracost_enabled:${{ inputs.enable-infracost }}" \        
+          -var "infracost_enabled:${{ inputs.enable-infracost }}" \
           --output "$STEP_SUMMARY_FILE" \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
           plan -- atmos terraform plan ${{ inputs.component }} \
