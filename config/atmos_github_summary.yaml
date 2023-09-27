@@ -8,8 +8,6 @@ ci:
   link: []
   vars: {}
 templates:
-  trunk: |
-    {{.Vars.commitSHA}}
   plan_title: |
     {{- if eq .ExitCode 1 }}
     ## :x: Plan Failed for `{{.Vars.component}}` in `{{.Vars.stack}}`
@@ -139,6 +137,7 @@ templates:
     </details>
     {{- end}}
   branding: |
+    {{.Vars.commitSHA}}
     {{- if ne .Vars.logoImage "" }}
     <a href="{{.Vars.logoUrl}}"><img src="{{.Vars.logoImage}}" width="100px" align="right"/></a>
     {{- end }}
