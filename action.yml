@@ -279,10 +279,8 @@ runs:
           terraform show -json "$PLAN_FILE_STORED" > "$PLAN_FILE_STORED.json"
         
           # sort and remove timestamp
-          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE.json" | jq 'del(.timestamp)' > current.json
-          # jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_STORED.json" | jq 'del(.timestamp)' > stored.json
-        
-          cat "$PLAN_FILE_STORED.json" > stored.json
+          jq 'if has("relevant_attributes") then .relevant_attributes |= sort_by(.resource, .attribute) else . end' "$PLAN_FILE.json" | jq 'del(.timestamp)' > current.json
+          jq 'if has("relevant_attributes") then .relevant_attributes |= sort_by(.resource, .attribute) else . end' "$PLAN_FILE_STORED.json" | jq 'del(.timestamp)' > stored.json
         
           # calculate checksums of stored and current plans
           MD5_CURRENT=$(md5sum current.json | awk '{ print $1 }')
