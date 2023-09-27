@@ -26,10 +26,11 @@ templates:
     {{ end }}
 
   result: |
-    <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />{{if .Result}}{{ if eq .ExitCode 0 }}{{ .Result }}{{else}}## :warning: Errors{{end}}{{end}}</summary>
+    {{- if eq .ExitCode 0 }}
+    <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />{{if .Result}}{{ .Result }}{{end}}</summary>
 
     <br/>
-
+    {{- end }}
   updated_resources: |
     ---
     {{- if .CreatedResources}}
@@ -65,7 +66,7 @@ templates:
     {{- end}}
     ```
     {{ end}}
-
+    </details>
   deletion_warning: |
     {{if .HasDestroy}}
     ### :warning: Resource Deletion will happen :warning:
@@ -126,14 +127,14 @@ terraform:
       {{template "badge" .}}
       {{template "deletion_warning" .}}
       {{template "result" .}}
-      {{template "error_messages" .}}
+      {{template "error_messages" .}}      
       To reproduce this locally, run:<br/><br/>
       
       ```shell
       atmos terraform plan {{.Vars.component}} -s {{.Vars.stack}}
       ```
+      {{ if eq .ExitCode 0 }}
       {{template "updated_resources" .}}
-      </details>
       {{if .ChangedResult}}
       <details><summary>Terraform <strong>Plan</strong> Summary</summary>
       {{wrapCode .ChangedResult}}
@@ -144,6 +145,7 @@ terraform:
       {{end}}
       {{if ne .Vars.infracost_details_diff_breakdown ""}}
       {{template "infracost" .}}
+      {{end}}
     when_parse_error:
       template: |
         {{template "plan_title" .}}
