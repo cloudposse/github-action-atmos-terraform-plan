@@ -8,6 +8,8 @@ ci:
   link: []
   vars: {}
 templates:
+  trunk: |
+    {{.Vars.commitSHA}}
   plan_title: |
     {{- if eq .ExitCode 1 }}
     ## :x: Plan Failed for `{{.Vars.component}}` in `{{.Vars.stack}}`
