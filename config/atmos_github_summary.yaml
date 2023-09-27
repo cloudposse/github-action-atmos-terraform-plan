@@ -28,15 +28,12 @@ templates:
   result: |
     {{- if eq .ExitCode 0 }}
     <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />{{if .Result}}{{ .Result }}{{end}}</summary>
-
-    <br/>
     {{- end }}
-
     {{- if eq .ExitCode 1 }}
     <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />:warning: Error summary</summary>
+    {{- end }}
 
     <br/>
-    {{- end }}
 
   updated_resources: |
     {{- if eq .ExitCode 0 }}    
