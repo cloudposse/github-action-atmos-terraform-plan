@@ -197,8 +197,6 @@ runs:
           -repo "${{ github.event.repository.name }}" \
           -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
           -var "component:${{ inputs.component }}" \
-          -var "componentPath:${{ inputs.component-path }}" \
-          -var "commitSHA:${{ inputs.sha }}" \        
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
           -var "logoImage:${{ inputs.branding-logo-image }}" \
@@ -252,6 +250,7 @@ runs:
         role-to-assume: ${{ inputs.terraform-state-role }}
         role-session-name: "atmos-terraform-state-gitops"
         mask-aws-account-id: "no"
+
     - name: Retrieve Plan
       if: env.HAS_CHANGES == 'true'
       uses: cloudposse/github-action-terraform-plan-storage@v1
@@ -266,6 +265,7 @@ runs:
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
         failOnMissingPlan: "false"
+
     - name: Compare Current and Stored PLANFILEs
       if: env.HAS_CHANGES == 'true'
       shell: bash
@@ -310,6 +310,7 @@ runs:
         stack: ${{ inputs.stack }}
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
+
     - name: Store Lockfile for New Plan
       if: env.NEW_PLAN_FOUND == 'true'
       uses: cloudposse/github-action-terraform-plan-storage@v1
@@ -321,6 +322,7 @@ runs:
         stack: ${{ inputs.stack }}-lockfile
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
+
     - name: Check Whether Infracost is Enabled
       if: env.HAS_CHANGES == 'true'
       shell: bash
@@ -336,6 +338,7 @@ runs:
       uses: infracost/actions/setup@v2
       with:
         api-key: ${{ inputs.infracost-api-key }}
+
     - name: Generate Infracost Diff
       if: env.INFRACOST_ENABLED == 'true'
       shell: bash
