@@ -241,8 +241,6 @@ runs:
       run: |
         cd "${{ inputs.component-path }}"
         terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
-        
-        cat "${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Configure State AWS Credentials
       if: env.HAS_CHANGES == 'true'
@@ -282,7 +280,9 @@ runs:
         
           # sort and remove timestamp
           jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE.json" | jq 'del(.timestamp)' > current.json
-          jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_STORED.json" | jq 'del(.timestamp)' > stored.json
+          # jq '.relevant_attributes |= sort_by(.resource, .attribute)' "$PLAN_FILE_STORED.json" | jq 'del(.timestamp)' > stored.json
+        
+          cat "$PLAN_FILE_STORED.json" > stored.json
         
           # calculate checksums of stored and current plans
           MD5_CURRENT=$(md5sum current.json | awk '{ print $1 }')
