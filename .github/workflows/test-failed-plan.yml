@@ -39,7 +39,7 @@ jobs:
           terraform-state-bucket: ${{ secrets.TERRAFORM_STATE_BUCKET }}
           terraform-state-table: ${{ secrets.TERRAFORM_STATE_TABLE }}
           aws-region: ${{ env.AWS_REGION }}
-          sha: 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+          sha: da39a3ee5e6b4b0d3255bfef95601890afd80709
 
     outputs:
       result: ${{ steps.current.outcome }}
