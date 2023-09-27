@@ -59,12 +59,7 @@ jobs:
           expected: |
             ## :x: Plan Failed for `foobar-fail` in `plat-ue2-sandbox`
             
-            
-            
             <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
-            
-            
-            
             
             
             
@@ -72,17 +67,16 @@ jobs:
             
             <br/>
             
-            
-            ```shell
+            ```hcl
             Error: Invalid function argument
             
               on main.tf line 10, in locals:
-              10:   failure = var.enable_failure ? file(&#34;Failed because failure mode is enabled&#34;) : null
+              10:   failure = var.enable_failure ? file("Failed because failure mode is enabled") : null
                 ├────────────────
                 │ while calling file(path)
             
-            Invalid value for &#34;path&#34; parameter: no file exists at &#34;Failed because failure
-            mode is enabled&#34;; this function works only with files that are distributed as
+            Invalid value for "path" parameter: no file exists at "Failed because failure
+            mode is enabled"; this function works only with files that are distributed as
             part of the configuration source code, so if this file will be created by a
             resource in this configuration you must instead obtain this result from an
             attribute of that resource.
@@ -90,15 +84,16 @@ jobs:
             ```
             
             
+            
                   
             To reproduce this locally, run:<br/><br/>
             
             ```shell
             atmos terraform plan foobar-fail -s plat-ue2-sandbox
-            ```
-            
-            
+            ```    
             </details>
+  
+
 
   teardown:
     runs-on: ubuntu-latest
