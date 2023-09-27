@@ -40,11 +40,12 @@ templates:
     ```shell
     atmos terraform plan {{.Vars.component}} -s {{.Vars.stack}}
     ```
+    {{- if eq .ExitCode 0 }}    
     {{- template "updated_resources" .}}
+    {{- end }}    
     </details>
 
   updated_resources: |
-    {{- if eq .ExitCode 0 }}    
     ---
     {{- if .CreatedResources}}
     ### <a id="create-{{.Vars.stack}}-{{.Vars.component}}" />Create
@@ -79,7 +80,6 @@ templates:
     {{- end}}
     ```
     {{- end}}
-    {{- end }}
 
   deletion_warning: |
     {{- if .HasDestroy}}
