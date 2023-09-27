@@ -91,9 +91,7 @@ templates:
     {{end}}
   error_messages: |
     {{ if eq .ExitCode 1 }}
-    ```shell
-    {{ .Result }}
-    ```
+    {{wrapCode .Result }}
     {{end}}
     {{if .ErrorMessages}}
     ## :warning: Errors
