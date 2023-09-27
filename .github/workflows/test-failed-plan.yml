@@ -68,6 +68,11 @@ jobs:
             
             
             
+            <details><summary><a id="result-plat-ue2-sandbox-foobar-fail" />:warning: Error summary</summary>
+            
+            <br/>
+            
+            
             ```shell
             Error: Invalid function argument
             
@@ -85,14 +90,15 @@ jobs:
             ```
             
             
-            
-            
-            
+                  
             To reproduce this locally, run:<br/><br/>
             
             ```shell
             atmos terraform plan foobar-fail -s plat-ue2-sandbox
             ```
+            
+            
+            </details>
 
   teardown:
     runs-on: ubuntu-latest

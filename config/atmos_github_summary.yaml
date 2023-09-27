@@ -75,7 +75,7 @@ templates:
     ```
     {{ end}}
     {{- end }}
-    
+
   deletion_warning: |
     {{if .HasDestroy}}
     ### :warning: Resource Deletion will happen :warning:
