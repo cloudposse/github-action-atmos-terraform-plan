@@ -34,14 +34,14 @@ templates:
     {{- end }}
     
     <br/>      
-    {{- template "error_messages" .}}      
+    {{ template "error_messages" .}}      
     To reproduce this locally, run:<br/><br/>
     
     ```shell
     atmos terraform plan {{.Vars.component}} -s {{.Vars.stack}}
     ```
-    {{- if eq .ExitCode 0 }}    
-    {{- template "updated_resources" .}}
+    {{ if eq .ExitCode 0 }}    
+    {{ template "updated_resources" .}}
     {{- end }}    
     </details>
 
