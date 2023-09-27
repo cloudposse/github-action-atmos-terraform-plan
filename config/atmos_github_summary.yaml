@@ -86,6 +86,14 @@ templates:
     ### :warning: Resource Deletion will happen :warning:
     This plan contains resource delete operation. Please check the plan result very carefully!
     {{- end}}
+
+  change_inside_terraform: |
+    {{- if .ChangedResult}}
+    <details><summary>Terraform <strong>Plan</strong> Summary</summary>
+    {{wrapCode .ChangedResult}}
+    </details>
+    {{- end}}  
+
   change_outside_terraform: |
     {{if .ChangeOutsideTerraform}}
     <details><summary>:information_source: Objects have changed outside of Terraform</summary>
@@ -109,6 +117,7 @@ templates:
     * {{. -}}
     {{- end}}{{end}}
   infracost: |
+    {{- if ne .Vars.infracost_details_diff_breakdown ""}}    
     <details><summary>
     {{- $cost := .Vars.infracost_total_monthly_cost | float64 }}
     {{- $roundedCost := printf "%.2f" $cost }}
@@ -126,6 +135,7 @@ templates:
       ```
 
     </details>
+    {{- end}}
   branding: |
     {{- if ne .Vars.logoImage "" }}
     <a href="{{.Vars.logoUrl}}"><img src="{{.Vars.logoImage}}" width="100px" align="right"/></a>
@@ -139,16 +149,11 @@ terraform:
       {{- template "badge" .}}
       {{- template "deletion_warning" .}}
       {{- template "result" .}}
-      {{- if .ChangedResult}}
-      <details><summary>Terraform <strong>Plan</strong> Summary</summary>
-      {{wrapCode .ChangedResult}}
-      </details>
-      {{- end}}
+      {{- template "change_inside_terraform" .}}
       {{- template "change_outside_terraform" .}}
       {{- template "warning" .}}
-      {{- if ne .Vars.infracost_details_diff_breakdown ""}}
       {{- template "infracost" .}}
-      {{- end}}
+
     when_parse_error:
       template: |
         {{template "plan_title" .}}
