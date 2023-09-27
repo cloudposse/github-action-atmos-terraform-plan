@@ -18,7 +18,7 @@ templates:
     
   badge: |
     {{- if eq .ExitCode 0 }}
-    {{ if .CreatedResources}}[![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
+    {{- if .CreatedResources}}[![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
     {{- if .UpdatedResources }} [![change](https://shields.io/badge/PLAN-CHANGE-important?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
     {{- if .ReplacedResources }} [![replace](https://shields.io/badge/PLAN-REPLACE-critical?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
     {{- if .DeletedResources }} [![destroy](https://shields.io/badge/PLAN-DESTROY-critical?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
@@ -32,8 +32,6 @@ templates:
     {{- if eq .ExitCode 1 }}
     <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />:warning: Error summary</summary>
     {{- end }}
-
-    <br/>
 
   updated_resources: |
     {{- if eq .ExitCode 0 }}    
@@ -70,14 +68,14 @@ templates:
     - {{.}}
     {{- end}}
     ```
-    {{ end}}
+    {{- end}}
     {{- end }}
 
   deletion_warning: |
-    {{if .HasDestroy}}
+    {{- if .HasDestroy}}
     ### :warning: Resource Deletion will happen :warning:
     This plan contains resource delete operation. Please check the plan result very carefully!
-    {{end}}
+    {{- end}}
   change_outside_terraform: |
     {{if .ChangeOutsideTerraform}}
     <details><summary>:information_source: Objects have changed outside of Terraform</summary>
@@ -128,29 +126,30 @@ terraform:
   plan:
     disable_label: false
     template: |
-      {{template "plan_title" .}}
-      {{template "branding" .}}
-      {{template "badge" .}}
-      {{template "deletion_warning" .}}
-      {{template "result" .}}
-      {{template "error_messages" .}}      
+      {{- template "plan_title" .}}
+      {{- template "branding" .}}
+      {{- template "badge" .}}
+      {{- template "deletion_warning" .}}
+      {{- template "result" .}}
+      <br/>      
+      {{- template "error_messages" .}}      
       To reproduce this locally, run:<br/><br/>
       
       ```shell
       atmos terraform plan {{.Vars.component}} -s {{.Vars.stack}}
       ```
-      {{template "updated_resources" .}}
+      {{- template "updated_resources" .}}
       </details>
-      {{if .ChangedResult}}
+      {{- if .ChangedResult}}
       <details><summary>Terraform <strong>Plan</strong> Summary</summary>
       {{wrapCode .ChangedResult}}
       </details>
-      {{end}}
-      {{template "change_outside_terraform" .}}
-      {{template "warning" .}}
-      {{if ne .Vars.infracost_details_diff_breakdown ""}}
-      {{template "infracost" .}}
-      {{end}}
+      {{- end}}
+      {{- template "change_outside_terraform" .}}
+      {{- template "warning" .}}
+      {{- if ne .Vars.infracost_details_diff_breakdown ""}}
+      {{- template "infracost" .}}
+      {{- end}}
     when_parse_error:
       template: |
         {{template "plan_title" .}}
