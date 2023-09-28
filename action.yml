@@ -382,7 +382,7 @@ runs:
         INFRA_COST_SUMMARY="Test Infra cost"
         
         sed -i "s/%INFRACOST_SUMMARY%/${INFRA_COST_SUMMARY}/" ${STEP_SUMMARY_FILE}
-        sed -i -e 's/%INFRACOST_DIFF%/{r /tmp/infracost.txt' -e 'd}' ${STEP_SUMMARY_FILE}
+        sed -i -e '/%INFRACOST_DIFF%/{r /tmp/infracost.txt' -e 'd}' ${STEP_SUMMARY_FILE}
         
         
 
