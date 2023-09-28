@@ -55,11 +55,6 @@ jobs:
           expected: 'success'
           actual: "${{ needs.test.outputs.result }}"
 
-      - uses: nick-fields/assert-action@v1
-        with:
-          actual: "${{ fromJSON(needs.test.outputs.summary) }}"
-          expected: ""
-
       - name: Download Artifacts
         uses: actions/download-artifact@v3
 
@@ -84,6 +79,10 @@ jobs:
           actual: "${{ steps.metadata.outputs.file_exists }}"
           expected: "1"
 
+      - uses: nick-fields/assert-action@v1
+        with:
+          actual: "${{ fromJSON(needs.test.outputs.summary) }}"
+          expected: ""
 
   teardown:
     runs-on: ubuntu-latest

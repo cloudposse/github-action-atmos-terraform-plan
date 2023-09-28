@@ -425,7 +425,7 @@ runs:
         fi
 
     - name: Upload Artifacts
-      if: always() && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
+      if: always() && env.DRIFT_DETECTION_MODE_ENABLED == 'true' && (env.HAS_CHANGES == 'true' || env.HAS_ERROR == 'true' )
       uses: actions/upload-artifact@v3
       with:
         name: metadata
