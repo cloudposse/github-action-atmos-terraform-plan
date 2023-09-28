@@ -64,7 +64,25 @@ jobs:
         uses: actions/download-artifact@v3
 
       - name: Display structure of downloaded files
-        run: ls -R
+        id: metadata
+        run: |
+          test -d ./metadata
+          DIR_EXISTS=$?
+          echo "dir_exists=${DIR_EXISTS}" >> $GITHUB_OUTPUT
+
+          test -d ./metadata/plat-ue2-sandbox-foobar.metadata.json
+          FILE_EXISTS=$?
+          echo "file_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
+
+      - uses: nick-fields/assert-action@v1
+        with:
+          actual: "${{ steps.metadata.outputs.dir_exists }}"
+          expected: "1"
+
+      - uses: nick-fields/assert-action@v1
+        with:
+          actual: "${{ steps.metadata.outputs.file_exists }}"
+          expected: "1"
 
 
   teardown:
