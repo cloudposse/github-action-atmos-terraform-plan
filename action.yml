@@ -378,7 +378,7 @@ runs:
         
         INFRACOST_DIFF_TOTAL_MONTHLY_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
         INFRACOST_DETAILS_DIFF_BREAKDOWN="$(cat /tmp/infracost.txt)"
-  
+        
         if [[ "${INFRACOST_DIFF_TOTAL_MONTHLY_COST}" == "0" ]]; then
           INFRA_COST_SUMMARY="Infracost Estimate: monthly cost will not change"
         elif [[ "${INFRACOST_DIFF_TOTAL_MONTHLY_COST:0:1}" == "-" ]]; then
