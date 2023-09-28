@@ -54,6 +54,20 @@ jobs:
           expected: 'failure'
           actual: "${{ needs.test.outputs.result }}"
 
+      - name: Display structure of downloaded files
+        id: metadata
+        run: |
+          set +e
+          
+          test -d ./metadata
+          DIR_EXISTS=$?
+          echo "dir_exists=${DIR_EXISTS}" >> $GITHUB_OUTPUT
+
+      - uses: nick-fields/assert-action@v1
+        with:
+          actual: "${{ steps.metadata.outputs.dir_exists }}"
+          expected: "1"
+
       - uses: nick-fields/assert-action@v1
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
