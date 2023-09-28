@@ -61,6 +61,8 @@ jobs:
       - name: Display structure of downloaded files
         id: metadata
         run: |
+          set +e
+          
           test -d ./metadata
           DIR_EXISTS=$?
           echo "dir_exists=${DIR_EXISTS}" >> $GITHUB_OUTPUT
