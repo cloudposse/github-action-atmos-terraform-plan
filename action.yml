@@ -380,8 +380,8 @@ runs:
         INFRACOST_DETAILS_DIFF_BREAKDOWN="$(cat /tmp/infracost.txt)"
   
         if [[ "${INFRACOST_DIFF_TOTAL_MONTHLY_COST}" == "0" ]]; then
-          INFRA_COST_SUMMARY="Infracost Estimate: monthly cost will not change"        
-        else if [[ "${INFRACOST_DIFF_TOTAL_MONTHLY_COST:0:1}" == "-" ]]; then
+          INFRA_COST_SUMMARY="Infracost Estimate: monthly cost will not change"
+        elif [[ "${INFRACOST_DIFF_TOTAL_MONTHLY_COST:0:1}" == "-" ]]; then
           INFRA_COST_SUMMARY="Infracost Estimate: monthly cost will decrease by ${INFRACOST_DIFF_TOTAL_MONTHLY_COST} 📉"
         else
           INFRA_COST_SUMMARY="Infracost Estimate: monthly cost will increase by ${INFRACOST_DIFF_TOTAL_MONTHLY_COST} 📈"
