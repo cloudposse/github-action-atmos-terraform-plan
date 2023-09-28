@@ -1,4 +1,4 @@
-name: "Test - No changes"
+name: "Test - No changes - Drift mode"
 
 on:
   workflow_dispatch: {}
