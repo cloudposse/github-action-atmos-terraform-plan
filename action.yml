@@ -379,7 +379,18 @@ runs:
         INFRACOST_DIFF_TOTAL_MONTHLY_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
         INFRACOST_DETAILS_DIFF_BREAKDOWN="$(cat /tmp/infracost.txt)"
         
-        INFRA_COST_SUMMARY="Test Infra cost"
+        
+        #    {{- $cost := .Vars.infracost_total_monthly_cost | float64 }}
+        #    {{- $roundedCost := printf "%.2f" $cost }}
+        #    {{- if eq $cost 0.0 }}
+        #    Infracost Estimate: monthly cost will not change
+        #    {{- else if gt $cost 0.0 }}
+        #    Infracost Estimate: monthly cost will increase by ${{ $roundedCost }} 📈
+        #    {{- else }}
+        #    Infracost Estimate: monthly cost will decrease by ${{ $roundedCost }} 📉
+        #    {{- end }}
+
+        INFRA_COST_SUMMARY="Test Infra cost (${INFRACOST_DIFF_TOTAL_MONTHLY_COST})"
         
         sed -i "s/%INFRACOST_SUMMARY%/${INFRA_COST_SUMMARY}/" ${STEP_SUMMARY_FILE}
         sed -i -e '/%INFRACOST_DIFF%/{r /tmp/infracost.txt' -e 'd}' ${STEP_SUMMARY_FILE}
