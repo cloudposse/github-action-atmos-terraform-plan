@@ -122,7 +122,9 @@ templates:
     <details><summary>%INFRACOST_SUMMARY%</summary>
 
       ```
+    
       %INFRACOST_DIFF%
+    
       ```
 
     </details>
