@@ -235,14 +235,14 @@ runs:
         echo "error=${HAS_ERROR}" >> $GITHUB_OUTPUT
 
     - name: Convert PLANFILE to JSON
-      if: env.HAS_CHANGES == 'true'
+      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       shell: bash
       run: |
         cd "${{ inputs.component-path }}"
         terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Configure State AWS Credentials
-      if: env.HAS_CHANGES == 'true'
+      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       uses: aws-actions/configure-aws-credentials@v4.0.0
       with:
         aws-region: ${{ inputs.aws-region }}
@@ -251,7 +251,7 @@ runs:
         mask-aws-account-id: "no"
 
     - name: Retrieve Plan
-      if: env.HAS_CHANGES == 'true'
+      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       id: retrieve-plan
       continue-on-error: true
@@ -266,7 +266,7 @@ runs:
         failOnMissingPlan: "false"
 
     - name: Compare Current and Stored PLANFILEs
-      if: env.HAS_CHANGES == 'true'
+      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       shell: bash
       run: |
         PLAN_FILE="${{ steps.vars.outputs.plan_file }}"
@@ -329,7 +329,7 @@ runs:
         api-key: ${{ inputs.infracost-api-key }}
 
     - name: Generate Infracost Diff
-      if: ${{ inputs.enable-infracost == 'true' && env.HAS_CHANGES == 'true' }}
+      if: ${{ inputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
       shell: bash
       run: |
         infracost diff \
@@ -344,7 +344,7 @@ runs:
           --out-file=/tmp/infracost.json
 
     - name: Debug Infracost
-      if: ${{ inputs.enable-infracost == 'true' && inputs.debug == 'true' && env.HAS_CHANGES == 'true' }}
+      if: ${{ inputs.enable-infracost == 'true' && inputs.debug == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
       shell: bash
       run: |
         cat ${{ steps.vars.outputs.plan_file }}.json
@@ -352,7 +352,7 @@ runs:
         cat /tmp/infracost.json
 
     - name: Set Infracost Variables
-      if: ${{ inputs.enable-infracost == 'true' && env.HAS_CHANGES == 'true' }}
+      if: ${{ inputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
       id: infracost-diff
       shell: bash
       run: |
@@ -407,7 +407,7 @@ runs:
         fi
 
     - name: Upload Artifacts
-      if: always() && env.DRIFT_DETECTION_MODE_ENABLED == 'true' && (env.HAS_CHANGES == 'true' || env.HAS_ERROR == 'true' )
+      if: always() && env.DRIFT_DETECTION_MODE_ENABLED == 'true' && (steps.atmos-plan.outputs.changes == 'true' || env.HAS_ERROR == 'true' )
       uses: actions/upload-artifact@v3
       with:
         name: metadata
