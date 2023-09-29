@@ -325,7 +325,7 @@ runs:
         api-key: ${{ inputs.infracost-api-key }}
 
     - name: Generate Infracost Diff
-      if: ${{ inputs.enable-infracost == 'true' }} && ${{ env.HAS_CHANGES == 'true' }}
+      if: ${{ inputs.enable-infracost == 'true' && env.HAS_CHANGES == 'true' }}
       shell: bash
       run: |
         infracost diff \
