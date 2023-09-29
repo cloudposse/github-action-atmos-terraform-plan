@@ -215,7 +215,7 @@ runs:
         echo -ne "${TERRAFORM_OUTPUT}"
         
         HAS_CHANGES=false
-        HAS_ERROR=false        
+        HAS_ERROR=false
         if [[ "${TERRAFORM_RESULT}" == "0" ]]; then
           if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
             echo "No changes found"
