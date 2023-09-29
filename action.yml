@@ -96,11 +96,6 @@ runs:
         terraform_version: ${{ inputs.terraform-version }}
         terraform_wrapper: false
 
-#    - name: Install Node
-#      uses: actions/setup-node@v3
-#      with:
-#        node-version: 16
-
     - name: Install Atmos
       uses: cloudposse/github-action-setup-atmos@v1
       env:
