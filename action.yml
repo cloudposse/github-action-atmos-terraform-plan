@@ -229,6 +229,8 @@ runs:
           echo "HAS_CHANGES=false" >> $GITHUB_ENV
           echo "HAS_ERROR=true" >> $GITHUB_ENV
         fi
+        
+        echo "result=${TERRAFORM_RESULT}" >> $GITHUB_OUTPUT
 
     - name: Convert PLANFILE to JSON
       if: env.HAS_CHANGES == 'true'
@@ -413,5 +415,4 @@ runs:
     - name: Exit status
       shell: bash
       run: |
-        exit ${TERRAFORM_RESULT}        
-
+        exit ${{ steps.atmos-plan.outputs.result }}    
