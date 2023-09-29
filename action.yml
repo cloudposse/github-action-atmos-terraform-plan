@@ -375,7 +375,7 @@ runs:
         
         STEP_SUMMARY_FILE="${{ steps.vars.outputs.summary_file }}"
         
-        if [[ "" == "true" ]]; then
+        if [[ "${{ steps.atmos-plan.outputs.changes }}" == "false" ]]; then
           rm -f ${STEP_SUMMARY_FILE}
         fi
         
