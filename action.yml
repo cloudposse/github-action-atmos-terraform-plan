@@ -206,10 +206,12 @@ runs:
         echo -ne "${TERRAFORM_OUTPUT}"
         
         HAS_CHANGES=false
+        HAS_NO_CHANGES=false
         HAS_ERROR=false
         if [[ "${TERRAFORM_RESULT}" == "0" ]]; then
           if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
             echo "No changes found"
+            HAS_NO_CHANGES=true
           else
             HAS_CHANGES=true
             echo "Found changes"
@@ -219,9 +221,12 @@ runs:
           echo "Error appears"
         fi
 
-        echo "result=${TERRAFORM_RESULT}" >> $GITHUB_OUTPUT
+        # One of changes, no-changes, error should be true
         echo "changes=${HAS_CHANGES}" >> $GITHUB_OUTPUT
+        echo "no-changes=${HAS_NO_CHANGES}" >> $GITHUB_OUTPUT
         echo "error=${HAS_ERROR}" >> $GITHUB_OUTPUT
+
+        echo "result=${TERRAFORM_RESULT}" >> $GITHUB_OUTPUT
 
     - name: Convert PLANFILE to JSON
       if: steps.atmos-plan.outputs.changes
@@ -231,7 +236,7 @@ runs:
         terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Configure State AWS Credentials
-      if: ${{ steps.atmos-plan.outputs.changes }}
+      if: steps.atmos-plan.outputs.changes
       uses: aws-actions/configure-aws-credentials@v4.0.0
       with:
         aws-region: ${{ inputs.aws-region }}
@@ -314,7 +319,7 @@ runs:
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Setup Infracost
-      if: ${{ inputs.enable-infracost }}
+      if: inputs.enable-infracost
       uses: infracost/actions/setup@v2
       with:
         api-key: ${{ inputs.infracost-api-key }}
@@ -379,7 +384,7 @@ runs:
         
         STEP_SUMMARY_FILE="${{ steps.vars.outputs.summary_file }}"
         
-        if [[ "${{ steps.atmos-plan.outputs.changes == 'false' && steps.atmos-plan.outputs.error == 'false' }}" == "true" ]]; then
+        if [[ "${{ steps.atmos-plan.outputs.no-changes }}" == "true" ]]; then
           rm -f ${STEP_SUMMARY_FILE}
         fi
         
@@ -401,7 +406,7 @@ runs:
         fi
 
     - name: Upload Artifacts
-      if: inputs.drift-detection-mode-enabled  && ( steps.atmos-plan.outputs.changes == 'true' || steps.atmos-plan.outputs.error == 'true' )
+      if: inputs.drift-detection-mode-enabled  && steps.atmos-plan.outputs.no-changes == 'false'
       uses: actions/upload-artifact@v3
       with:
         name: metadata
