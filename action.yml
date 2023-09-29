@@ -177,7 +177,7 @@ runs:
       run: |
         STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${{ steps.vars.outputs.component_slug }}.md"
         
-        if [[ "$DRIFT_DETECTION_MODE_ENABLED" == "true" ]]; then
+        if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
           TEMPLATE_FILE="${{ github.action_path }}/config/github_issue_description.yaml"
         else 
           TEMPLATE_FILE="${{ github.action_path }}/config/atmos_github_summary.yaml"
@@ -214,22 +214,22 @@ runs:
         
         echo -ne "${TERRAFORM_OUTPUT}"
         
+        HAS_CHANGES=false
+        HAS_ERROR=false        
         if [[ "${TERRAFORM_RESULT}" == "0" ]]; then
-          echo "HAS_ERROR=false" >> $GITHUB_ENV
-        
           if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
-            echo "HAS_CHANGES=false" >> $GITHUB_ENV
             echo "No changes found"
             rm -f ${STEP_SUMMARY_FILE}
           else
-            echo "HAS_CHANGES=true" >> $GITHUB_ENV
+            HAS_CHANGES=true
             echo "Found changes"
           fi
         else
-          echo "HAS_CHANGES=false" >> $GITHUB_ENV
-          echo "HAS_ERROR=true" >> $GITHUB_ENV
+          HAS_ERROR=true
         fi
-        
+
+        echo "HAS_CHANGES=${HAS_CHANGES}" >> $GITHUB_ENV
+        echo "HAS_ERROR=${HAS_ERROR}" >> $GITHUB_ENV
         echo "result=${TERRAFORM_RESULT}" >> $GITHUB_OUTPUT
 
     - name: Convert PLANFILE to JSON
