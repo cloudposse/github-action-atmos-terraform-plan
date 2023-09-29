@@ -58,6 +58,9 @@ jobs:
           expected: 'success'
           actual: "${{ needs.test.outputs.result }}"
 
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+
       - name: Display structure of downloaded files
         id: metadata
         run: |
@@ -67,9 +70,15 @@ jobs:
           DIR_EXISTS=$?
           echo "dir_exists=${DIR_EXISTS}" >> $GITHUB_OUTPUT
 
-          test -d ./metadata/plat-ue2-sandbox-foobar.metadata.json
+          test -d ./metadata/plat-ue2-sandbox-foobar-changes.metadata.json
           FILE_EXISTS=$?
           echo "file_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
+
+          test -d ./metadata/issue-description-plat-ue2-sandbox-foobar-changes.md
+          FILE_EXISTS=$?
+          echo "file_md_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
+          
+          echo "file_md=$(cat ./metadata/issue-description-plat-ue2-sandbox-foobar-changes.md | jq -Rs .)" >> $GITHUB_OUTPUT
 
       - uses: nick-fields/assert-action@v1
         with:
@@ -79,6 +88,11 @@ jobs:
       - uses: nick-fields/assert-action@v1
         with:
           actual: "${{ steps.metadata.outputs.file_exists }}"
+          expected: "0"
+
+      - uses: nick-fields/assert-action@v1
+        with:
+          actual: "${{ steps.metadata.outputs.file_md_exists }}"
           expected: "0"
 
       - uses: nick-fields/assert-action@v1

@@ -417,7 +417,7 @@ runs:
             cat $STEP_SUMMARY_FILE >> $GITHUB_STEP_SUMMARY
           else
             echo "Drift detection mode enabled"
-            cp $STEP_SUMMARY_FILE $GITHUB_WORKSPACE/metadata/issue-description-${{ steps.vars.outputs.component_slug }}.md
+            mv $STEP_SUMMARY_FILE $GITHUB_WORKSPACE/metadata/issue-description-${{ steps.vars.outputs.component_slug }}.md
           fi
         else 
           echo "${STEP_SUMMARY_FILE} not found"
