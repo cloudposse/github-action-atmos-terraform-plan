@@ -74,7 +74,7 @@ jobs:
           FILE_EXISTS=$?
           echo "file_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
 
-          test -d ./metadata/issue-description-plat-ue2-sandbox-foobar-changes.md
+          test -f ./metadata/issue-description-plat-ue2-sandbox-foobar-changes.md
           FILE_EXISTS=$?
           echo "file_md_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
           
