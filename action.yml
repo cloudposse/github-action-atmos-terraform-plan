@@ -320,7 +320,7 @@ runs:
         api-key: ${{ inputs.infracost-api-key }}
 
     - name: Generate Infracost Diff
-      if: ${{ inputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
+      if: inputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true'
       id: infracost
       shell: bash
       run: |
