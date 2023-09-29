@@ -228,7 +228,6 @@ runs:
           HAS_ERROR=true
         fi
 
-        echo "HAS_CHANGES=${HAS_CHANGES}" >> $GITHUB_ENV
         echo "HAS_ERROR=${HAS_ERROR}" >> $GITHUB_ENV
         echo "result=${TERRAFORM_RESULT}" >> $GITHUB_OUTPUT
         echo "changes=${HAS_CHANGES}" >> $GITHUB_OUTPUT
@@ -377,7 +376,7 @@ runs:
       if: always() && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
       shell: bash
       run: |
-        echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}", "drifted": '"$HAS_CHANGES"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
+        echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}", "drifted": '"${{ steps.atmos-plan.outputs.changes }}"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
 
     - name: Publish Summary or Generate GitHub Issue Description for Drift Detection
       id: summary
