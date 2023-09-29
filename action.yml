@@ -113,45 +113,33 @@ runs:
     - name: Define Job Control State Variables
       shell: bash
       run: |
-        echo "DEBUG_ENABLED=${{ inputs.debug }}" >> $GITHUB_ENV
-        echo "ACTIONS_ENABLED=false" >> $GITHUB_ENV
         echo "HAS_CHANGES=false" >> $GITHUB_ENV
         echo "NEW_PLAN_FOUND=false" >> $GITHUB_ENV
-        echo "INFRACOST_ENABLED=false" >> $GITHUB_ENV
         echo "DRIFT_DETECTION_MODE_ENABLED=${{ inputs.drift-detection-mode-enabled }}" >> $GITHUB_ENV
 
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v0
-      id: atmos-settings
+      id: atmos-github-actions-enabled
       with:
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
         settings-path: github.actions_enabled
 
-    - name: Check If GitHub Actions is Enabled For Component
-      shell: bash
-      run: |
-        if [[ "${{ steps.atmos-settings.outputs.value }}" == "true" ]]; then
-          echo "ACTIONS_ENABLED=true" >> $GITHUB_ENV
-        else
-          echo "ACTIONS_ENABLED=false" >> $GITHUB_ENV
-        fi
-
     - name: Update Global Path for tfcmt
-      if: env.ACTIONS_ENABLED == 'true'
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       shell: bash
       run: |
         # setup-tfcmt requires this PATH update when running on self-hosted (amazon linux) https://github.com/shmokmt/actions-setup-tfcmt/blob/main/action.yml#L11C1-L12C1
         echo "/usr/local/bin" >> $GITHUB_PATH
 
     - name: Install tfcmt
-      if: env.ACTIONS_ENABLED == 'true'
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       uses: shmokmt/actions-setup-tfcmt@v2
       with:
         version: v4.6.0
 
     - name: Define Job Variables
-      if: env.ACTIONS_ENABLED == 'true'
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       id: vars
       shell: bash
       run: |
@@ -168,7 +156,7 @@ runs:
         echo "lock_file=$LOCK_FILE" >> $GITHUB_OUTPUT
 
     - name: Configure Plan AWS Credentials
-      if: env.ACTIONS_ENABLED == 'true'
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       uses: aws-actions/configure-aws-credentials@v4.0.0
       with:
         aws-region: ${{ inputs.aws-region }}
@@ -182,7 +170,7 @@ runs:
         mkdir -p metadata
 
     - name: Atmos Terraform Plan
-      if: env.ACTIONS_ENABLED == 'true'
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       id: atmos-plan
       shell: bash
       run: |
@@ -330,24 +318,14 @@ runs:
         tableName: ${{ inputs.terraform-state-table }}
         bucketName: ${{ inputs.terraform-state-bucket }}
 
-    - name: Check Whether Infracost is Enabled
-      if: env.HAS_CHANGES == 'true'
-      shell: bash
-      run: |
-        if [[ "${{ inputs.enable-infracost }}" == "true" ]]; then
-          echo "INFRACOST_ENABLED=true" >> $GITHUB_ENV
-        else
-          echo "INFRACOST_ENABLED=false" >> $GITHUB_ENV
-        fi
-
     - name: Setup Infracost
-      if: env.INFRACOST_ENABLED == 'true'
+      if: ${{ inputs.enable-infracost == 'true' }}
       uses: infracost/actions/setup@v2
       with:
         api-key: ${{ inputs.infracost-api-key }}
 
     - name: Generate Infracost Diff
-      if: env.INFRACOST_ENABLED == 'true'
+      if: ${{ inputs.enable-infracost == 'true' }} && env.HAS_CHANGES == 'true'
       shell: bash
       run: |
         infracost diff \
@@ -362,7 +340,7 @@ runs:
           --out-file=/tmp/infracost.json
 
     - name: Debug Infracost
-      if: env.INFRACOST_ENABLED == 'true' && env.DEBUG_ENABLED == 'true'
+      if: ${{ inputs.enable-infracost == 'true' }} && ${{ inputs.debug == 'true' }} && env.HAS_CHANGES == 'true'
       shell: bash
       run: |
         cat ${{ steps.vars.outputs.plan_file }}.json
@@ -370,7 +348,7 @@ runs:
         cat /tmp/infracost.json
 
     - name: Set Infracost Variables
-      if: env.INFRACOST_ENABLED == 'true'
+      if: ${{ inputs.enable-infracost == 'true' }} && env.HAS_CHANGES == 'true'
       id: infracost-diff
       shell: bash
       run: |
