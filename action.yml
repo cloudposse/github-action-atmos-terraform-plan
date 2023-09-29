@@ -137,11 +137,19 @@ runs:
         PLAN_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/$COMPONENT_SLUG-${{ inputs.sha }}.planfile"
         LOCK_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/.terraform.lock.hcl"
 
+        if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
+          TEMPLATE_FILE="${{ github.action_path }}/config/github_issue_description.yaml"
+        else 
+          TEMPLATE_FILE="${{ github.action_path }}/config/atmos_github_summary.yaml"
+        fi
+
+
         echo "stack_name=$STACK_NAME" >> $GITHUB_OUTPUT
         echo "component_name=$COMPONENT_NAME" >> $GITHUB_OUTPUT
         echo "component_slug=$COMPONENT_SLUG" >> $GITHUB_OUTPUT
         echo "plan_file=$PLAN_FILE" >> $GITHUB_OUTPUT
         echo "lock_file=$LOCK_FILE" >> $GITHUB_OUTPUT
+        echo "template_file=$TEMPLATE_FILE" >> $GITHUB_OUTPUT
 
     - name: Configure Plan AWS Credentials
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
@@ -165,17 +173,11 @@ runs:
       run: |
         STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${{ steps.vars.outputs.component_slug }}.md"
         
-        if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
-          TEMPLATE_FILE="${{ github.action_path }}/config/github_issue_description.yaml"
-        else 
-          TEMPLATE_FILE="${{ github.action_path }}/config/atmos_github_summary.yaml"
-        fi
-        
         set +e 
         
         TERRAFORM_OUTPUT=$( \
           tfcmt \
-          --config ${TEMPLATE_FILE} \
+          --config ${{ steps.var.outputs.template_file }} \
           -owner "${{ github.repository_owner }}" \
           -repo "${{ github.event.repository.name }}" \
           -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
