@@ -113,9 +113,7 @@ runs:
     - name: Define Job Control State Variables
       shell: bash
       run: |
-        echo "HAS_CHANGES=false" >> $GITHUB_ENV
         echo "NEW_PLAN_FOUND=false" >> $GITHUB_ENV
-        echo "DRIFT_DETECTION_MODE_ENABLED=${{ inputs.drift-detection-mode-enabled }}" >> $GITHUB_ENV
 
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v0
@@ -372,7 +370,7 @@ runs:
         
 
     - name: Store Component Metadata to Artifacts
-      if: always() && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
+      if: ${{ always() && inputs.drift-detection-mode-enabled  == 'true' }}
       shell: bash
       run: |
         echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}", "drifted": '"${{ steps.atmos-plan.outputs.changes }}"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
@@ -392,7 +390,7 @@ runs:
           STEP_SUMMARY=$(cat ${STEP_SUMMARY_FILE} | jq -Rs .)
           echo "result=${STEP_SUMMARY}" >> $GITHUB_OUTPUT
 
-          if [[ "$DRIFT_DETECTION_MODE_ENABLED" == "false" ]]; then
+          if [[ "${{ inputs.drift-detection-mode-enabled }}" == "false" ]]; then
             echo "Drift detection mode disabled"
             cat $STEP_SUMMARY_FILE >> $GITHUB_STEP_SUMMARY
           else
@@ -405,7 +403,7 @@ runs:
         fi
 
     - name: Upload Artifacts
-      if: always() && env.DRIFT_DETECTION_MODE_ENABLED == 'true' && (steps.atmos-plan.outputs.changes == 'true' || steps.atmos-plan.outputs.error == 'true' )
+      if: ${{ always() && inputs.drift-detection-mode-enabled  && (steps.atmos-plan.outputs.changes == 'true' || steps.atmos-plan.outputs.error == 'true' ) }}
       uses: actions/upload-artifact@v3
       with:
         name: metadata
