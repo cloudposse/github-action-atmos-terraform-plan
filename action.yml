@@ -114,26 +114,26 @@ runs:
         settings-path: github.actions_enabled
 
     - name: Update Global Path for tfcmt
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value }}
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       shell: bash
       run: |
         # setup-tfcmt requires this PATH update when running on self-hosted (amazon linux) https://github.com/shmokmt/actions-setup-tfcmt/blob/main/action.yml#L11C1-L12C1
         echo "/usr/local/bin" >> $GITHUB_PATH
 
     - name: Install tfcmt
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value }}
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       uses: shmokmt/actions-setup-tfcmt@v2
       with:
         version: v4.6.0
 
     - name: Prepare Artifacts Directory
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value }}
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       shell: bash
       run: |
         mkdir -p metadata    
 
     - name: Define Job Variables
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value }}
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       id: vars
       shell: bash
       run: |
@@ -314,7 +314,7 @@ runs:
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Setup Infracost
-      if: ${{ inputs.enable-infracost == 'true' }}
+      if: ${{ inputs.enable-infracost }}
       uses: infracost/actions/setup@v2
       with:
         api-key: ${{ inputs.infracost-api-key }}
