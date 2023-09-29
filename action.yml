@@ -121,19 +121,19 @@ runs:
         echo "/usr/local/bin" >> $GITHUB_PATH
 
     - name: Install tfcmt
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value }}
       uses: shmokmt/actions-setup-tfcmt@v2
       with:
         version: v4.6.0
 
     - name: Prepare Artifacts Directory
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value }}
       shell: bash
       run: |
         mkdir -p metadata    
 
     - name: Define Job Variables
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value }}
       id: vars
       shell: bash
       run: |
