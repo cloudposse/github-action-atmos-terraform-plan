@@ -138,13 +138,12 @@ runs:
         LOCK_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/.terraform.lock.hcl"
 
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
-          TEMPLATE_FILE="${{ github.action_path }}/config/github_issue_description.yaml"
+          TEMPLATE_FILE="${{ github.action_path }}config/github_issue_description.yaml"
           SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/issue-description-${COMPONENT_SLUG}.md"        
         else 
-          TEMPLATE_FILE="${{ github.action_path }}/config/atmos_github_summary.yaml"
+          TEMPLATE_FILE="${{ github.action_path }}config/atmos_github_summary.yaml"
           SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md"        
         fi
-
 
         echo "stack_name=${STACK_NAME}" >> $GITHUB_OUTPUT
         echo "component_name=${COMPONENT_NAME}" >> $GITHUB_OUTPUT
