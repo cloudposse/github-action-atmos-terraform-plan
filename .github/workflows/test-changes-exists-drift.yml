@@ -98,6 +98,11 @@ jobs:
       - uses: nick-fields/assert-action@v1
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
+          expected: "${{ fromJSON(steps.metadata.outputs.file_md) }}"
+
+      - uses: nick-fields/assert-action@v1
+        with:
+          actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
             ## Drift Detected for `foobar-changes` in `plat-ue2-sandbox`
             
