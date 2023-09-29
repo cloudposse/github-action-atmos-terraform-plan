@@ -237,7 +237,7 @@ runs:
         terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Configure State AWS Credentials
-      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
+      if: ${{ steps.atmos-plan.outputs.changes }}
       uses: aws-actions/configure-aws-credentials@v4.0.0
       with:
         aws-region: ${{ inputs.aws-region }}
@@ -385,7 +385,7 @@ runs:
         
         STEP_SUMMARY_FILE="${{ steps.vars.outputs.summary_file }}"
         
-        if [[ "${{ steps.atmos-plan.outputs.changes == 'false' && steps.atmos-plan.outputs.error == 'false' }}" == "true" ]]; then
+        if [[ "${{ steps.atmos-plan.outputs.no-changes }}" == "true" ]]; then
           rm -f ${STEP_SUMMARY_FILE}
         fi
         
@@ -407,7 +407,7 @@ runs:
         fi
 
     - name: Upload Artifacts
-      if: ${{ inputs.drift-detection-mode-enabled  && ( steps.atmos-plan.outputs.changes || steps.atmos-plan.outputs.error ) }}
+      if: ${{ inputs.drift-detection-mode-enabled  && ! steps.atmos-plan.outputs.no-changes }}
       uses: actions/upload-artifact@v3
       with:
         name: metadata
