@@ -114,26 +114,26 @@ runs:
         settings-path: github.actions_enabled
 
     - name: Update Global Path for tfcmt
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value }}
       shell: bash
       run: |
         # setup-tfcmt requires this PATH update when running on self-hosted (amazon linux) https://github.com/shmokmt/actions-setup-tfcmt/blob/main/action.yml#L11C1-L12C1
         echo "/usr/local/bin" >> $GITHUB_PATH
 
     - name: Install tfcmt
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value }}
       uses: shmokmt/actions-setup-tfcmt@v2
       with:
         version: v4.6.0
 
     - name: Prepare Artifacts Directory
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value }}
       shell: bash
       run: |
         mkdir -p metadata    
 
     - name: Define Job Variables
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value }}
       id: vars
       shell: bash
       run: |
@@ -160,7 +160,7 @@ runs:
         echo "summary_file=${SUMMARY_FILE}" >> $GITHUB_OUTPUT
 
     - name: Configure Plan AWS Credentials
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value }}
       uses: aws-actions/configure-aws-credentials@v4.0.0
       with:
         aws-region: ${{ inputs.aws-region }}
@@ -169,7 +169,7 @@ runs:
         mask-aws-account-id: "no"
 
     - name: Atmos Terraform Plan
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value }}
       id: atmos-plan
       shell: bash
       run: |
@@ -224,14 +224,14 @@ runs:
         echo "error=${HAS_ERROR}" >> $GITHUB_OUTPUT
 
     - name: Convert PLANFILE to JSON
-      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
+      if: ${{ steps.atmos-plan.outputs.changes }}
       shell: bash
       run: |
         cd "${{ inputs.component-path }}"
         terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Configure State AWS Credentials
-      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
+      if: ${{ steps.atmos-plan.outputs.changes }}
       uses: aws-actions/configure-aws-credentials@v4.0.0
       with:
         aws-region: ${{ inputs.aws-region }}
@@ -240,7 +240,7 @@ runs:
         mask-aws-account-id: "no"
 
     - name: Retrieve Plan
-      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
+      if: ${{ steps.atmos-plan.outputs.changes }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       id: retrieve-plan
       continue-on-error: true
@@ -255,7 +255,7 @@ runs:
         failOnMissingPlan: "false"
 
     - name: Compare Current and Stored PLANFILEs
-      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
+      if: ${{ steps.atmos-plan.outputs.changes }}
       id: new-plan
       shell: bash
       run: |
@@ -289,7 +289,7 @@ runs:
         echo "found=${NEW_PLAN_FOUND}" >> $GITHUB_OUTPUT
 
     - name: Store New Plan
-      if: ${{ steps.new-plan.outputs.found == 'true' }}
+      if: ${{ steps.new-plan.outputs.found }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       id: store-plan
       with:
@@ -302,7 +302,7 @@ runs:
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Store Lockfile for New Plan
-      if: ${{ steps.new-plan.outputs.found == 'true' }}
+      if: ${{ steps.new-plan.outputs.found }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       with:
         action: storePlan
@@ -346,7 +346,7 @@ runs:
         cat /tmp/infracost.json
 
     - name: Set Infracost Variables
-      if: ${{ steps.infracost.outputs.finished == 'true' }}
+      if: ${{ steps.infracost.outputs.finished }}
       id: infracost-diff
       shell: bash
       run: |
@@ -366,7 +366,7 @@ runs:
         
 
     - name: Store Component Metadata to Artifacts
-      if: ${{ inputs.drift-detection-mode-enabled  == 'true' }}
+      if: ${{ inputs.drift-detection-mode-enabled }}
       shell: bash
       run: |
         echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}", "drifted": '"${{ steps.atmos-plan.outputs.changes }}"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
