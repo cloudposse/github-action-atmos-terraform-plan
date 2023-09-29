@@ -110,11 +110,6 @@ runs:
         token: ${{ inputs.token }}
         install-wrapper: false
 
-    - name: Define Job Control State Variables
-      shell: bash
-      run: |
-        echo "NEW_PLAN_FOUND=false" >> $GITHUB_ENV
-
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v0
       id: atmos-github-actions-enabled
@@ -263,11 +258,13 @@ runs:
 
     - name: Compare Current and Stored PLANFILEs
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
+      id: new-plan
       shell: bash
       run: |
         PLAN_FILE="${{ steps.vars.outputs.plan_file }}"
         PLAN_FILE_STORED="${{ steps.vars.outputs.plan_file }}.stored"
 
+        NEW_PLAN_FOUND=false
         if [ -f "$PLAN_FILE_STORED" ]; then
           cd "${{ inputs.component-path }}"
           
@@ -283,18 +280,18 @@ runs:
 
           if [ "$MD5_CURRENT" == "$MD5_STORED" ]; then
             echo "Current plan is equal to stored plan"
-            echo "NEW_PLAN_FOUND=false" >> $GITHUB_ENV
           else
             echo "Current plan is different from stored plan"
-            echo "NEW_PLAN_FOUND=true" >> $GITHUB_ENV
+            NEW_PLAN_FOUND=true
           fi
         else
           echo "New plan found"
-          echo "NEW_PLAN_FOUND=true" >> $GITHUB_ENV
+          NEW_PLAN_FOUND=true
         fi
+        echo "found=${NEW_PLAN_FOUND}" >> $GITHUB_OUTPUT
 
     - name: Store New Plan
-      if: env.NEW_PLAN_FOUND == 'true'
+      if: ${{ steps.new-plan.outputs.found == 'true' }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       id: store-plan
       with:
@@ -307,7 +304,7 @@ runs:
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Store Lockfile for New Plan
-      if: env.NEW_PLAN_FOUND == 'true'
+      if: ${{ steps.new-plan.outputs.found == 'true' }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       with:
         action: storePlan
