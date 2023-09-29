@@ -114,7 +114,7 @@ runs:
         settings-path: github.actions_enabled
 
     - name: Update Global Path for tfcmt
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value }}
+      if: steps.atmos-github-actions-enabled.outputs.value
       shell: bash
       run: |
         # setup-tfcmt requires this PATH update when running on self-hosted (amazon linux) https://github.com/shmokmt/actions-setup-tfcmt/blob/main/action.yml#L11C1-L12C1
