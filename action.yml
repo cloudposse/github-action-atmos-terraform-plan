@@ -206,10 +206,13 @@ runs:
         echo -ne "${TERRAFORM_OUTPUT}"
         
         HAS_CHANGES=false
+        HAS_NO_CHANGES=false
         HAS_ERROR=false
+
         if [[ "${TERRAFORM_RESULT}" == "0" ]]; then
           if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
             echo "No changes found"
+            HAS_NO_CHANGES=true
           else
             HAS_CHANGES=true
             echo "Found changes"
@@ -219,9 +222,12 @@ runs:
           echo "Error appears"
         fi
 
-        echo "result=${TERRAFORM_RESULT}" >> $GITHUB_OUTPUT
+        ## One of changes, no-changes, error have to be true
         echo "changes=${HAS_CHANGES}" >> $GITHUB_OUTPUT
+        echo "no-changes=${HAS_NO_CHANGES}" >> $GITHUB_OUTPUT
         echo "error=${HAS_ERROR}" >> $GITHUB_OUTPUT
+
+        echo "result=${TERRAFORM_RESULT}" >> $GITHUB_OUTPUT
 
     - name: Convert PLANFILE to JSON
       if: ${{ steps.atmos-plan.outputs.changes }}
