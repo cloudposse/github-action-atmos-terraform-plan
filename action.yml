@@ -319,7 +319,7 @@ runs:
         bucketName: ${{ inputs.terraform-state-bucket }}
 
     - name: Setup Infracost
-      if: inputs.enable-infracost
+      if: inputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true'
       uses: infracost/actions/setup@v2
       with:
         api-key: ${{ inputs.infracost-api-key }}
@@ -397,8 +397,6 @@ runs:
           if [[ "${{ inputs.drift-detection-mode-enabled }}" == "false" ]]; then
             echo "Drift detection mode disabled"
             cat $STEP_SUMMARY_FILE >> $GITHUB_STEP_SUMMARY
-          else
-            echo "Drift detection mode enabled"
           fi
         else 
           echo "${STEP_SUMMARY_FILE} not found"
