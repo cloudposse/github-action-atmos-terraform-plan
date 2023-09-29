@@ -70,7 +70,7 @@ jobs:
           DIR_EXISTS=$?
           echo "dir_exists=${DIR_EXISTS}" >> $GITHUB_OUTPUT
 
-          test -d ./metadata/plat-ue2-sandbox-foobar-changes.metadata.json
+          test -f ./metadata/plat-ue2-sandbox-foobar-changes.metadata.json
           FILE_EXISTS=$?
           echo "file_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
 
