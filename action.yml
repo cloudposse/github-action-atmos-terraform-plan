@@ -340,7 +340,7 @@ runs:
           --out-file=/tmp/infracost.json
 
     - name: Debug Infracost
-      if: ${{ inputs.enable-infracost == 'true' }} && ${{ inputs.debug == 'true' }} && env.HAS_CHANGES == 'true'
+      if: ${{ inputs.enable-infracost == 'true' && inputs.debug == 'true' && env.HAS_CHANGES == 'true' }}
       shell: bash
       run: |
         cat ${{ steps.vars.outputs.plan_file }}.json
@@ -348,7 +348,7 @@ runs:
         cat /tmp/infracost.json
 
     - name: Set Infracost Variables
-      if: ${{ inputs.enable-infracost == 'true' }} && env.HAS_CHANGES == 'true'
+      if: ${{ inputs.enable-infracost == 'true' && env.HAS_CHANGES == 'true' }}
       id: infracost-diff
       shell: bash
       run: |
