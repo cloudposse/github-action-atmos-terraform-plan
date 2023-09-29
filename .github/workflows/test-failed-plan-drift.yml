@@ -104,7 +104,67 @@ jobs:
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
-            Test
+            ## :x: Drift Detection Failed for `foobar-fail` in `plat-ue2-sandbox`!
+            
+            
+            
+            <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
+            
+            
+            
+            
+            
+            
+            <details><summary><a id="result-plat-ue2-sandbox-foobar-fail" />:warning: Error summary</summary>
+            
+            <br/>      
+            
+            
+            ```hcl
+            Error: Invalid function argument
+            
+              on main.tf line 10, in locals:
+              10:   failure = var.enable_failure ? file("Failed because failure mode is enabled") : null
+                ├────────────────
+                │ while calling file(path)
+            
+            Invalid value for "path" parameter: no file exists at "Failed because failure
+            mode is enabled"; this function works only with files that are distributed as
+            part of the configuration source code, so if this file will be created by a
+            resource in this configuration you must instead obtain this result from an
+            attribute of that resource.
+            exit status 1
+            ```
+            
+                
+            
+                  
+            To reproduce this locally, run:<br/><br/>
+            
+            ```shell
+            atmos terraform plan foobar-fail -s plat-ue2-sandbox
+            ```
+                
+            </details>
+            
+            
+                  
+            
+            
+            
+            
+            <details><summary>Metadata</summary>
+            
+            ```json
+            {
+              "component": "foobar-fail",
+              "stack": "plat-ue2-sandbox",
+              "componentPath": "components/terraform/foobar",
+              "commitSHA": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+            }
+            ```
+            </details>
+
   teardown:
     runs-on: ubuntu-latest
     needs: [assert]
