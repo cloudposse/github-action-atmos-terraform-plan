@@ -138,10 +138,10 @@ runs:
         LOCK_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/.terraform.lock.hcl"
 
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
-          TEMPLATE_FILE="${{ github.action_path }}config/github_issue_description.yaml"
+          TEMPLATE_FILE="${{ github.action_path }}/config/github_issue_description.yaml"
           SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/issue-description-${COMPONENT_SLUG}.md"        
         else 
-          TEMPLATE_FILE="${{ github.action_path }}config/atmos_github_summary.yaml"
+          TEMPLATE_FILE="${{ github.action_path }}/config/atmos_github_summary.yaml"
           SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md"        
         fi
 
@@ -209,7 +209,6 @@ runs:
         if [[ "${TERRAFORM_RESULT}" == "0" ]]; then
           if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
             echo "No changes found"
-            rm -f ${STEP_SUMMARY_FILE}
           else
             HAS_CHANGES=true
             echo "Found changes"
@@ -375,6 +374,10 @@ runs:
         cd "${{ inputs.component-path }}"
         
         STEP_SUMMARY_FILE="${{ steps.vars.outputs.summary_file }}"
+        
+        if [[ "" == "true" ]]; then
+          rm -f ${STEP_SUMMARY_FILE}
+        fi
         
         if [ -f ${STEP_SUMMARY_FILE} ]; then
           echo "${STEP_SUMMARY_FILE} found"
