@@ -99,54 +99,7 @@ jobs:
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
-            ## Changes Found for `foobar-changes` in `plat-ue2-sandbox`
-            
-            <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
-            [![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#plat-ue2-sandbox-foobar-changes)
-            
-            
-            <details><summary><a id="result-plat-ue2-sandbox-foobar-changes" />Plan: 1 to add, 0 to change, 0 to destroy.</summary>
-            
-            <br/>      
-            
-            
-                  
-            To reproduce this locally, run:<br/><br/>
-            
-            ```shell
-            atmos terraform plan foobar-changes -s plat-ue2-sandbox
-            ```
-                
-            ---
-            ### <a id="create-plat-ue2-sandbox-foobar-changes" />Create
-            ```diff
-            + random_id.foo
-            ```
-                
-            </details>
-            
-            <details><summary>Terraform <strong>Plan</strong> Summary</summary>
-            
-            ```hcl
-            
-              # random_id.foo will be created
-              + resource "random_id" "foo" {
-                  + b64_std     = (known after apply)
-                  + b64_url     = (known after apply)
-                  + byte_length = 8
-                  + dec         = (known after apply)
-                  + hex         = (known after apply)
-                  + id          = (known after apply)
-                  + keepers     = {
-                      + "seed" = "foo-plat-ue2-sandbox-blue"
-                    }
-                }
-            
-            Plan: 1 to add, 0 to change, 0 to destroy.
-            ```
-            
-            </details>
-
+            Test
 
   teardown:
     runs-on: ubuntu-latest
