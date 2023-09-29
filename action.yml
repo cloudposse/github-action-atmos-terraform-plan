@@ -177,7 +177,7 @@ runs:
         
         TERRAFORM_OUTPUT=$( \
           tfcmt \
-          --config ${{ steps.var.outputs.template_file }} \
+          --config ${{ steps.vars.outputs.template_file }} \
           -owner "${{ github.repository_owner }}" \
           -repo "${{ github.event.repository.name }}" \
           -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
