@@ -392,7 +392,7 @@ runs:
         
 
     - name: Store Component Metadata to Artifacts
-      if: env.DRIFT_DETECTION_MODE_ENABLED == 'true'
+      if: always() && env.DRIFT_DETECTION_MODE_ENABLED == 'true'
       shell: bash
       run: |
         echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}", "drifted": '"$HAS_CHANGES"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
