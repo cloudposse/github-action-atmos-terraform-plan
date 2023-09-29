@@ -231,6 +231,8 @@ runs:
         echo "HAS_CHANGES=${HAS_CHANGES}" >> $GITHUB_ENV
         echo "HAS_ERROR=${HAS_ERROR}" >> $GITHUB_ENV
         echo "result=${TERRAFORM_RESULT}" >> $GITHUB_OUTPUT
+        echo "changes=${HAS_CHANGES}" >> $GITHUB_OUTPUT
+        echo "error=${HAS_ERROR}" >> $GITHUB_OUTPUT
 
     - name: Convert PLANFILE to JSON
       if: env.HAS_CHANGES == 'true'
