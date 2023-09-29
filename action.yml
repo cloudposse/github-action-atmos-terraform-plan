@@ -320,7 +320,7 @@ runs:
         api-key: ${{ inputs.infracost-api-key }}
 
     - name: Generate Infracost Diff
-      if: ${{ inputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
+      if: ${{ inputs.enable-infracost && steps.atmos-plan.outputs.changes }}
       id: infracost
       shell: bash
       run: |
@@ -338,7 +338,7 @@ runs:
         echo "finished=true" >> $GITHUB_OUTPUT
 
     - name: Debug Infracost
-      if: ${{ steps.infracost.outputs.finished == 'true' && inputs.debug == 'true' }}
+      if: ${{ steps.infracost.outputs.finished && inputs.debug }}
       shell: bash
       run: |
         cat ${{ steps.vars.outputs.plan_file }}.json
@@ -401,7 +401,7 @@ runs:
         fi
 
     - name: Upload Artifacts
-      if: ${{ inputs.drift-detection-mode-enabled  && ( steps.atmos-plan.outputs.changes == 'true' || steps.atmos-plan.outputs.error == 'true' ) }}
+      if: ${{ inputs.drift-detection-mode-enabled  && ( steps.atmos-plan.outputs.changes || steps.atmos-plan.outputs.error ) }}
       uses: actions/upload-artifact@v3
       with:
         name: metadata
