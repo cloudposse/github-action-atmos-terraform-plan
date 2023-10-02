@@ -1,10 +1,7 @@
-name: "Test - "
+name: "Test - Github action settings disabled"
 
 on:
   workflow_dispatch: {}
-  pull_request:
-    branches: [ main ]
-    types: [opened, synchronize, reopened]
 
 env:
   AWS_REGION: us-east-2
