@@ -44,7 +44,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           sha: da39a3ee5e6b4b0d3255bfef95601890afd80709
           drift-detection-mode-enabled: true
-          
+
     outputs:
       result: ${{ steps.current.outcome }}
       summary: ${{ steps.current.outputs.summary }}

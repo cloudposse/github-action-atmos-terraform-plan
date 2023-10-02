@@ -371,7 +371,7 @@ runs:
         
 
     - name: Store Component Metadata to Artifacts
-      if: ${{ inputs.drift-detection-mode-enabled == 'true' }}
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && inputs.drift-detection-mode-enabled == 'true' }}
       shell: bash
       run: |
         echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}", "drifted": '"${{ steps.atmos-plan.outputs.changes }}"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
@@ -412,6 +412,7 @@ runs:
         retention-days: ${{ inputs.metadata-retention-days }}
 
     - name: Exit status
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       shell: bash
       run: |
         exit ${{ steps.atmos-plan.outputs.result }}    
