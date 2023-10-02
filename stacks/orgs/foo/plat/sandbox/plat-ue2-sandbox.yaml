@@ -1,5 +1,8 @@
 import:
   - catalog/foobar
+  - catalog/foobar-fail
+  - catalog/foobar-changes
+  - catalog/foobar-disabled
 
 terraform:
   backend_type: s3
@@ -16,7 +19,6 @@ terraform:
   vars:
     environment: ue2
     namespace: foo
-    region: us-east-2
     stage: sandbox
     tenant: plat
     label_order:

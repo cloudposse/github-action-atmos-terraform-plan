@@ -26,10 +26,24 @@ templates:
     {{ end }}
 
   result: |
+    {{- if eq .ExitCode 0 }}
     <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />{{if .Result}}{{ .Result }}{{end}}</summary>
-
-    <br/>
+    {{- end }}
+    {{- if eq .ExitCode 1 }}
+    <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />:warning: Error summary</summary>
+    {{- end }}
+    
+    <br/>      
+    {{ template "error_messages" .}}      
     To reproduce this locally, run:<br/><br/>
+    
+    ```shell
+    atmos terraform plan {{.Vars.component}} -s {{.Vars.stack}}
+    ```
+    {{ if eq .ExitCode 0 }}    
+    {{ template "updated_resources" .}}
+    {{- end }}    
+    </details>
 
   updated_resources: |
     ---
@@ -66,12 +80,20 @@ templates:
     {{- end}}
     ```
     {{ end}}
-    </details>
+
   deletion_warning: |
     {{if .HasDestroy}}
     ### :warning: Resource Deletion will happen :warning:
     This plan contains resource delete operation. Please check the plan result very carefully!
     {{end}}
+
+  change_inside_terraform: |
+    {{- if .ChangedResult}}
+    <details><summary>Terraform <strong>Plan</strong> Summary</summary>
+    {{wrapCode .ChangedResult}}
+    </details>
+    {{- end}}
+
   change_outside_terraform: |
     {{if .ChangeOutsideTerraform}}
     <details><summary>:information_source: Objects have changed outside of Terraform</summary>
@@ -86,6 +108,9 @@ templates:
     {{wrapCode .Warning}}
     {{end}}
   error_messages: |
+    {{ if eq .ExitCode 1 }}
+    {{wrapCode .Result }}
+    {{end}}    
     {{if .ErrorMessages}}
     ## :warning: Errors
     {{range .ErrorMessages}}
@@ -116,18 +141,9 @@ terraform:
       {{template "badge" .}}
       {{template "deletion_warning" .}}
       {{template "result" .}}
-      ```shell
-      atmos terraform plan {{.Vars.component}} -s {{.Vars.stack}}
-      ```
-      {{template "updated_resources" .}}
-      {{if .ChangedResult}}
-      <details><summary>Terraform <strong>Plan</strong> Summary</summary>
-      {{wrapCode .ChangedResult}}
-      </details>
-      {{end}}
+      {{template "change_inside_terraform" .}}      
       {{template "change_outside_terraform" .}}
       {{template "warning" .}}
-      {{template "error_messages" .}}
       {{template "metadata" .}}
     when_parse_error:
       template: |

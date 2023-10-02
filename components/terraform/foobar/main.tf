@@ -5,3 +5,7 @@ resource "random_id" "foo" {
   }
   byte_length = 8
 }
+
+locals {
+  failure = var.enable_failure ? file("Failed because failure mode is enabled") : null
+}
