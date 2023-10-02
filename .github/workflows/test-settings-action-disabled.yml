@@ -1,0 +1,88 @@
+name: "Test - "
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
+
+env:
+  AWS_REGION: us-east-2
+
+# Permissions required for assuming AWS identity
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup
+        run: echo "Do setup"
+
+  test:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    needs: [setup]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Plan Atmos Component
+        id: current
+        uses: ./
+        with:
+          component: "foobar-disabled"
+          stack: "plat-ue2-sandbox"
+          component-path: "components/terraform/foobar"
+          terraform-plan-role: ${{ secrets.TERRAFORM_PLAN_ROLE }}
+          terraform-state-role: ${{ secrets.TERRAFORM_STATE_ROLE }}
+          terraform-state-bucket: ${{ secrets.TERRAFORM_STATE_BUCKET }}
+          terraform-state-table: ${{ secrets.TERRAFORM_STATE_TABLE }}
+          aws-region: ${{ env.AWS_REGION }}
+          sha: da39a3ee5e6b4b0d3255bfef95601890afd80709
+
+    outputs:
+      result: ${{ steps.current.outcome }}
+      summary: ${{ steps.current.outputs.summary }}
+
+  assert:
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: nick-fields/assert-action@v1
+        with:
+          expected: 'success'
+          actual: "${{ needs.test.outputs.result }}"
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Display structure of downloaded files
+        id: metadata
+        run: |
+          set +e
+          
+          test -d ./metadata
+          DIR_EXISTS=$?
+          echo "dir_exists=${DIR_EXISTS}" >> $GITHUB_OUTPUT
+
+      - uses: nick-fields/assert-action@v1
+        with:
+          actual: "${{ steps.metadata.outputs.dir_exists }}"
+          expected: "1"
+
+      - uses: nick-fields/assert-action@v1
+        with:
+          actual: "${{ fromJSON(needs.test.outputs.summary) }}"
+          expected: ""
+
+  teardown:
+    runs-on: ubuntu-latest
+    needs: [assert]
+    if: ${{ always() }}
+    steps:
+      - name: Tear down
+        run: echo "Do Tear down"

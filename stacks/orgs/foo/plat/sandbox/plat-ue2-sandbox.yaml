@@ -2,6 +2,7 @@ import:
   - catalog/foobar
   - catalog/foobar-fail
   - catalog/foobar-changes
+  - catalog/foobar-disabled
 
 terraform:
   backend_type: s3
