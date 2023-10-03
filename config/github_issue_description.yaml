@@ -18,19 +18,19 @@ templates:
 
   badge: |
     {{- if eq .ExitCode 0 }}
-    {{ if .CreatedResources}}[![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
-    {{- if .UpdatedResources }} [![change](https://shields.io/badge/PLAN-CHANGE-important?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
-    {{- if .ReplacedResources }} [![replace](https://shields.io/badge/PLAN-REPLACE-critical?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
-    {{- if .DeletedResources }} [![destroy](https://shields.io/badge/PLAN-DESTROY-critical?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
-    {{- if not (or .CreatedResources .UpdatedResources .ReplacedResources .DeletedResources) }} [![no changes](https://shields.io/badge/-NO_CHANGE-inactive?style=for-the-badge)](#{{.Vars.stack}}-{{.Vars.component}}){{ end }}
+    {{ if .CreatedResources}}[![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#{{.Vars.target}}){{ end }}
+    {{- if .UpdatedResources }} [![change](https://shields.io/badge/PLAN-CHANGE-important?style=for-the-badge)](#{{.Vars.target}}){{ end }}
+    {{- if .ReplacedResources }} [![replace](https://shields.io/badge/PLAN-REPLACE-critical?style=for-the-badge)](#{{.Vars.target}}){{ end }}
+    {{- if .DeletedResources }} [![destroy](https://shields.io/badge/PLAN-DESTROY-critical?style=for-the-badge)](#{{.Vars.target}}){{ end }}
+    {{- if not (or .CreatedResources .UpdatedResources .ReplacedResources .DeletedResources) }} [![no changes](https://shields.io/badge/-NO_CHANGE-inactive?style=for-the-badge)](#{{.Vars.target}}){{ end }}
     {{ end }}
 
   result: |
     {{- if eq .ExitCode 0 }}
-    <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />{{if .Result}}{{ .Result }}{{end}}</summary>
+    <details><summary><a id="result-{{.Vars.target}}" />{{if .Result}}{{ .Result }}{{end}}</summary>
     {{- end }}
     {{- if eq .ExitCode 1 }}
-    <details><summary><a id="result-{{.Vars.stack}}-{{.Vars.component}}" />:warning: Error summary</summary>
+    <details><summary><a id="result-{{.Vars.target}}" />:warning: Error summary</summary>
     {{- end }}
     
     <br/>      
@@ -48,7 +48,7 @@ templates:
   updated_resources: |
     ---
     {{- if .CreatedResources}}
-    ### <a id="create-{{.Vars.stack}}-{{.Vars.component}}" />Create
+    ### <a id="create-{{.Vars.target}}" />Create
     ```diff
     {{- range .CreatedResources}}
     + {{.}}
@@ -56,7 +56,7 @@ templates:
     ```
     {{- end}}
     {{- if .UpdatedResources}}
-    ### <a id="change-{{.Vars.stack}}-{{.Vars.component}}" />Change
+    ### <a id="change-{{.Vars.target}}" />Change
     ```diff
     {{- range .UpdatedResources}}
     ~ {{.}}
@@ -64,7 +64,7 @@ templates:
     ```
     {{- end}}
     {{- if .ReplacedResources}}
-    ### <a id="replace-{{.Vars.stack}}-{{.Vars.component}}" />Replace
+    ### <a id="replace-{{.Vars.target}}" />Replace
     ```diff
     {{- range .ReplacedResources}}
     - {{.}}
@@ -73,7 +73,7 @@ templates:
     ```
     {{- end}}
     {{- if .DeletedResources}}
-    ### <a id="destroy-{{.Vars.stack}}-{{.Vars.component}}" />Destroy
+    ### <a id="destroy-{{.Vars.target}}" />Destroy
     ```diff
     {{- range .DeletedResources}}
     - {{.}}
