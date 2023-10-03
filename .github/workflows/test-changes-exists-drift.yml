@@ -31,7 +31,7 @@ jobs:
         id: current
         uses: ./
         with:
-          component: "foobar-changes"
+          component: "foobar/changes"
           stack: "plat-ue2-sandbox"
           component-path: "components/terraform/foobar"
           terraform-plan-role: ${{ secrets.TERRAFORM_PLAN_ROLE }}
@@ -67,15 +67,15 @@ jobs:
           DIR_EXISTS=$?
           echo "dir_exists=${DIR_EXISTS}" >> $GITHUB_OUTPUT
 
-          test -f ./metadata/plat-ue2-sandbox-foobar-changes.metadata.json
+          test -f ./metadata/plat-ue2-sandbox-foobar_changes.metadata.json
           FILE_EXISTS=$?
           echo "file_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
 
-          test -f ./metadata/issue-description-plat-ue2-sandbox-foobar-changes.md
+          test -f ./metadata/issue-description-plat-ue2-sandbox-foobar_changes.md
           FILE_EXISTS=$?
           echo "file_md_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
           
-          echo "file_md=$(cat ./metadata/issue-description-plat-ue2-sandbox-foobar-changes.md | jq -Rs .)" >> $GITHUB_OUTPUT
+          echo "file_md=$(cat ./metadata/issue-description-plat-ue2-sandbox-foobar_changes.md | jq -Rs .)" >> $GITHUB_OUTPUT
 
       - uses: nick-fields/assert-action@v1
         with:
@@ -101,20 +101,19 @@ jobs:
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
-            ## Drift Detected for `foobar-changes` in `plat-ue2-sandbox`
+            ## Drift Detected for `foobar/changes` in `plat-ue2-sandbox`
             
             
             
             <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
             
-            
-            [![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#plat-ue2-sandbox-foobar-changes)
-            
+            [![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#create-plat-ue2-sandbox-foobar_changes)
             
             
             
             
-            <details><summary><a id="result-plat-ue2-sandbox-foobar-changes" />Plan: 1 to add, 0 to change, 0 to destroy.</summary>
+            
+            <details><summary><a id="result-plat-ue2-sandbox-foobar_changes" />Plan: 1 to add, 0 to change, 0 to destroy.</summary>
             
             <br/>      
                 
@@ -123,11 +122,11 @@ jobs:
             To reproduce this locally, run:<br/><br/>
             
             ```shell
-            atmos terraform plan foobar-changes -s plat-ue2-sandbox
+            atmos terraform plan foobar/changes -s plat-ue2-sandbox
             ```
                 
             ---
-            ### <a id="create-plat-ue2-sandbox-foobar-changes" />Create
+            ### <a id="create-plat-ue2-sandbox-foobar_changes" />Create
             ```diff
             + random_id.foo
             ```
@@ -165,7 +164,7 @@ jobs:
             
             ```json
             {
-              "component": "foobar-changes",
+              "component": "foobar/changes",
               "stack": "plat-ue2-sandbox",
               "componentPath": "components/terraform/foobar",
               "commitSHA": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
