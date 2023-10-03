@@ -161,7 +161,7 @@ runs:
 
     - name: Configure Plan AWS Credentials
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      uses: aws-actions/configure-aws-credentials@v4.0.0
+      uses: aws-actions/configure-aws-credentials@v4.0.1
       with:
         aws-region: ${{ inputs.aws-region }}
         role-to-assume: ${{ inputs.terraform-plan-role }}
@@ -237,7 +237,7 @@ runs:
 
     - name: Configure State AWS Credentials
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
-      uses: aws-actions/configure-aws-credentials@v4.0.0
+      uses: aws-actions/configure-aws-credentials@v4.0.1
       with:
         aws-region: ${{ inputs.aws-region }}
         role-to-assume: ${{ inputs.terraform-state-role }}
