@@ -67,15 +67,15 @@ jobs:
           DIR_EXISTS=$?
           echo "dir_exists=${DIR_EXISTS}" >> $GITHUB_OUTPUT
 
-          test -f ./metadata/plat-ue2-sandbox-foobar-changes.metadata.json
+          test -f ./metadata/plat-ue2-sandbox-foobar_changes.metadata.json
           FILE_EXISTS=$?
           echo "file_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
 
-          test -f ./metadata/issue-description-plat-ue2-sandbox-foobar-changes.md
+          test -f ./metadata/issue-description-plat-ue2-sandbox-foobar_changes.md
           FILE_EXISTS=$?
           echo "file_md_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
           
-          echo "file_md=$(cat ./metadata/issue-description-plat-ue2-sandbox-foobar-changes.md | jq -Rs .)" >> $GITHUB_OUTPUT
+          echo "file_md=$(cat ./metadata/issue-description-plat-ue2-sandbox-foobar_changes.md | jq -Rs .)" >> $GITHUB_OUTPUT
 
       - uses: nick-fields/assert-action@v1
         with:
@@ -108,13 +108,13 @@ jobs:
             <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
             
             
-            [![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#plat-ue2-sandbox-foobar-changes)
+            [![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#plat-ue2-sandbox-foobar_changes)
             
             
             
             
             
-            <details><summary><a id="result-plat-ue2-sandbox-foobar-changes" />Plan: 1 to add, 0 to change, 0 to destroy.</summary>
+            <details><summary><a id="result-plat-ue2-sandbox-foobar_changes" />Plan: 1 to add, 0 to change, 0 to destroy.</summary>
             
             <br/>      
                 
@@ -127,7 +127,7 @@ jobs:
             ```
                 
             ---
-            ### <a id="create-plat-ue2-sandbox-foobar-changes" />Create
+            ### <a id="create-plat-ue2-sandbox-foobar_changes" />Create
             ```diff
             + random_id.foo
             ```
