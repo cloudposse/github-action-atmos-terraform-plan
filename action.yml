@@ -404,7 +404,7 @@ runs:
         fi
 
     - name: Upload Artifacts
-      if: ${{ inputs.drift-detection-mode-enabled == 'true'  && steps.atmos-plan.outputs.no-changes == 'false' }}
+      if: ${{ inputs.drift-detection-mode-enabled == 'true' && steps.atmos-plan.outputs.no-changes == 'false' }}
       uses: actions/upload-artifact@v3
       with:
         name: metadata

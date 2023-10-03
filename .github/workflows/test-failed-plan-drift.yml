@@ -130,6 +130,27 @@ jobs:
             part of the configuration source code, so if this file will be created by a
             resource in this configuration you must instead obtain this result from an
             attribute of that resource.
+            
+            Terraform used the selected providers to generate the following execution
+            plan. Resource actions are indicated with the following symbols:
+              + create
+            
+            Terraform planned the following actions, but then encountered a problem:
+            
+              # random_id.foo will be created
+              + resource "random_id" "foo" {
+                  + b64_std     = (known after apply)
+                  + b64_url     = (known after apply)
+                  + byte_length = 8
+                  + dec         = (known after apply)
+                  + hex         = (known after apply)
+                  + id          = (known after apply)
+                  + keepers     = {
+                      + "seed" = "foo-plat-ue2-sandbox-blue"
+                    }
+                }
+            
+            Plan: 1 to add, 0 to change, 0 to destroy.
             exit status 1
             ```
             
@@ -161,6 +182,7 @@ jobs:
             }
             ```
             </details>
+
 
   teardown:
     runs-on: ubuntu-latest
