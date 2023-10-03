@@ -180,7 +180,7 @@ runs:
           --config ${{ steps.vars.outputs.template_file }} \
           -owner "${{ github.repository_owner }}" \
           -repo "${{ github.event.repository.name }}" \
-          -var "target:${{ inputs.stack }}-${{ inputs.component }}" \
+          -var "target:${{ steps.vars.outputs.component_slug }}" \
           -var "component:${{ inputs.component }}" \
           -var "componentPath:${{ inputs.component-path }}" \
           -var "commitSHA:${{ inputs.sha }}" \
