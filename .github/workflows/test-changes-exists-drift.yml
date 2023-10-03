@@ -31,7 +31,7 @@ jobs:
         id: current
         uses: ./
         with:
-          component: "foobar-changes"
+          component: "foobar/changes"
           stack: "plat-ue2-sandbox"
           component-path: "components/terraform/foobar"
           terraform-plan-role: ${{ secrets.TERRAFORM_PLAN_ROLE }}
@@ -101,7 +101,7 @@ jobs:
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
-            ## Drift Detected for `foobar-changes` in `plat-ue2-sandbox`
+            ## Drift Detected for `foobar/changes` in `plat-ue2-sandbox`
             
             
             
@@ -123,7 +123,7 @@ jobs:
             To reproduce this locally, run:<br/><br/>
             
             ```shell
-            atmos terraform plan foobar-changes -s plat-ue2-sandbox
+            atmos terraform plan foobar/changes -s plat-ue2-sandbox
             ```
                 
             ---
@@ -165,7 +165,7 @@ jobs:
             
             ```json
             {
-              "component": "foobar-changes",
+              "component": "foobar/changes",
               "stack": "plat-ue2-sandbox",
               "componentPath": "components/terraform/foobar",
               "commitSHA": "da39a3ee5e6b4b0d3255bfef95601890afd80709"

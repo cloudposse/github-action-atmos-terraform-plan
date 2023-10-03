@@ -1,6 +1,6 @@
 components:
   terraform:
-    foobar-changes:
+    foobar/changes:
       component: foobar
       settings:
         github:

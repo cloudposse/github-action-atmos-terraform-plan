@@ -31,7 +31,7 @@ jobs:
         id: current
         uses: ./
         with:
-          component: "foobar-changes"
+          component: "foobar/changes"
           stack: "plat-ue2-sandbox"
           component-path: "components/terraform/foobar"
           terraform-plan-role: ${{ secrets.TERRAFORM_PLAN_ROLE }}
@@ -76,7 +76,7 @@ jobs:
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
-            ## Changes Found for `foobar-changes` in `plat-ue2-sandbox`
+            ## Changes Found for `foobar/changes` in `plat-ue2-sandbox`
             
             <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
             [![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#plat-ue2-sandbox-foobar-changes)
@@ -91,7 +91,7 @@ jobs:
             To reproduce this locally, run:<br/><br/>
             
             ```shell
-            atmos terraform plan foobar-changes -s plat-ue2-sandbox
+            atmos terraform plan foobar/changes -s plat-ue2-sandbox
             ```
                 
             ---
