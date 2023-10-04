@@ -23,7 +23,7 @@ templates:
     {{- if .ReplacedResources }} [![replace](https://shields.io/badge/PLAN-REPLACE-critical?style=for-the-badge)](#user-content-replace-{{.Vars.target}}){{ end }}
     {{- if .DeletedResources }} [![destroy](https://shields.io/badge/PLAN-DESTROY-critical?style=for-the-badge)](#user-content-destroy-{{.Vars.target}}){{ end }}
     {{- if not (or .CreatedResources .UpdatedResources .ReplacedResources .DeletedResources) }} [![no changes](https://shields.io/badge/-NO_CHANGE-inactive?style=for-the-badge)](#user-content-{{.Vars.target}}){{ end }}
-    {{- end }}
+    {{ end }}
 
   result: |
     {{- if eq .ExitCode 0 }}
