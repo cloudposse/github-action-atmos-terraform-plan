@@ -194,6 +194,7 @@ runs:
           plan -- \
             atmos terraform plan ${{ inputs.component }} \
             --stack ${{ inputs.stack }} \
+            --base-path $(pwd) \
             -out="${{ steps.vars.outputs.plan_file }}" \
             -lock=false \
             -input=false \
