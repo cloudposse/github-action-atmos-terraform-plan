@@ -231,8 +231,8 @@ runs:
     - name: Convert PLANFILE to JSON
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       shell: bash
+      working-directory: ./${{ inputs.component-path }}
       run: |
-        cd "${{ inputs.component-path }}"
         terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Configure State AWS Credentials
@@ -263,14 +263,13 @@ runs:
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       id: new-plan
       shell: bash
+      working-directory: ./${{ inputs.component-path }}
       run: |
         PLAN_FILE="${{ steps.vars.outputs.plan_file }}"
         PLAN_FILE_STORED="${{ steps.vars.outputs.plan_file }}.stored"
 
         NEW_PLAN_FOUND=false
-        if [ -f "$PLAN_FILE_STORED" ]; then
-          cd "${{ inputs.component-path }}"
-          
+        if [ -f "$PLAN_FILE_STORED" ]; then          
           terraform show -json "$PLAN_FILE_STORED" > "$PLAN_FILE_STORED.json"
         
           # sort and remove timestamp
@@ -379,9 +378,8 @@ runs:
     - name: Publish Summary or Generate GitHub Issue Description for Drift Detection
       id: summary
       shell: bash
+      working-directory: ./${{ inputs.component-path }}
       run: |
-        cd "${{ inputs.component-path }}"
-        
         STEP_SUMMARY_FILE="${{ steps.vars.outputs.summary_file }}"
         
         if [[ "${{ steps.atmos-plan.outputs.no-changes }}" == "true" ]]; then
