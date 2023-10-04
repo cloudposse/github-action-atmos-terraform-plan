@@ -18,11 +18,11 @@ templates:
 
   badge: |
     {{- if eq .ExitCode 0 }}
-    {{- if .CreatedResources}}[![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#create-{{.Vars.target}}){{ end }}
-    {{- if .UpdatedResources }} [![change](https://shields.io/badge/PLAN-CHANGE-important?style=for-the-badge)](#change-{{.Vars.target}}){{ end }}
-    {{- if .ReplacedResources }} [![replace](https://shields.io/badge/PLAN-REPLACE-critical?style=for-the-badge)](#replace-{{.Vars.target}}){{ end }}
-    {{- if .DeletedResources }} [![destroy](https://shields.io/badge/PLAN-DESTROY-critical?style=for-the-badge)](#destroy-{{.Vars.target}}){{ end }}
-    {{- if not (or .CreatedResources .UpdatedResources .ReplacedResources .DeletedResources) }} [![no changes](https://shields.io/badge/-NO_CHANGE-inactive?style=for-the-badge)](#{{.Vars.target}}){{ end }}
+    {{- if .CreatedResources}}[![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#user-content-create-{{.Vars.target}}){{ end }}
+    {{- if .UpdatedResources }} [![change](https://shields.io/badge/PLAN-CHANGE-important?style=for-the-badge)](#user-content-change-{{.Vars.target}}){{ end }}
+    {{- if .ReplacedResources }} [![replace](https://shields.io/badge/PLAN-REPLACE-critical?style=for-the-badge)](#user-content-replace-{{.Vars.target}}){{ end }}
+    {{- if .DeletedResources }} [![destroy](https://shields.io/badge/PLAN-DESTROY-critical?style=for-the-badge)](#user-content-destroy-{{.Vars.target}}){{ end }}
+    {{- if not (or .CreatedResources .UpdatedResources .ReplacedResources .DeletedResources) }} [![no changes](https://shields.io/badge/-NO_CHANGE-inactive?style=for-the-badge)](#user-content-{{.Vars.target}}){{ end }}
     {{ end }}
 
   result: |
