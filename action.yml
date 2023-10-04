@@ -172,6 +172,8 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       id: atmos-plan
       shell: bash
+      env:
+        ATMOS_BASE_PATH: ${{ github.workspace }}
       run: |
         set +e 
         
@@ -194,7 +196,6 @@ runs:
           plan -- \
             atmos terraform plan ${{ inputs.component }} \
             --stack ${{ inputs.stack }} \
-            --base-path $(pwd) \
             -out="${{ steps.vars.outputs.plan_file }}" \
             -lock=false \
             -input=false \
