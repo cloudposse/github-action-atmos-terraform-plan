@@ -144,10 +144,10 @@ runs:
         LOCK_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/.terraform.lock.hcl"
 
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
-          TEMPLATE_FILE="${{ github.action_path }}/config/github_issue_description.yaml"
+          # TEMPLATE_FILE="${{ github.action_path }}/config/github_issue_description.yaml"
           SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/issue-description-${COMPONENT_SLUG}.md"        
         else 
-          TEMPLATE_FILE="${{ github.action_path }}/config/atmos_github_summary.yaml"
+          # TEMPLATE_FILE="${{ github.action_path }}/config/atmos_github_summary.yaml"
           SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md"        
         fi
 
@@ -156,7 +156,7 @@ runs:
         echo "component_slug=${COMPONENT_SLUG}" >> $GITHUB_OUTPUT
         echo "plan_file=${PLAN_FILE}" >> $GITHUB_OUTPUT
         echo "lock_file=${LOCK_FILE}" >> $GITHUB_OUTPUT
-        echo "template_file=${TEMPLATE_FILE}" >> $GITHUB_OUTPUT
+        # echo "template_file=${TEMPLATE_FILE}" >> $GITHUB_OUTPUT
         echo "summary_file=${SUMMARY_FILE}" >> $GITHUB_OUTPUT
 
     - name: Configure Plan AWS Credentials
@@ -179,7 +179,8 @@ runs:
         
         TERRAFORM_OUTPUT=$( \
           tfcmt \
-          --config ${{ steps.vars.outputs.template_file }} \
+          # --config ${{ steps.vars.outputs.template_file }} \
+          --config ${{ github.action_path }}/config/summary.yaml \
           -owner "${{ github.repository_owner }}" \
           -repo "${{ github.event.repository.name }}" \
           -var "target:${{ steps.vars.outputs.component_slug }}" \
@@ -191,6 +192,7 @@ runs:
           -var "logoImage:${{ inputs.branding-logo-image }}" \
           -var "logoUrl:${{ inputs.branding-logo-url }}" \
           -var "infracost_enabled:${{ inputs.enable-infracost }}" \
+          -var "driftModeEnabled:${{ inputs.drift-detection-mode-enabled }}" \
           --output "${{ steps.vars.outputs.summary_file }}" \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
           plan -- \
