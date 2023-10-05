@@ -78,10 +78,11 @@ jobs:
             [![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#user-content-create-plat-ue2-sandbox-foobar_changes)
             
             
+            
             <details><summary><a id="result-plat-ue2-sandbox-foobar_changes" />Plan: 1 to add, 0 to change, 0 to destroy.</summary>
             
             <br/>      
-            
+                
             
                   
             To reproduce this locally, run:<br/><br/>
