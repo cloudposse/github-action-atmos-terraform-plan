@@ -179,7 +179,6 @@ runs:
         
         TERRAFORM_OUTPUT=$( \
           tfcmt \
-          # --config ${{ steps.vars.outputs.template_file }} \
           --config ${{ github.action_path }}/config/summary.yaml \
           -owner "${{ github.repository_owner }}" \
           -repo "${{ github.event.repository.name }}" \
