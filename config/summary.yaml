@@ -169,7 +169,7 @@ terraform:
       {{- template "change_outside_terraform" .}}
       {{- template "warning" .}}
       {{- template "infracost" .}}
-      {{- if ne .Vars.driftModeEnabled "true" }}      
+      {{- if eq .Vars.driftModeEnabled "true" }}      
       <!------------ISSUE-MARKDOWN--------------!>
       {{template "issue_plan_title" .}}
       {{template "branding" .}}
@@ -188,7 +188,7 @@ terraform:
         <details><summary>Result</summary>
         {{wrapCode .CombinedOutput}}
         </details>
-        {{- if ne .Vars.driftModeEnabled "true" }}
+        {{- if eq .Vars.driftModeEnabled "true" }}
         <!------------ISSUE-MARKDOWN--------------!>
         {{template "plan_title" .}}
 
