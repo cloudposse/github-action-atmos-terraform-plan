@@ -237,12 +237,14 @@ runs:
 
         echo "result=${TERRAFORM_RESULT}" >> $GITHUB_OUTPUT
 
-    - name: Terraform Graph
+    - name: Terraform Graph to Mermaid
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
-      shell: bash
+      uses: actions/setup-node@v3
       working-directory: ./${{ inputs.component-path }}
+      with:
+        node-version: 18
       run: |
-        terraform graph -plan="${{ steps.vars.outputs.plan_file }}" >> $GITHUB_STEP_SUMMARY
+        terraform graph -plan="${{ steps.vars.outputs.plan_file }}" | node ${{ github.action_path }}/scripts/index.mjs >> $GITHUB_STEP_SUMMARY
 
     - name: Convert PLANFILE to JSON
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
