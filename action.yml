@@ -206,7 +206,7 @@ runs:
         
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
           grep -Pzo '(.|\n)*(?=_______________ISSUE-MARKDOWN_______________\n)' ${{ steps.vars.outputs.summary_file }} > ${{ steps.vars.outputs.step_summary_file }}
-          grep -Pzo '(?<=_______________ISSUE-MARKDOWN_______________\n)(.*\n)*' ${{ steps.vars.outputs.summary_file }} > ${{ steps.vars.outputs.issue_file }}        
+          grep -Pzo '(?<=_______________ISSUE-MARKDOWN_______________\n)(.|\n)*' ${{ steps.vars.outputs.summary_file }} > ${{ steps.vars.outputs.issue_file }}        
           rm -f ${{ steps.vars.outputs.summary_file }}
         else
           mv ${{ steps.vars.outputs.summary_file }} ${{ steps.vars.outputs.step_summary_file }}
