@@ -390,9 +390,9 @@ runs:
       working-directory: ./${{ inputs.component-path }}
       run: |
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
-          STEP_SUMMARY_FILE="${{ steps.vars.outputs.step_summary_file }}"
-        else
           STEP_SUMMARY_FILE="${{ steps.vars.outputs.issue_file }}"
+        else
+          STEP_SUMMARY_FILE="${{ steps.vars.outputs.step_summary_file }}"
         fi
         
         if [[ "${{ steps.atmos-plan.outputs.no-changes }}" == "true" ]]; then
