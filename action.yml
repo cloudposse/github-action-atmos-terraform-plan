@@ -150,6 +150,9 @@ runs:
           # TEMPLATE_FILE="${{ github.action_path }}/config/atmos_github_summary.yaml"
           SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md"        
         fi
+        
+        ISSUE_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/issue-description-${COMPONENT_SLUG}.md"
+        STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md"
 
         echo "stack_name=${STACK_NAME}" >> $GITHUB_OUTPUT
         echo "component_name=${COMPONENT_NAME}" >> $GITHUB_OUTPUT
@@ -157,7 +160,8 @@ runs:
         echo "plan_file=${PLAN_FILE}" >> $GITHUB_OUTPUT
         echo "lock_file=${LOCK_FILE}" >> $GITHUB_OUTPUT
         # echo "template_file=${TEMPLATE_FILE}" >> $GITHUB_OUTPUT
-        echo "summary_file=${SUMMARY_FILE}" >> $GITHUB_OUTPUT
+        echo "summary_file=${STEP_SUMMARY_FILE}" >> $GITHUB_OUTPUT
+        echo "issue_file=${ISSUE_SUMMARY_FILE}" >> $GITHUB_OUTPUT
 
     - name: Configure Plan AWS Credentials
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
@@ -175,7 +179,9 @@ runs:
       env:
         ATMOS_BASE_PATH: ${{ github.workspace }}
       run: |
-        set +e 
+        set +e
+        
+        OUTPUT_FILE="$GITHUB_WORKSPACE/metadata/summary-${{ steps.vars.outputs.component_slug }}.md"
         
         TERRAFORM_OUTPUT=$( \
           tfcmt \
@@ -192,7 +198,7 @@ runs:
           -var "logoUrl:${{ inputs.branding-logo-url }}" \
           -var "infracost_enabled:${{ inputs.enable-infracost }}" \
           -var "driftModeEnabled:${{ inputs.drift-detection-mode-enabled }}" \
-          --output "$GITHUB_WORKSPACE/metadata/summary-${COMPONENT_SLUG}.md" \
+          --output ${OUTPUT_FILE} \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
           plan -- \
             atmos terraform plan ${{ inputs.component }} \
@@ -207,10 +213,10 @@ runs:
         set -e
         
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
-          grep -Pzo '(?<=_______________ISSUE-MARKDOWN_______________\n)(.*\n)*' $GITHUB_WORKSPACE/metadata/summary-${COMPONENT_SLUG}.md > $GITHUB_WORKSPACE/metadata/issue-description-${COMPONENT_SLUG}.md
-          grep -Pzo '(?<=_______________ISSUE-MARKDOWN_______________\n)(.*\n)*' $GITHUB_WORKSPACE/metadata/summary-${COMPONENT_SLUG}.md > $GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md
+          grep -Pzo '(?<=_______________ISSUE-MARKDOWN_______________\n)(.*\n)*' ${OUTPUT_FILE} > ${{ steps.vars.outputs.summary_file }}
+          grep -Pzo '(.|\n)*(?=_______________ISSUE-MARKDOWN_______________\n)' ${OUTPUT_FILE} > ${{ steps.vars.outputs.issue_file }}
         else 
-          mv $GITHUB_WORKSPACE/metadata/summary-${COMPONENT_SLUG}.md "$GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md"
+          mv ${OUTPUT_FILE} ${{ steps.vars.outputs.summary_file }}
         fi
         
         
