@@ -1,0 +1,5 @@
+# Mermaid Graph
+
+```mermaid
+%%tfmermaid
+```
