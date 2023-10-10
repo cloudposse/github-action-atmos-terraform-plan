@@ -248,7 +248,7 @@ runs:
       shell: bash
       working-directory: ${{ github.action_path }}/scripts
       run: |
-        echo -e "# Mermaid Graph\n\n```mermaid\n%%tfmermaid\n```" > mermaid_template.md
+        printf "# Mermaid Graph\n\n```mermaid\n%%tfmermaid\n```" > mermaid_template.md
         cat mermaid_template.md
         terraform graph -plan="${{ steps.vars.outputs.plan_file }}" | node index.mjs mermaid_template.md >> $GITHUB_STEP_SUMMARY
 
