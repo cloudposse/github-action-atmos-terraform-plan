@@ -119,6 +119,7 @@ templates:
     {{end}}
   error_messages: |
     {{ if eq .ExitCode 1 }}
+    ---
     {{wrapCode .Result }}
     {{end}}    
     {{if .ErrorMessages}}
