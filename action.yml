@@ -205,8 +205,10 @@ runs:
         set -e
         
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
-          grep -Pzo '(.|\n)*(?=_______________ISSUE-MARKDOWN_______________\n)' ${{ steps.vars.outputs.summary_file }} > ${{ steps.vars.outputs.step_summary_file }}
-          grep -Pzo '(?<=_______________ISSUE-MARKDOWN_______________\n)(.*\n)*' ${{ steps.vars.outputs.summary_file }} > ${{ steps.vars.outputs.issue_file }}        
+          # Split summary to 2 files - issue and step summary files
+          # Remove \0 at the end of the grep output
+          grep -Pzo '(.|\n)*(?=_______________ISSUE-MARKDOWN_______________\n)' ${{ steps.vars.outputs.summary_file }} | sed 's/0*$//' > ${{ steps.vars.outputs.step_summary_file }}
+          grep -Pzo '(?<=_______________ISSUE-MARKDOWN_______________\n)(.|\n)*' ${{ steps.vars.outputs.summary_file }} | sed 's/0*$//' > ${{ steps.vars.outputs.issue_file }}
           rm -f ${{ steps.vars.outputs.summary_file }}
         else
           mv ${{ steps.vars.outputs.summary_file }} ${{ steps.vars.outputs.step_summary_file }}
