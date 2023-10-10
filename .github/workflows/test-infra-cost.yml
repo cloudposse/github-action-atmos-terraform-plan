@@ -86,14 +86,14 @@ jobs:
             <details><summary><a id="result-plat-ue2-sandbox-foobar_changes" />Plan: 1 to add, 0 to change, 0 to destroy.</summary>
             
             <br/>      
-                
-            
-                  
             To reproduce this locally, run:<br/><br/>
             
             ```shell
             atmos terraform plan foobar/changes -s plat-ue2-sandbox
             ```
+                
+            
+            
                 
             ---
             ### <a id="create-plat-ue2-sandbox-foobar_changes" />Create
@@ -136,8 +136,6 @@ jobs:
               ```
             
             </details>
-            
-
 
   teardown:
     runs-on: ubuntu-latest

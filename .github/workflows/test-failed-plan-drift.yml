@@ -101,12 +101,14 @@ jobs:
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
-            ## :x: Drift Detection Failed for `foobar-fail` in `plat-ue2-sandbox`!
+            ## Drift Detection Failed for `foobar-fail` in `plat-ue2-sandbox`!
             
             
             
             <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
             
+            
+            [![failed](https://shields.io/badge/PLAN-FAILED-ff0000?style=for-the-badge)](#user-content-result-plat-ue2-sandbox-foobar-fail)
             
             
             
@@ -115,7 +117,13 @@ jobs:
             <details><summary><a id="result-plat-ue2-sandbox-foobar-fail" />:warning: Error summary</summary>
             
             <br/>      
+            To reproduce this locally, run:<br/><br/>
             
+            ```shell
+            atmos terraform plan foobar-fail -s plat-ue2-sandbox
+            ```
+            
+            ---
             
             ```hcl
             Error: Invalid function argument
@@ -135,12 +143,7 @@ jobs:
             
                 
             
-                  
-            To reproduce this locally, run:<br/><br/>
             
-            ```shell
-            atmos terraform plan foobar-fail -s plat-ue2-sandbox
-            ```
                 
             </details>
             
@@ -161,7 +164,6 @@ jobs:
             }
             ```
             </details>
-
 
   teardown:
     runs-on: ubuntu-latest
