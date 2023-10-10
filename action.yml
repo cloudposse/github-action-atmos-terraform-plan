@@ -192,7 +192,7 @@ runs:
           -var "logoUrl:${{ inputs.branding-logo-url }}" \
           -var "infracost_enabled:${{ inputs.enable-infracost }}" \
           -var "driftModeEnabled:${{ inputs.drift-detection-mode-enabled }}" \
-          --output "${{ steps.vars.outputs.summary_file }}" \
+          --output "$GITHUB_WORKSPACE/metadata/summary-${COMPONENT_SLUG}.md" \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
           plan -- \
             atmos terraform plan ${{ inputs.component }} \
@@ -205,6 +205,14 @@ runs:
         TERRAFORM_RESULT=$?
 
         set -e
+        
+        if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
+          grep -Pzo '(?<=_______________ISSUE-MARKDOWN_______________\n)(.*\n)*' $GITHUB_WORKSPACE/metadata/summary-${COMPONENT_SLUG}.md > $GITHUB_WORKSPACE/metadata/issue-description-${COMPONENT_SLUG}.md
+          grep -Pzo '(?<=_______________ISSUE-MARKDOWN_______________\n)(.*\n)*' $GITHUB_WORKSPACE/metadata/summary-${COMPONENT_SLUG}.md > $GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md
+        else 
+          mv $GITHUB_WORKSPACE/metadata/summary-${COMPONENT_SLUG}.md "$GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md"
+        fi
+        
         
         echo -ne "${TERRAFORM_OUTPUT}"
         

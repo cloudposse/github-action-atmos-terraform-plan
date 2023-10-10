@@ -170,7 +170,7 @@ terraform:
       {{- template "warning" .}}
       {{- template "infracost" .}}
       {{- if eq .Vars.driftModeEnabled "true" }}      
-      <<------------ISSUE-MARKDOWN-------------->>
+      _______________ISSUE-MARKDOWN_______________
       {{template "issue_plan_title" .}}
       {{template "branding" .}}
       {{template "badge" .}}
@@ -189,7 +189,7 @@ terraform:
         {{wrapCode .CombinedOutput}}
         </details>
         {{- if eq .Vars.driftModeEnabled "true" }}
-        <<------------ISSUE-MARKDOWN-------------->>
+        _______________ISSUE-MARKDOWN_______________
         {{template "plan_title" .}}
 
         <details><summary>Result</summary>
