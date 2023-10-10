@@ -248,7 +248,7 @@ runs:
       shell: bash
       working-directory: ./${{ inputs.component-path }}
       run: |
-        echo "# Mermaid Graph\n\n```mermaid\n%%tfmermaid\n```" > mermaid_template.md
+        echo -e "# Mermaid Graph\n\n```mermaid\n%%tfmermaid\n```" > mermaid_template.md
         terraform graph -plan="${{ steps.vars.outputs.plan_file }}" | node ${{ github.action_path }}/scripts/index.mjs mermaid_template.md >> $GITHUB_STEP_SUMMARY
 
     - name: Convert PLANFILE to JSON
