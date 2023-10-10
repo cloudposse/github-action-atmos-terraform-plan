@@ -71,6 +71,10 @@ jobs:
           FILE_EXISTS=$?
           echo "file_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
 
+          test -f ./metadata/step-summary-plat-ue2-sandbox-foobar_changes.md
+          FILE_EXISTS=$?
+          echo "file_summary_md_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
+
           test -f ./metadata/issue-description-plat-ue2-sandbox-foobar_changes.md
           FILE_EXISTS=$?
           echo "file_md_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
@@ -90,6 +94,11 @@ jobs:
       - uses: nick-fields/assert-action@v1
         with:
           actual: "${{ steps.metadata.outputs.file_md_exists }}"
+          expected: "0"
+
+      - uses: nick-fields/assert-action@v1
+        with:
+          actual: "${{ steps.metadata.outputs.file_summary_md_exists }}"
           expected: "0"
 
       - uses: nick-fields/assert-action@v1

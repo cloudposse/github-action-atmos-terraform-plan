@@ -143,21 +143,19 @@ runs:
         PLAN_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/$COMPONENT_SLUG-${{ inputs.sha }}.planfile"
         LOCK_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/.terraform.lock.hcl"
 
-        if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
-          TEMPLATE_FILE="${{ github.action_path }}/config/github_issue_description.yaml"
-          SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/issue-description-${COMPONENT_SLUG}.md"        
-        else 
-          TEMPLATE_FILE="${{ github.action_path }}/config/atmos_github_summary.yaml"
-          SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md"        
-        fi
-
+        ISSUE_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/issue-description-${COMPONENT_SLUG}.md"
+        STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md"
+        SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/summary-${COMPONENT_SLUG}.md"
+        
         echo "stack_name=${STACK_NAME}" >> $GITHUB_OUTPUT
         echo "component_name=${COMPONENT_NAME}" >> $GITHUB_OUTPUT
         echo "component_slug=${COMPONENT_SLUG}" >> $GITHUB_OUTPUT
         echo "plan_file=${PLAN_FILE}" >> $GITHUB_OUTPUT
         echo "lock_file=${LOCK_FILE}" >> $GITHUB_OUTPUT
-        echo "template_file=${TEMPLATE_FILE}" >> $GITHUB_OUTPUT
+
         echo "summary_file=${SUMMARY_FILE}" >> $GITHUB_OUTPUT
+        echo "step_summary_file=${STEP_SUMMARY_FILE}" >> $GITHUB_OUTPUT
+        echo "issue_file=${ISSUE_SUMMARY_FILE}" >> $GITHUB_OUTPUT
 
     - name: Configure Plan AWS Credentials
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
@@ -175,11 +173,11 @@ runs:
       env:
         ATMOS_BASE_PATH: ${{ github.workspace }}
       run: |
-        set +e 
+        set +e
         
         TERRAFORM_OUTPUT=$( \
           tfcmt \
-          --config ${{ steps.vars.outputs.template_file }} \
+          --config ${{ github.action_path }}/config/summary.yaml \
           -owner "${{ github.repository_owner }}" \
           -repo "${{ github.event.repository.name }}" \
           -var "target:${{ steps.vars.outputs.component_slug }}" \
@@ -191,7 +189,8 @@ runs:
           -var "logoImage:${{ inputs.branding-logo-image }}" \
           -var "logoUrl:${{ inputs.branding-logo-url }}" \
           -var "infracost_enabled:${{ inputs.enable-infracost }}" \
-          --output "${{ steps.vars.outputs.summary_file }}" \
+          -var "driftModeEnabled:${{ inputs.drift-detection-mode-enabled }}" \
+          --output ${{ steps.vars.outputs.summary_file }} \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
           plan -- \
             atmos terraform plan ${{ inputs.component }} \
@@ -204,6 +203,14 @@ runs:
         TERRAFORM_RESULT=$?
 
         set -e
+        
+        if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
+          grep -Pzo '(.|\n)*(?=_______________ISSUE-MARKDOWN_______________\n)' ${{ steps.vars.outputs.summary_file }} > ${{ steps.vars.outputs.step_summary_file }}
+          grep -Pzo '(?<=_______________ISSUE-MARKDOWN_______________\n)(.*\n)*' ${{ steps.vars.outputs.summary_file }} > ${{ steps.vars.outputs.issue_file }}        
+          rm -f ${{ steps.vars.outputs.summary_file }}
+        else
+          mv ${{ steps.vars.outputs.summary_file }} ${{ steps.vars.outputs.step_summary_file }}
+        fi
         
         echo -ne "${TERRAFORM_OUTPUT}"
         
@@ -367,8 +374,8 @@ runs:
           INFRA_COST_SUMMARY="Infracost Estimate: monthly cost will increase by ${INFRACOST_DIFF_TOTAL_MONTHLY_COST} 📈"
         fi
 
-        sed -i "s/%INFRACOST_SUMMARY%/${INFRA_COST_SUMMARY}/" ${{ steps.vars.outputs.summary_file }}
-        sed -i -e '/%INFRACOST_DIFF%/{r /tmp/infracost.txt' -e 'd}' ${{ steps.vars.outputs.summary_file }}
+        sed -i "s/%INFRACOST_SUMMARY%/${INFRA_COST_SUMMARY}/" ${{ steps.vars.outputs.step_summary_file }}
+        sed -i -e '/%INFRACOST_DIFF%/{r /tmp/infracost.txt' -e 'd}' ${{ steps.vars.outputs.step_summary_file }}
         
 
     - name: Store Component Metadata to Artifacts
@@ -382,7 +389,11 @@ runs:
       shell: bash
       working-directory: ./${{ inputs.component-path }}
       run: |
-        STEP_SUMMARY_FILE="${{ steps.vars.outputs.summary_file }}"
+        if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
+          STEP_SUMMARY_FILE="${{ steps.vars.outputs.issue_file }}"
+        else
+          STEP_SUMMARY_FILE="${{ steps.vars.outputs.step_summary_file }}"
+        fi
         
         if [[ "${{ steps.atmos-plan.outputs.no-changes }}" == "true" ]]; then
           rm -f ${STEP_SUMMARY_FILE}
