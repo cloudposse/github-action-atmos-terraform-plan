@@ -237,6 +237,13 @@ runs:
 
         echo "result=${TERRAFORM_RESULT}" >> $GITHUB_OUTPUT
 
+    - name: Terraform Graph
+      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
+      shell: bash
+      working-directory: ./${{ inputs.component-path }}
+      run: |
+        terraform graph -plan="${{ steps.vars.outputs.plan_file }}" >> $GITHUB_STEP_SUMMARY
+
     - name: Convert PLANFILE to JSON
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       shell: bash
