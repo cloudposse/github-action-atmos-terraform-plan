@@ -397,7 +397,11 @@ runs:
       shell: bash
       working-directory: ./${{ inputs.component-path }}
       run: |
-        STEP_SUMMARY_FILE="${{ steps.vars.outputs.summary_file }}"
+        if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
+          STEP_SUMMARY_FILE="${{ steps.vars.outputs.summary_file }}"
+        else
+          STEP_SUMMARY_FILE="${{ steps.vars.outputs.issue_file }}"
+        fi
         
         if [[ "${{ steps.atmos-plan.outputs.no-changes }}" == "true" ]]; then
           rm -f ${STEP_SUMMARY_FILE}
