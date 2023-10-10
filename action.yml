@@ -213,12 +213,12 @@ runs:
         set -e
         
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
-          grep -Pzo '(?<=_______________ISSUE-MARKDOWN_______________\n)(.*\n)*' ${OUTPUT_FILE} > ${{ steps.vars.outputs.summary_file }}
-          grep -Pzo '(.|\n)*(?=_______________ISSUE-MARKDOWN_______________\n)' ${OUTPUT_FILE} > ${{ steps.vars.outputs.issue_file }}
-        else 
+          grep -Pzo '(.|\n)*(?=_______________ISSUE-MARKDOWN_______________\n)' ${OUTPUT_FILE} > ${{ steps.vars.outputs.summary_file }}
+          grep -Pzo '(?<=_______________ISSUE-MARKDOWN_______________\n)(.*\n)*' ${OUTPUT_FILE} > ${{ steps.vars.outputs.issue_file }}        
+          rm -f ${OUTPUT_FILE}
+        else
           mv ${OUTPUT_FILE} ${{ steps.vars.outputs.summary_file }}
         fi
-        
         
         echo -ne "${TERRAFORM_OUTPUT}"
         
