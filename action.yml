@@ -253,10 +253,15 @@ runs:
         tar xvf terraform-graph-beautifier_0.3.3_linux_amd64.tar.gz
         chmod +x terraform-graph-beautifier
 
-        terraform graph -plan="${{ steps.vars.outputs.plan_file }}" | ./terraform-graph-beautifier -output-type=graphviz > beauty.out
-        cat beauty.out | node ${{ github.action_path }}/scripts/index.mjs ${{ github.action_path }}/scripts/mermaid_template.md > mermaid.out
+        terraform graph -plan="${{ steps.vars.outputs.plan_file }}" > graph.out
         
-        cat mermaid.out        
+        cat graph.out | ./terraform-graph-beautifier -output-type=graphviz > beauty.out
+        cat beauty.out | node ${{ github.action_path }}/scripts/index.mjs ${{ github.action_path }}/scripts/mermaid_template.md > mermaid_b.out
+        cat graph.out | node ${{ github.action_path }}/scripts/index.mjs ${{ github.action_path }}/scripts/mermaid_template.md > mermaid.out
+        
+        cat mermaid.out
+        cat mermaid_b.out
+        
         cat mermaid.out >> $GITHUB_STEP_SUMMARY
 
     - name: Convert PLANFILE to JSON
