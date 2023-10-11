@@ -101,7 +101,7 @@ jobs:
 
       - uses: nick-fields/assert-action@v1
         with:
-          actual: "${{ fromJSON(steps.metadata.outputs.file_md) }}"
+          actual: "${{ fromJSON(steps.metadata.outputs.file_json) }}"
           expected: |
             { "stack": "plat-ue2-sandbox", "component": "foobar/changes", "componentPath": "components/terraform/foobar", "drifted": true }
 
