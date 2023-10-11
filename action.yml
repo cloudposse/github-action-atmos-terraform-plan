@@ -259,6 +259,7 @@ runs:
         cat beauty.out | node ${{ github.action_path }}/scripts/index.mjs ${{ github.action_path }}/scripts/mermaid_template.md > mermaid_b.out
         cat graph.out | node ${{ github.action_path }}/scripts/index.mjs ${{ github.action_path }}/scripts/mermaid_template.md > mermaid.out
         
+        cat beauty.out
         cat mermaid.out
         cat mermaid_b.out
         
