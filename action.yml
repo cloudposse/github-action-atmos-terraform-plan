@@ -384,7 +384,7 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && inputs.drift-detection-mode-enabled == 'true' }}
       shell: bash
       run: |
-        echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}", "drifted": '"${{ steps.atmos-plan.outputs.changes }}"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
+        echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}", "drifted": '"${{ steps.atmos-plan.outputs.changes }}"', "error": '"${{ steps.atmos-plan.outputs.error }}"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
 
     - name: Publish Summary or Generate GitHub Issue Description for Drift Detection
       id: summary
