@@ -76,6 +76,8 @@ jobs:
           echo "file_md_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
           
           echo "file_md=$(cat ./metadata/issue-description-plat-ue2-sandbox-foobar-fail.md | jq -Rs .)" >> $GITHUB_OUTPUT
+          
+          echo "file_json=$(cat ./metadata/plat-ue2-sandbox-foobar-fail.metadata.json | jq -Rs . )" >> $GITHUB_OUTPUT          
 
       - uses: nick-fields/assert-action@v1
         with:
@@ -96,6 +98,12 @@ jobs:
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: "${{ fromJSON(steps.metadata.outputs.file_md) }}"
+
+      - uses: nick-fields/assert-action@v1
+        with:
+          actual: "${{ fromJSON(steps.metadata.outputs.file_json) }}"
+          expected: |
+            { "stack": "plat-ue2-sandbox", "component": "foobar-fail", "componentPath": "components/terraform/foobar", "drifted": false, "error": true }
 
       - uses: nick-fields/assert-action@v1
         with:
