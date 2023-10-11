@@ -248,7 +248,7 @@ runs:
       shell: bash
       working-directory: ./${{ inputs.component-path }}
       run: |
-        set +e
+        set -e
         wget -q https://github.com/pcasteran/terraform-graph-beautifier/releases/download/v0.3.3/terraform-graph-beautifier_0.3.3_linux_amd64.tar.gz
         tar xvf terraform-graph-beautifier_0.3.3_linux_amd64.tar.gz
         chmod +x terraform-graph-beautifier
