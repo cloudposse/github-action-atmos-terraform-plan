@@ -77,7 +77,7 @@ jobs:
           
           echo "file_md=$(cat ./metadata/issue-description-plat-ue2-sandbox-foobar-fail.md | jq -Rs .)" >> $GITHUB_OUTPUT
           
-          echo "file_json=$(cat ./metadata/plat-ue2-sandbox-foobar-fail.metadata.json)" >> $GITHUB_OUTPUT          
+          echo "file_json=$(cat ./metadata/plat-ue2-sandbox-foobar-fail.metadata.json | jq -Rs . )" >> $GITHUB_OUTPUT          
 
       - uses: nick-fields/assert-action@v1
         with:
