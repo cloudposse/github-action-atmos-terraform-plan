@@ -251,11 +251,11 @@ runs:
         set +e
         wget -q https://github.com/pcasteran/terraform-graph-beautifier/releases/download/v0.3.3/terraform-graph-beautifier_0.3.3_linux_amd64.tar.gz
         tar xvf terraform-graph-beautifier_0.3.3_linux_amd64.tar.gz
-        echo $?
         chmod +x terraform-graph-beautifier
         ./terraform-graph-beautifier --help
-        terraform graph -plan="${{ steps.vars.outputs.plan_file }}" | node ${{ github.action_path }}/scripts/index.mjs ${{ github.action_path }}/scripts/mermaid_template.md >> $GITHUB_STEP_SUMMARY
+        terraform graph -plan="${{ steps.vars.outputs.plan_file }}" | ./terraform-graph-beautifier --output-type=graphviz --embed-modules=false
 
+        #  | node ${{ github.action_path }}/scripts/index.mjs ${{ github.action_path }}/scripts/mermaid_template.md >> $GITHUB_STEP_SUMMARY
         # | ./terraform-graph-beautifier --output-type=graphviz --embed-modules=false | node ${{ github.action_path }}/scripts/index.mjs ${{ github.action_path }}/scripts/mermaid_template.md >> $GITHUB_STEP_SUMMARY
 
     - name: Convert PLANFILE to JSON
