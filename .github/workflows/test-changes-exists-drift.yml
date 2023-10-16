@@ -83,7 +83,7 @@ jobs:
           
           echo "file_json=$(cat ./metadata/plat-ue2-sandbox-foobar_changes.metadata.json | jq -Rs . )" >> $GITHUB_OUTPUT
           
-          echo files_json_count=$(ls ./metadata/*.metadata.json) >> $GITHUB_OUTPUT
+          echo files_json_count=$(ls -lA "./metadata/*.metadata.json") >> $GITHUB_OUTPUT
 
       - uses: nick-fields/assert-action@v1
         with:
