@@ -112,7 +112,7 @@ jobs:
 
       - uses: nick-fields/assert-action@v1
         with:
-          actual: "${{ fromJSON(steps.metadata.outputs.files_json_count) }}"
+          actual: "${{ steps.metadata.outputs.files_json_count }}"
           expected: "10"
 
       - uses: nick-fields/assert-action@v1
