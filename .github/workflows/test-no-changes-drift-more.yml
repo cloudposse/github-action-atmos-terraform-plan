@@ -74,12 +74,12 @@ jobs:
       - uses: nick-fields/assert-action@v1
         with:
           actual: "${{ steps.metadata.outputs.dir_exists }}"
-          expected: "1"
+          expected: "0"
 
       - uses: nick-fields/assert-action@v1
         with:
           actual: "${{ steps.metadata.outputs.file_exists }}"
-          expected: "1"
+          expected: "0"
 
       - uses: nick-fields/assert-action@v1
         with:
