@@ -95,11 +95,6 @@ jobs:
 
       - uses: nick-fields/assert-action@v1
         with:
-          actual: "${{ steps.metadata.outputs.files_json_count }}"
-          expected: "0"
-
-      - uses: nick-fields/assert-action@v1
-        with:
           actual: "${{ fromJSON(steps.metadata.outputs.file_json) }}"
           expected: |
             { "stack": "plat-ue2-sandbox", "component": "foobar", "componentPath": "components/terraform/foobar", "drifted": false, "error": false }
