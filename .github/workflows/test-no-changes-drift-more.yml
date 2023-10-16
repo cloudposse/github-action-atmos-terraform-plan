@@ -90,6 +90,11 @@ jobs:
 
       - uses: nick-fields/assert-action@v1
         with:
+          actual: "${{ steps.metadata.outputs.file_md_exists }}"
+          expected: "1"
+
+      - uses: nick-fields/assert-action@v1
+        with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: "${{ fromJSON(steps.metadata.outputs.file_md) }}"
 
