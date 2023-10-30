@@ -91,7 +91,7 @@ runs:
       uses: actions/checkout@v4
 
     - name: Install Terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{ inputs.terraform-version }}
         terraform_wrapper: false
