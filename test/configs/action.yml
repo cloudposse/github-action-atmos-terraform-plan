@@ -283,7 +283,7 @@ runs:
           TERRAFORM_RESULT=$?
           
           set -e
-        
+
           if [[ "${TERRAFORM_RESULT}" == "0" ]]; then
             # sort and remove timestamp
             jq 'if has("relevant_attributes") then .relevant_attributes |= sort_by(.resource, .attribute) else . end' "$PLAN_FILE.json" | jq 'del(.timestamp)' > current.json
@@ -300,6 +300,7 @@ runs:
               NEW_PLAN_FOUND=true
             fi
           else
+            # If terraform show failed that means old plan is wrong        
             NEW_PLAN_FOUND=true
           fi
         else
