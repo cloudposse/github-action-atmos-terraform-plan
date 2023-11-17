@@ -98,8 +98,6 @@ runs:
 
     - name: Install Atmos
       uses: cloudposse/github-action-setup-atmos@v1
-      env:
-       ATMOS_CLI_CONFIG_PATH: ${{inputs.atmos-config-path}}
       with:
         atmos-version: ${{ inputs.atmos-version }}
         token: ${{ inputs.token }}
@@ -170,8 +168,6 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       id: atmos-plan
       shell: bash
-      env:
-        ATMOS_BASE_PATH: ${{ github.workspace }}
       run: |
         set +e
         
