@@ -266,6 +266,12 @@ runs:
         bucketName: ${{ inputs.terraform-state-bucket }}
         failOnMissingPlan: "false"
 
+    - if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
+      shell: bash
+      run: |-
+        cat ${{ steps.vars.outputs.plan_file }}.stored
+        
+
     - name: Compare Current and Stored PLANFILEs
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       id: new-plan
