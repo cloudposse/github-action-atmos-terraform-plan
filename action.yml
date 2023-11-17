@@ -173,6 +173,8 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       id: atmos-plan
       shell: bash
+      env:
+        ATMOS_BASE_PATH: ${{ github.workspace }}
       run: |
         set +e
         
