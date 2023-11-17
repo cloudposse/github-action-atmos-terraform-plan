@@ -43,6 +43,7 @@ jobs:
           enable-infracost: true
           infracost-api-key: ${{ secrets.INFRACOST_API_KEY }}
           debug: true
+          atmos-config-path: ./test/configs/atmos.yaml
 
     outputs:
       result: ${{ steps.current.outcome }}
