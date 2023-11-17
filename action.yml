@@ -111,6 +111,8 @@ runs:
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v0
       id: atmos-github-actions-enabled
+      env:
+        ATMOS_BASE_PATH: ${{ github.workspace }}
       with:
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
