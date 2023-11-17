@@ -87,6 +87,11 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Set vars
+      shell: bash
+      run: |-
+        echo "ATMOS_CLI_CONFIG_PATH=${{inputs.atmos-config-path}}" >> $GITHUB_ENV
+
     - name: Checkout
       uses: actions/checkout@v4
 
