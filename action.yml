@@ -90,7 +90,7 @@ runs:
     - name: Set vars
       shell: bash
       run: |-
-        echo "ATMOS_CLI_CONFIG_PATH=$(pwd ${{inputs.atmos-config-path}})" >> $GITHUB_ENV
+        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{inputs.atmos-config-path}})" >> $GITHUB_ENV
         echo "ATMOS_BASE_PATH=${{ github.workspace }}" >> $GITHUB_ENV
 
     - name: Checkout
