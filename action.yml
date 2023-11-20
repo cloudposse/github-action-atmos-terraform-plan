@@ -87,14 +87,14 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
     - name: Set vars
       shell: bash
       run: |-
         echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{inputs.atmos-config-path}})" >> $GITHUB_ENV
         echo "ATMOS_BASE_PATH=${{ github.workspace }}" >> $GITHUB_ENV
-
-    - name: Checkout
-      uses: actions/checkout@v4
 
     - name: Install Terraform
       uses: hashicorp/setup-terraform@v2
