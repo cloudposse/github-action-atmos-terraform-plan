@@ -45,7 +45,7 @@ inputs:
   atmos-config-path:
     description: "The path to the atmos.yaml file"
     required: false
-    default: atmos.yaml
+    default: ./
   terraform-version:
     description: 'The version of Terraform CLI to install. Instead of full version string you can also specify constraint string starting with "<" (for example `<1.13.0`) to install the latest version satisfying the constraint. A value of `latest` will install the latest version of Terraform CLI. Defaults to `latest`.'
     default: 'latest'
@@ -91,6 +91,7 @@ runs:
       shell: bash
       run: |-
         echo "ATMOS_CLI_CONFIG_PATH=${{inputs.atmos-config-path}}" >> $GITHUB_ENV
+        echo "ATMOS_BASE_PATH=${{ github.workspace }}" >> $GITHUB_ENV
 
     - name: Checkout
       uses: actions/checkout@v4
@@ -111,8 +112,6 @@ runs:
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v0
       id: atmos-github-actions-enabled
-      env:
-        ATMOS_BASE_PATH: ${{ github.workspace }}
       with:
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
@@ -175,8 +174,6 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       id: atmos-plan
       shell: bash
-      env:
-        ATMOS_BASE_PATH: ${{ github.workspace }}
       run: |
         set +e
         
