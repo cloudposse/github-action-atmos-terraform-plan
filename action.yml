@@ -175,7 +175,7 @@ runs:
       id: atmos-plan
       shell: bash
       env:
-        ATMOS_CLI_CONFIG_PATH: ${{inputs.atmos-config-path}}
+        ATMOS_CLI_CONFIG_PATH: ${{ github.workspace }}/${{inputs.atmos-config-path}}
         ATMOS_BASE_PATH: ${{ github.workspace }}
       run: |
         set +e
