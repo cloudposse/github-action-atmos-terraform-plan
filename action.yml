@@ -90,7 +90,7 @@ runs:
     - name: Set vars
       shell: bash
       run: |-
-        echo "ATMOS_CLI_CONFIG_PATH=${{inputs.atmos-config-path}}" >> $GITHUB_ENV
+        echo "ATMOS_CLI_CONFIG_PATH=$(pwd ${{inputs.atmos-config-path}})" >> $GITHUB_ENV
         echo "ATMOS_BASE_PATH=${{ github.workspace }}" >> $GITHUB_ENV
 
     - name: Checkout
@@ -174,9 +174,6 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       id: atmos-plan
       shell: bash
-      env:
-        ATMOS_CLI_CONFIG_PATH: ${{ github.workspace }}/${{inputs.atmos-config-path}}
-        ATMOS_BASE_PATH: ${{ github.workspace }}
       run: |
         set +e
         
