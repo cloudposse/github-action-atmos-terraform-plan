@@ -97,7 +97,7 @@ runs:
         echo "ATMOS_BASE_PATH=${{ github.workspace }}" >> $GITHUB_ENV
 
     - name: Install Terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{ inputs.terraform-version }}
         terraform_wrapper: false
