@@ -24,7 +24,7 @@ jobs:
 
       - uses: finnp/create-file-action@2.0.0
         env:
-          FILE_NAME: ./atmos-gitops.yaml
+          FILE_NAME: /tmp/atmos-gitops.yaml
           FILE_DATA: |-
             atmos-version: 1.45.3
             atmos-config-path: ./tests/
@@ -44,4 +44,4 @@ jobs:
           component: "foobar"
           stack: "plat-ue2-sandbox"
           component-path: "components/terraform/foobar"
-          atmos-gitops-config-path: "./atmos-gitops.yaml"
+          atmos-gitops-config-path: "/tmp/atmos-gitops.yaml"
