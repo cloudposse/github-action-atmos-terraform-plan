@@ -11,9 +11,6 @@ inputs:
   stack:
     description: "The stack name for the given component."
     required: true
-  component-path:
-    description: "The path to the base component. Atmos defines this value as component_path."
-    required: true
   sha:
     description: "SHA to use"
     required: true
@@ -97,16 +94,13 @@ runs:
         settings-path: settings.github.actions_enabled
 
     - name: Find component path
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       uses: cloudposse/github-action-atmos-get-setting@retrive-general-settings
       id: component-path
       with:
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
         settings-path: component_info.component_path
-
-    - shell: bash
-      run: |
-        echo "${{ steps.component-path.outputs.value }}"
 
     - name: Install tfcmt
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
@@ -127,10 +121,11 @@ runs:
       shell: bash
       run: |
         STACK_NAME=$(echo "${{ inputs.stack }}" | sed 's#/#_#g')
+        COMPONENT_PATH=${{ steps.component-path.outputs.value }}
         COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
         COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
-        PLAN_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/$COMPONENT_SLUG-${{ inputs.sha }}.planfile"
-        LOCK_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/.terraform.lock.hcl"
+        PLAN_FILE="$( realpath ${COMPONENT_PATH})/$COMPONENT_SLUG-${{ inputs.sha }}.planfile"
+        LOCK_FILE="$( realpath ${COMPONENT_PATH})/.terraform.lock.hcl"
 
         ISSUE_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/issue-description-${COMPONENT_SLUG}.md"
         STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md"
@@ -139,6 +134,7 @@ runs:
         echo "stack_name=${STACK_NAME}" >> $GITHUB_OUTPUT
         echo "component_name=${COMPONENT_NAME}" >> $GITHUB_OUTPUT
         echo "component_slug=${COMPONENT_SLUG}" >> $GITHUB_OUTPUT
+        echo "component_path=${COMPONENT_PATH}" >> $GITHUB_OUTPUT
         echo "plan_file=${PLAN_FILE}" >> $GITHUB_OUTPUT
         echo "lock_file=${LOCK_FILE}" >> $GITHUB_OUTPUT
 
@@ -169,7 +165,7 @@ runs:
           -repo "${{ github.event.repository.name }}" \
           -var "target:${{ steps.vars.outputs.component_slug }}" \
           -var "component:${{ inputs.component }}" \
-          -var "componentPath:${{ inputs.component-path }}" \
+          -var "componentPath:${{ steps.vars.outputs.component_path }}" \
           -var "commitSHA:${{ inputs.sha }}" \
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
@@ -229,7 +225,7 @@ runs:
     - name: Convert PLANFILE to JSON
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       shell: bash
-      working-directory: ./${{ inputs.component-path }}
+      working-directory: ./${{ steps.vars.outputs.component_path }}
       run: |
         terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
@@ -261,7 +257,7 @@ runs:
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       id: new-plan
       shell: bash
-      working-directory: ./${{ inputs.component-path }}
+      working-directory: ./${{ steps.vars.outputs.component_path }}
       run: |
         PLAN_FILE="${{ steps.vars.outputs.plan_file }}"
         PLAN_FILE_STORED="${{ steps.vars.outputs.plan_file }}.stored"
@@ -381,12 +377,12 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && inputs.drift-detection-mode-enabled == 'true' }}
       shell: bash
       run: |
-        echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}", "drifted": '"${{ steps.atmos-plan.outputs.changes }}"', "error": '"${{ steps.atmos-plan.outputs.error }}"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
+        echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ steps.vars.outputs.component_path }}", "drifted": '"${{ steps.atmos-plan.outputs.changes }}"', "error": '"${{ steps.atmos-plan.outputs.error }}"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
 
     - name: Publish Summary or Generate GitHub Issue Description for Drift Detection
       id: summary
       shell: bash
-      working-directory: ./${{ inputs.component-path }}
+      working-directory: ./${{ steps.vars.outputs.component_path }}
       run: |
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
           STEP_SUMMARY_FILE="${{ steps.vars.outputs.issue_file }}"
