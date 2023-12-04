@@ -155,6 +155,7 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       id: atmos-plan
       shell: bash
+      working-directory: ./
       run: |
         set +e
         
@@ -165,7 +166,7 @@ runs:
           -repo "${{ github.event.repository.name }}" \
           -var "target:${{ steps.vars.outputs.component_slug }}" \
           -var "component:${{ inputs.component }}" \
-          -var "componentPath:${{ steps.vars.outputs.component_path }}2" \
+          -var "componentPath:${{ steps.vars.outputs.component_path }}" \
           -var "commitSHA:${{ inputs.sha }}" \
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
