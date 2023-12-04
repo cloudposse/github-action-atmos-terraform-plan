@@ -96,6 +96,18 @@ runs:
         stack: ${{ inputs.stack }}
         settings-path: github.actions_enabled
 
+    - name: Find component path
+      uses: cloudposse/github-action-atmos-get-setting@v0
+      id: component-path
+      with:
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        settings-path: component-path
+
+    - shell: bash
+      run: |
+        echo "${{ steps.component-path.outputs.value }}"
+
     - name: Install tfcmt
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       uses: jaxxstorm/action-install-gh-release@v1.10.0
