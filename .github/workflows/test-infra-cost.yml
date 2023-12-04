@@ -27,23 +27,33 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
+      - shell: bash
+        run: |
+          mkdir -p ${{ runner.temp }}
+          cat > ${{ runner.temp }}/atmos-gitops.yaml <<EOL
+          atmos-version: 1.45.3
+          atmos-config-path: ./tests/
+          terraform-state-bucket: ${{ secrets.TERRAFORM_STATE_BUCKET }}
+          terraform-state-table: ${{ secrets.TERRAFORM_STATE_TABLE }}
+          terraform-state-role: ${{ secrets.TERRAFORM_STATE_ROLE }}
+          terraform-plan-role: ${{ secrets.TERRAFORM_PLAN_ROLE }}
+          terraform-version: 1.5.2
+          enable-infracost: true          
+          aws-region: ${{ env.AWS_REGION }}
+          sort-by: .stack_slug
+          group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")          
+          EOL
+
       - name: Plan Atmos Component
         id: current
         uses: ./
         with:
           component: "foobar/changes"
           stack: "plat-ue2-sandbox"
-          component-path: "components/terraform/foobar"
-          terraform-plan-role: ${{ secrets.TERRAFORM_PLAN_ROLE }}
-          terraform-state-role: ${{ secrets.TERRAFORM_STATE_ROLE }}
-          terraform-state-bucket: ${{ secrets.TERRAFORM_STATE_BUCKET }}
-          terraform-state-table: ${{ secrets.TERRAFORM_STATE_TABLE }}
-          aws-region: ${{ env.AWS_REGION }}
           sha: 55bfef95601890afd80709da39a3ee5e6b4b0d32
-          enable-infracost: true
           infracost-api-key: ${{ secrets.INFRACOST_API_KEY }}
           debug: true
-          atmos-config-path: ./test/configs/
+          atmos-gitops-config-path: "${{ runner.temp }}/atmos-gitops.yaml"
 
     outputs:
       result: ${{ steps.current.outcome }}

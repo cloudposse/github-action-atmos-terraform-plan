@@ -38,10 +38,6 @@ jobs:
           group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")          
           EOL
 
-      - shell: bash
-        run: |
-          cat ${{ runner.temp }}/atmos-gitops.yaml
-
       - name: Plan Atmos Component
         uses: ./
         with:
