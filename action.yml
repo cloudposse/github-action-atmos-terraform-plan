@@ -156,10 +156,9 @@ runs:
       id: atmos-plan
       shell: bash
       run: |
-        export
         set +e
         
-        export
+        echo "$(pwd)"
         
         TERRAFORM_OUTPUT=$( \
           tfcmt \
