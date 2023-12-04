@@ -158,7 +158,11 @@ runs:
       run: |
         set +e
         
-        echo "$(pwd)"
+        export
+        
+        echo "-----------------------------------------------------------"
+        
+        echo "$(export)"
         
         TERRAFORM_OUTPUT=$( \
           tfcmt \
