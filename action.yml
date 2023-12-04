@@ -165,7 +165,7 @@ runs:
           -repo "${{ github.event.repository.name }}" \
           -var "target:${{ steps.vars.outputs.component_slug }}" \
           -var "component:${{ inputs.component }}" \
-          -var "componentPath:${{ steps.vars.outputs.component_path }}" \
+          -var "componentPath:${{ steps.vars.outputs.component_path }}2" \
           -var "commitSHA:${{ inputs.sha }}" \
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
