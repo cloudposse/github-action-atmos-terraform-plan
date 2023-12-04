@@ -47,5 +47,4 @@ jobs:
         with:
           component: "foobar"
           stack: "plat-ue2-sandbox"
-          component-path: "components/terraform/foobar"
           atmos-gitops-config-path: "${{ runner.temp }}/atmos-gitops.yaml"
