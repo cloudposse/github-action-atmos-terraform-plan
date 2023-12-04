@@ -24,7 +24,7 @@ jobs:
 
       - uses: finnp/create-file-action@2.0.0
         env:
-          FILE_NAME: /tmp/atmos-gitops.yaml
+          FILE_NAME: ./atmos-gitops.yaml
           FILE_DATA: |-
             atmos-version: 1.45.3
             atmos-config-path: ./tests/
@@ -39,7 +39,7 @@ jobs:
 
       - shell: bash
         run: |
-          cat /tmp/atmos-gitops.yaml
+          cat ./atmos-gitops.yaml
 
       - name: Plan Atmos Component
         uses: ./
