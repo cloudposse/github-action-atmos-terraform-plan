@@ -155,9 +155,11 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       id: atmos-plan
       shell: bash
-      working-directory: ./
       run: |
+        pwd
         set +e
+        
+        pwd
         
         TERRAFORM_OUTPUT=$( \
           tfcmt \
