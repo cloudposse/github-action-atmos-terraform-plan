@@ -53,7 +53,7 @@ jobs:
           sha: da39a3ee5e6b4b0d3255bfef95601890afd80709
           drift-detection-mode-enabled: true
           atmos-gitops-config-path: "${{ runner.temp }}/atmos-gitops.yaml"
-          
+
     outputs:
       result: ${{ steps.current.outcome }}
       summary: ${{ steps.current.outputs.summary }}
