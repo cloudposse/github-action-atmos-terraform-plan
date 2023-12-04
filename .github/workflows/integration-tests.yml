@@ -24,14 +24,22 @@ jobs:
 
       - uses: finnp/create-file-action@2.0.0
         env:
-          FILE_NAME: ${{ env.RUNNER_TEMP }}/atmos-gitops.yaml
+          FILE_NAME: /tmp/atmos-gitops.yaml
           FILE_DATA: |-
             atmos-version: 1.45.3
             atmos-config-path: ./tests/
+            terraform-state-bucket: ${{ secrets.TERRAFORM_STATE_BUCKET }}
+            terraform-state-table: ${{ secrets.TERRAFORM_STATE_TABLE }}
+            terraform-state-role: ${{ secrets.TERRAFORM_STATE_ROLE }}
+            terraform-plan-role: ${{ secrets.TERRAFORM_PLAN_ROLE }}
             terraform-version: 1.5.2
             aws-region: ${{ env.AWS_REGION }}
             sort-by: .stack_slug
             group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
+
+      - shell: bash
+        run: |
+          cat /tmp/atmos-gitops.yaml
 
       - name: Plan Atmos Component
         uses: ./
