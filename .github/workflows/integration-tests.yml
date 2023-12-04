@@ -22,6 +22,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
+      - shell: bash
+        run: |
+          mkdir -p ${{ runner.temp }}
+
       - uses: finnp/create-file-action@2.0.0
         env:
           FILE_NAME: ${{ runner.temp }}/atmos-gitops.yaml
