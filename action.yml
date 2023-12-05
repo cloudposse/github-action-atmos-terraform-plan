@@ -159,12 +159,6 @@ runs:
       run: |
         set +e
         
-        export
-        
-        echo "-----------------------------------------------------------"
-        
-        echo "$(export)"
-        
         TERRAFORM_OUTPUT=$( \
           tfcmt \
           --config ${{ github.action_path }}/config/summary.yaml \
