@@ -114,6 +114,7 @@ runs:
     - name: Set atmos cli base path vars
       shell: bash
       run: |-
+        # Set ATMOS_BASE_PATH allow `cloudposse/utils` provider to read atmos config from the correct path 
         echo "ATMOS_BASE_PATH=$(realpath ${{ steps.base-path.outputs.value }})" >> $GITHUB_ENV
 
     - name: Install tfcmt
