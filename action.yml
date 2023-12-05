@@ -226,6 +226,7 @@ runs:
     - name: Convert PLANFILE to JSON
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       shell: bash
+      working-directory: ${{ steps.vars.outputs.component_path }}
       run: |
         terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
