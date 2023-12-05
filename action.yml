@@ -67,11 +67,10 @@ runs:
         patterns: |
           - ${{ inputs.atmos-gitops-config-path }}
 
-    - name: Set vars
+    - name: Set atmos cli config path vars
       shell: bash
       run: |-
         echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ steps.config.outputs.atmos-config-path }})" >> $GITHUB_ENV
-        echo "ATMOS_BASE_PATH=${{ github.workspace }}" >> $GITHUB_ENV        
 
     - name: Install Terraform
       uses: hashicorp/setup-terraform@v2
@@ -102,6 +101,20 @@ runs:
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
         settings-path: component_info.component_path
+
+    - name: Find atmos cli base path
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      uses: cloudposse/github-action-atmos-get-setting@retrive-general-settings
+      id: base-path
+      with:
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        settings-path: atmos_cli_config.base_path
+
+    - name: Set atmos cli base path vars
+      shell: bash
+      run: |-
+        echo "ATMOS_BASE_PATH=$(realpath ${{ steps.base-path.outputs.value }})" >> $GITHUB_ENV
 
     - name: Install tfcmt
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
@@ -226,7 +239,7 @@ runs:
     - name: Convert PLANFILE to JSON
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       shell: bash
-      working-directory: ${{ steps.vars.outputs.component_path }}
+      working-directory: ./${{ steps.vars.outputs.component_path }}
       run: |
         terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
