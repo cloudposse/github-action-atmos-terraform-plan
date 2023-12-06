@@ -74,7 +74,7 @@ jobs:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
             ## Plan Failed for `foobar-fail` in `plat-ue2-sandbox`
-            
+
             <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
             
             [![failed](https://shields.io/badge/PLAN-FAILED-ff0000?style=for-the-badge)](#user-content-result-plat-ue2-sandbox-foobar-fail)
@@ -95,8 +95,8 @@ jobs:
             ```hcl
             Error: Invalid function argument
             
-              on main.tf line 10, in locals:
-              10:   failure = var.enable_failure ? file("Failed because failure mode is enabled") : null
+              on main.tf line 16, in locals:
+              16:   failure = var.enable_failure ? file("Failed because failure mode is enabled") : null
                 ├────────────────
                 │ while calling file(path)
             
@@ -113,7 +113,6 @@ jobs:
             
                 
             </details>
-
   teardown:
     runs-on: ubuntu-latest
     needs: [assert]
