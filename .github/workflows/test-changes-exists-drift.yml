@@ -126,53 +126,60 @@ jobs:
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
-            ## Drift Detection Failed for `foobar-fail` in `plat-ue2-sandbox`!
+            ## Drift Detected for `foobar/changes` in `plat-ue2-sandbox`
             
             
             
             <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
             
-            
-            [![failed](https://shields.io/badge/PLAN-FAILED-ff0000?style=for-the-badge)](#user-content-result-plat-ue2-sandbox-foobar-fail)
-            
+            [![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#user-content-create-plat-ue2-sandbox-foobar_changes)
             
             
             
             
-            <details><summary><a id="result-plat-ue2-sandbox-foobar-fail" />:warning: Error summary</summary>
+            
+            <details><summary><a id="result-plat-ue2-sandbox-foobar_changes" />Plan: 1 to add, 0 to change, 0 to destroy.</summary>
             
             <br/>      
             To reproduce this locally, run:<br/><br/>
             
             ```shell
-            atmos terraform plan foobar-fail -s plat-ue2-sandbox
+            atmos terraform plan foobar/changes -s plat-ue2-sandbox
             ```
-            
-            ---
-            
-            ```hcl
-            Error: Invalid function argument
-            
-              on main.tf line 16, in locals:
-              16:   failure = var.enable_failure ? file("Failed because failure mode is enabled") : null
-                ├────────────────
-                │ while calling file(path)
-            
-            Invalid value for "path" parameter: no file exists at "Failed because failure
-            mode is enabled"; this function works only with files that are distributed as
-            part of the configuration source code, so if this file will be created by a
-            resource in this configuration you must instead obtain this result from an
-            attribute of that resource.
-            exit status 1
-            ```
-            
                 
             
             
+                
+            ---
+            ### <a id="create-plat-ue2-sandbox-foobar_changes" />Create
+            ```diff
+            + random_id.foo
+            ```
                 
             </details>
             
             
+            <details><summary>Terraform <strong>Plan</strong> Summary</summary>
+            
+            ```hcl
+            
+              # random_id.foo will be created
+              + resource "random_id" "foo" {
+                  + b64_std     = (known after apply)
+                  + b64_url     = (known after apply)
+                  + byte_length = 8
+                  + dec         = (known after apply)
+                  + hex         = (known after apply)
+                  + id          = (known after apply)
+                  + keepers     = {
+                      + "seed" = "foo-plat-ue2-sandbox-blue"
+                    }
+                }
+            
+            Plan: 1 to add, 0 to change, 0 to destroy.
+            ```
+            
+            </details>
                   
             
             
@@ -182,7 +189,7 @@ jobs:
             
             ```json
             {
-              "component": "foobar-fail",
+              "component": "foobar/changes",
               "stack": "plat-ue2-sandbox",
               "componentPath": "components/terraform/foobar",
               "commitSHA": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
