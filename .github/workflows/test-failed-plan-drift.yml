@@ -137,8 +137,8 @@ jobs:
             ```hcl
             Error: Invalid function argument
             
-              on main.tf line 10, in locals:
-              10:   failure = var.enable_failure ? file("Failed because failure mode is enabled") : null
+              on main.tf line 16, in locals:
+              16:   failure = var.enable_failure ? file("Failed because failure mode is enabled") : null
                 ├────────────────
                 │ while calling file(path)
             
