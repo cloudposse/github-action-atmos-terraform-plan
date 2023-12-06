@@ -7,7 +7,7 @@ resource "random_id" "foo" {
 
   lifecycle {
     ignore_changes = [
-      keepers.timestamp
+      keepers["timestamp"]
     ]
   }
 }
