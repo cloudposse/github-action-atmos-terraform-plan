@@ -4,6 +4,12 @@ resource "random_id" "foo" {
     seed = "${module.this.id}-${var.example}"
   }
   byte_length = 8
+
+  lifecycle {
+    ignore_changes = [
+      keepers.timestamp
+    ]
+  }
 }
 
 locals {
