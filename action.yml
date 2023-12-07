@@ -60,7 +60,7 @@ runs:
       uses: actions/checkout@v4
 
     - name: config
-      uses: blablacar/action-config-levels@dc8ddbca36875e29f870e53bcc1160b7000ff5b2
+      uses: cloudposse/github-action-config-levels@nodejs20
       id: config
       with:
         output_properties: true
@@ -112,6 +112,7 @@ runs:
         settings-path: atmos_cli_config.base_path
 
     - name: Set atmos cli base path vars
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       shell: bash
       run: |-
         # Set ATMOS_BASE_PATH allow `cloudposse/utils` provider to read atmos config from the correct path 
