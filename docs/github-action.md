@@ -4,7 +4,7 @@
 
 | Name | Description | Default | Required |
 |------|-------------|---------|----------|
-| atmos-config-path | The path to the atmos.yaml file | atmos.yaml | false |
+| atmos-config-path | The path to the atmos.yaml file | ./ | false |
 | atmos-version | Atmos version to use for vendoring. Default 'latest' | latest | false |
 | aws-region | AWS region for assuming identity. | us-east-1 | false |
 | branding-logo-image | Branding logo image url | https://cloudposse.com/logo-300x69.svg | false |
