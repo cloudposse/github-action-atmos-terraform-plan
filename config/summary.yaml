@@ -93,8 +93,9 @@ templates:
 
   deletion_warning: |
     {{if .HasDestroy}}
-    ### :warning: Resource Deletion will happen :warning:
-    This plan contains resource delete operation. Please check the plan result very carefully!
+    > [!CAUTION]
+    **Terraform will delete resources!** 
+    This plan contains resource delete operations. Please check the plan result very carefully.
     {{end}}
 
   change_inside_terraform: |
