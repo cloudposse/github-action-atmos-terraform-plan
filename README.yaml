@@ -53,6 +53,26 @@ usage: |-
   In order to store Terraform State, we configure an S3 Bucket to store plan files and a DynamoDB table to track plan metadata. Both will need to be deployed before running
   this action. For more on setting up those components, see the `gitops` component (__documentation pending__). This action will then use the [github-action-terraform-plan-storage](https://github.com/cloudposse/github-action-terraform-plan-storage) action to update these resources.
 
+  ### Config
+
+  The action expects the atmos gitops configuration file to be present in the repository in `./.github/config/atmos-gitops.yaml`.
+  The config should have the following structure:
+  
+  ```yaml
+    atmos-version: 1.45.3
+    atmos-config-path: ./rootfs/usr/local/etc/atmos/
+    terraform-state-bucket: cptest-core-ue2-auto-gitops
+    terraform-state-table: cptest-core-ue2-auto-gitops
+    terraform-state-role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
+    terraform-plan-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+    terraform-apply-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+    terraform-version: 1.5.2
+    aws-region: us-east-2
+    enable-infracost: false
+    sort-by: .stack_slug
+    group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")  
+  ```
+
   ### Workflow example
 
   ```yaml
@@ -90,6 +110,54 @@ usage: |-
               aws-region: "us-east-2"
 
   ```
+  
+  ### Migrate from `v1` to `v2`
+  
+  `v2` drop `component-path` variable. Now it fetches from `atmos.yaml` file automatically.
+  
+  `v2` moved variables from `inputs` to atmos gitops config path `./.github/config/atmos-gitops.yaml`
+  
+  |         name             |
+  |--------------------------|
+  | `atmos-version`          |
+  | `atmos-config-path`      |
+  | `terraform-state-bucket` |
+  | `terraform-state-table`  |
+  | `terraform-state-role`   |
+  | `terraform-plan-role`    |
+  | `terraform-apply-role`   |
+  | `terraform-version`      |
+  | `aws-region`             |
+  | `enable-infracost`       |
+  
+  
+  If you want `v2` having the same behaviour as `v1` you should create config `./.github/config/atmos-gitops.yaml` with the same variables as in `v1` inputs.
+  
+  ```yaml
+    - name: Plan Atmos Component
+      uses: cloudposse/github-action-atmos-terraform-plan@v1
+      with:
+        component: "foobar"
+        stack: "plat-ue2-sandbox"
+        atmos-gitops-config-path: ./.github/config/atmos-gitops.yaml
+  ```
+  
+  same behaviour as
+  
+  ```yaml
+    - name: Plan Atmos Component
+      uses: cloudposse/github-action-atmos-terraform-plan@v1
+      with:
+        component: "foobar"
+        stack: "plat-ue2-sandbox"
+        component-path: "components/terraform/s3-bucket"
+        terraform-plan-role: "arn:aws:iam::111111111111:role/acme-core-gbl-identity-gitops"
+        terraform-state-bucket: "acme-core-ue2-auto-gitops"
+        terraform-state-role: "arn:aws:iam::999999999999:role/acme-core-ue2-auto-gitops-gha"
+        terraform-state-table: "acme-core-ue2-auto-gitops"
+        aws-region: "us-east-2"
+  ```
+  
 
 include:
   - "docs/github-action.md"
