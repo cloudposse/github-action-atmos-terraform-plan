@@ -86,7 +86,7 @@ runs:
         install-wrapper: false
 
     - name: Filter Atmos Settings Value
-      uses: cloudposse/github-action-atmos-get-setting@retrive-general-settings
+      uses: cloudposse/github-action-atmos-get-setting@v1
       id: atmos-github-actions-enabled
       with:
         component: ${{ inputs.component }}
@@ -95,7 +95,7 @@ runs:
 
     - name: Find component path
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      uses: cloudposse/github-action-atmos-get-setting@retrive-general-settings
+      uses: cloudposse/github-action-atmos-get-setting@v1
       id: component-path
       with:
         component: ${{ inputs.component }}
@@ -104,7 +104,7 @@ runs:
 
     - name: Find atmos cli base path
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      uses: cloudposse/github-action-atmos-get-setting@retrive-general-settings
+      uses: cloudposse/github-action-atmos-get-setting@v1
       id: base-path
       with:
         component: ${{ inputs.component }}
