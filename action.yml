@@ -110,7 +110,7 @@ runs:
         install-wrapper: false
 
     - name: Filter Atmos Settings Value
-      uses: cloudposse/github-action-atmos-get-setting@v0
+      uses: cloudposse/github-action-atmos-get-setting@v1
       id: atmos-github-actions-enabled
       with:
         component: ${{ inputs.component }}
