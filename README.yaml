@@ -73,6 +73,10 @@ usage: |-
     group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")  
   ```
 
+  [!IMPORTANT]
+  >**Please note!** the `terraform-state-*` parameters refer to the S3 Bucket and corresponding meta storage DynamoDB table used to store the Terraform Plan files, and not the "Terraform State". These parameters will be renamed in a subsequent release.  
+
+
   ### Workflow example
 
   ```yaml
@@ -113,10 +117,8 @@ usage: |-
   
   ### Migrating from `v1` to `v2`
   
-  `v2` drop `component-path` variable. Now it fetches from `atmos.yaml` file automatically.
-  
-  `v2` moved variables from `inputs` to atmos gitops config path `./.github/config/atmos-gitops.yaml`
-  
+  1.  `v2` drops the `component-path` variable and instead fetches if directly from the [`atmos.yaml` file](https://atmos.tools/cli/configuration/) automatically. Simply remove the `component-path` argument from your invocations of the `cloudposse/github-action-atmos-terraform-plan` action.
+  2.  `v2` moves most of the `inputs` to the Atmos GitOps config path `./.github/config/atmos-gitops.yaml`. Simply create this file, transfer your settings to it, then remove the corresponding arguments from your invocations of the `cloudposse/github-action-atmos-terraform-plan` action.
   |         name             |
   |--------------------------|
   | `atmos-version`          |
@@ -131,7 +133,7 @@ usage: |-
   | `enable-infracost`       |
   
   
-  If you want the same behavior in `v2`  as in`v1` you should create config `./.github/config/atmos-gitops.yaml` with the same variables as in `v1` inputs.
+  If you want the same behavior in `v2` as in `v1` you should create config `./.github/config/atmos-gitops.yaml` with the same variables as in `v1` inputs.
   
   ```yaml
     - name: Plan Atmos Component
@@ -142,7 +144,7 @@ usage: |-
         atmos-gitops-config-path: ./.github/config/atmos-gitops.yaml
   ```
   
-  same behaviour as
+  Which would produce the same behavior as in `v1`, doing this:
   
   ```yaml
     - name: Plan Atmos Component

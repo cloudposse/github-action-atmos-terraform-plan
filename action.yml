@@ -12,7 +12,7 @@ inputs:
     description: "The stack name for the given component."
     required: true
   sha:
-    description: "SHA to use"
+    description: "Commit SHA to plan. Default: github.sha"
     required: true
     default: "${{ github.event.pull_request.head.sha }}"
   drift-detection-mode-enabled:

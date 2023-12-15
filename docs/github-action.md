@@ -12,7 +12,7 @@
 | drift-detection-mode-enabled | Indicate whether this action is used in drift detection workflow. | false | true |
 | infracost-api-key | Infracost API key | N/A | false |
 | metadata-retention-days | Infracost API key | 1 | false |
-| sha | SHA to use | ${{ github.event.pull\_request.head.sha }} | true |
+| sha | Commit SHA to plan. Default: github.sha | ${{ github.event.pull\_request.head.sha }} | true |
 | stack | The stack name for the given component. | N/A | true |
 | token | Used to pull node distributions for Atmos from Cloud Posse's GitHub repository. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting. | ${{ github.server\_url == 'https://github.com' && github.token \|\| '' }} | false |
 
