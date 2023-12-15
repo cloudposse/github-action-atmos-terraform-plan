@@ -91,8 +91,8 @@ The config should have the following structure:
   group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")  
 ```
 
-[!IMPORTANT]
->**Please note!** the `terraform-state-*` parameters refer to the S3 Bucket and corresponding meta storage DynamoDB table used to store the Terraform Plan files, and not the "Terraform State". These parameters will be renamed in a subsequent release.  
+> [!IMPORTANT]
+> **Please note!** the `terraform-state-*` parameters refer to the S3 Bucket and corresponding meta storage DynamoDB table used to store the Terraform Plan files, and not the "Terraform State". These parameters will be renamed in a subsequent release.  
 
 
 ### Workflow example
