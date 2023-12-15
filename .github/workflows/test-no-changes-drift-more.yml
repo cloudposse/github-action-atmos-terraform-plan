@@ -67,6 +67,11 @@ jobs:
           expected: 'success'
           actual: "${{ needs.test.outputs.result }}"
 
+      - name: Sleep for 30 seconds
+        uses: kibertoad/wait-action@1.0.1
+        with:
+          time: '30s'
+          
       - name: Download Artifacts
         uses: actions/download-artifact@v3
 
