@@ -11,49 +11,18 @@ inputs:
   stack:
     description: "The stack name for the given component."
     required: true
-  component-path:
-    description: "The path to the base component. Atmos defines this value as component_path."
-    required: true
   sha:
-    description: "SHA to use"
+    description: "Commit SHA to plan. Default: github.sha"
     required: true
     default: "${{ github.event.pull_request.head.sha }}"
   drift-detection-mode-enabled:
     description: "Indicate whether this action is used in drift detection workflow."
     required: true
     default: 'false'
-  terraform-plan-role:
-    description: "The AWS role to be used to plan Terraform."
-    required: true
-  terraform-state-role:
-    description: "The AWS role to be used to retrieve the planfile from AWS."
-    required: true
-  terraform-state-bucket:
-    description: "The S3 Bucket where the planfiles are stored."
-    required: true
-  terraform-state-table:
-    description: "The DynamoDB table where planfile metadata is stored."
-    required: true
-  aws-region:
-    description: "AWS region for assuming identity."
+  atmos-gitops-config-path:
+    description: The path to the atmos-gitops.yaml file
     required: false
-    default: "us-east-1"
-  atmos-version:
-    description: "Atmos version to use for vendoring. Default 'latest'"
-    required: false
-    default: 'latest'
-  atmos-config-path:
-    description: "The path to the atmos.yaml file"
-    required: false
-    default: ./
-  terraform-version:
-    description: 'The version of Terraform CLI to install. Instead of full version string you can also specify constraint string starting with "<" (for example `<1.13.0`) to install the latest version satisfying the constraint. A value of `latest` will install the latest version of Terraform CLI. Defaults to `latest`.'
-    default: 'latest'
-    required: false
-  enable-infracost:
-    description: "Whether to enable infracost summary. Requires secret `infracost-api-key` to be specified. Default: 'false"
-    default: 'false'
-    required: false
+    default: ./.github/config/atmos-gitops.yaml
   infracost-api-key:
     description: "Infracost API key"
     required: false
@@ -90,32 +59,65 @@ runs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set vars
+    - name: config
+      uses: cloudposse/github-action-config-levels@nodejs20
+      id: config
+      with:
+        output_properties: true
+        patterns: |
+          - ${{ inputs.atmos-gitops-config-path }}
+
+    - name: Set atmos cli config path vars
       shell: bash
       run: |-
-        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{inputs.atmos-config-path}})" >> $GITHUB_ENV
-        echo "ATMOS_BASE_PATH=${{ github.workspace }}" >> $GITHUB_ENV
+        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ steps.config.outputs.atmos-config-path }})" >> $GITHUB_ENV
 
     - name: Install Terraform
       uses: hashicorp/setup-terraform@v2
       with:
-        terraform_version: ${{ inputs.terraform-version }}
+        terraform_version: ${{ steps.config.outputs.terraform-version }}
         terraform_wrapper: false
 
     - name: Install Atmos
       uses: cloudposse/github-action-setup-atmos@v1
       with:
-        atmos-version: ${{ inputs.atmos-version }}
+        atmos-version: ${{ steps.config.outputs.atmos-version }}
         token: ${{ inputs.token }}
         install-wrapper: false
 
     - name: Filter Atmos Settings Value
-      uses: cloudposse/github-action-atmos-get-setting@v0
+      uses: cloudposse/github-action-atmos-get-setting@v1
       id: atmos-github-actions-enabled
       with:
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
-        settings-path: github.actions_enabled
+        settings-path: settings.github.actions_enabled
+
+    - name: Find component path
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      uses: cloudposse/github-action-atmos-get-setting@v1
+      id: component-path
+      with:
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        settings-path: component_info.component_path
+
+    - name: Find atmos cli base path
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      uses: cloudposse/github-action-atmos-get-setting@v1
+      id: base-path
+      with:
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        settings-path: atmos_cli_config.base_path
+
+    - name: Set atmos cli base path vars
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      shell: bash
+      run: |-
+        # Set ATMOS_BASE_PATH allow `cloudposse/utils` provider to read atmos config from the correct path 
+        ATMOS_BASE_PATH="${{ steps.base-path.outputs.value }}"
+        echo "ATMOS_BASE_PATH=$(realpath ${ATMOS_BASE_PATH:-./})" >> $GITHUB_ENV
 
     - name: Install tfcmt
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
@@ -136,10 +138,11 @@ runs:
       shell: bash
       run: |
         STACK_NAME=$(echo "${{ inputs.stack }}" | sed 's#/#_#g')
+        COMPONENT_PATH=${{ steps.component-path.outputs.value }}
         COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
         COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
-        PLAN_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/$COMPONENT_SLUG-${{ inputs.sha }}.planfile"
-        LOCK_FILE="$GITHUB_WORKSPACE/${{ inputs.component-path}}/.terraform.lock.hcl"
+        PLAN_FILE="$( realpath ${COMPONENT_PATH})/$COMPONENT_SLUG-${{ inputs.sha }}.planfile"
+        LOCK_FILE="$( realpath ${COMPONENT_PATH})/.terraform.lock.hcl"
 
         ISSUE_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/issue-description-${COMPONENT_SLUG}.md"
         STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md"
@@ -148,6 +151,7 @@ runs:
         echo "stack_name=${STACK_NAME}" >> $GITHUB_OUTPUT
         echo "component_name=${COMPONENT_NAME}" >> $GITHUB_OUTPUT
         echo "component_slug=${COMPONENT_SLUG}" >> $GITHUB_OUTPUT
+        echo "component_path=${COMPONENT_PATH}" >> $GITHUB_OUTPUT
         echo "plan_file=${PLAN_FILE}" >> $GITHUB_OUTPUT
         echo "lock_file=${LOCK_FILE}" >> $GITHUB_OUTPUT
 
@@ -159,8 +163,8 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       uses: aws-actions/configure-aws-credentials@v4.0.1
       with:
-        aws-region: ${{ inputs.aws-region }}
-        role-to-assume: ${{ inputs.terraform-plan-role }}
+        aws-region: ${{ steps.config.outputs.aws-region }}
+        role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
         role-session-name: "atmos-terraform-plan-gitops"
         mask-aws-account-id: "no"
 
@@ -178,13 +182,13 @@ runs:
           -repo "${{ github.event.repository.name }}" \
           -var "target:${{ steps.vars.outputs.component_slug }}" \
           -var "component:${{ inputs.component }}" \
-          -var "componentPath:${{ inputs.component-path }}" \
+          -var "componentPath:${{ steps.vars.outputs.component_path }}" \
           -var "commitSHA:${{ inputs.sha }}" \
           -var "stack:${{ inputs.stack }}" \
           -var "job:${{ github.job }}" \
           -var "logoImage:${{ inputs.branding-logo-image }}" \
           -var "logoUrl:${{ inputs.branding-logo-url }}" \
-          -var "infracost_enabled:${{ inputs.enable-infracost }}" \
+          -var "infracost_enabled:${{ steps.config.outputs.enable-infracost }}" \
           -var "driftModeEnabled:${{ inputs.drift-detection-mode-enabled }}" \
           --output ${{ steps.vars.outputs.summary_file }} \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
@@ -238,7 +242,7 @@ runs:
     - name: Convert PLANFILE to JSON
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       shell: bash
-      working-directory: ./${{ inputs.component-path }}
+      working-directory: ./${{ steps.vars.outputs.component_path }}
       run: |
         terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
@@ -246,8 +250,8 @@ runs:
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       uses: aws-actions/configure-aws-credentials@v4.0.1
       with:
-        aws-region: ${{ inputs.aws-region }}
-        role-to-assume: ${{ inputs.terraform-state-role }}
+        aws-region: ${{ steps.config.outputs.aws-region }}
+        role-to-assume: ${{ steps.config.outputs.terraform-state-role }}
         role-session-name: "atmos-terraform-state-gitops"
         mask-aws-account-id: "no"
 
@@ -262,15 +266,15 @@ runs:
         commitSHA: ${{ inputs.sha }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
-        tableName: ${{ inputs.terraform-state-table }}
-        bucketName: ${{ inputs.terraform-state-bucket }}
+        tableName: ${{ steps.config.outputs.terraform-state-table }}
+        bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
         failOnMissingPlan: "false"
 
     - name: Compare Current and Stored PLANFILEs
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       id: new-plan
       shell: bash
-      working-directory: ./${{ inputs.component-path }}
+      working-directory: ./${{ steps.vars.outputs.component_path }}
       run: |
         PLAN_FILE="${{ steps.vars.outputs.plan_file }}"
         PLAN_FILE_STORED="${{ steps.vars.outputs.plan_file }}.stored"
@@ -319,8 +323,8 @@ runs:
         planPath: ${{ steps.vars.outputs.plan_file }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
-        tableName: ${{ inputs.terraform-state-table }}
-        bucketName: ${{ inputs.terraform-state-bucket }}
+        tableName: ${{ steps.config.outputs.terraform-state-table }}
+        bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
 
     - name: Store Lockfile for New Plan
       if: ${{ steps.new-plan.outputs.found == 'true' }}
@@ -331,17 +335,17 @@ runs:
         planPath: ${{ steps.vars.outputs.lock_file }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}-lockfile
-        tableName: ${{ inputs.terraform-state-table }}
-        bucketName: ${{ inputs.terraform-state-bucket }}
+        tableName: ${{ steps.config.outputs.terraform-state-table }}
+        bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
 
     - name: Setup Infracost
-      if: ${{ inputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
+      if: ${{ steps.config.outputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
       uses: infracost/actions/setup@v2
       with:
         api-key: ${{ inputs.infracost-api-key }}
 
     - name: Generate Infracost Diff
-      if: ${{ inputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
+      if: ${{ steps.config.outputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
       id: infracost
       shell: bash
       run: |
@@ -390,12 +394,12 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && inputs.drift-detection-mode-enabled == 'true' }}
       shell: bash
       run: |
-        echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ inputs.component-path }}", "drifted": '"${{ steps.atmos-plan.outputs.changes }}"', "error": '"${{ steps.atmos-plan.outputs.error }}"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
+        echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ steps.vars.outputs.component_path }}", "drifted": '"${{ steps.atmos-plan.outputs.changes }}"', "error": '"${{ steps.atmos-plan.outputs.error }}"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
 
     - name: Publish Summary or Generate GitHub Issue Description for Drift Detection
       id: summary
       shell: bash
-      working-directory: ./${{ inputs.component-path }}
+      working-directory: ./${{ steps.vars.outputs.component_path }}
       run: |
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
           STEP_SUMMARY_FILE="${{ steps.vars.outputs.issue_file }}"
