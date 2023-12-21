@@ -82,10 +82,19 @@ runs:
         cache-name: atmos-plan
       with:
         path: |
-          /usr/local/bin/atmos
-          /usr/local/bin/tfcmt
-          /usr/local/bin/terraform
+          /runner/_work/_temp/*/terraform
+          /runner/_work/_actions/cloudposse/github-action-setup-atmos/atmos/atmos
+          /runner/_work/_tool/suzuki-shunsuke/tfcmt/v4.6.0/linux-x64/tfcmt
         key: atmos-plan-${{ hashFiles( inputs.atmos-gitops-config-path ) }}
+
+    - name: Update PATH if cache-hit for each install
+      if: ${{ steps.cache-dependencies.outputs.cache-hit == 'true' }}
+      run: |
+        for i in /runner/_work/_temp/*/terraform; do
+          echo $(dirname $i) >> $GITHUB_PATH
+        done
+        echo "/runner/_work/_actions/cloudposse/github-action-setup-atmos/atmos" >> $GITHUB_PATH
+        echo "/runner/_work/_tool/suzuki-shunsuke/tfcmt/v4.6.0/linux-x64" >> $GITHUB_PATH
 
     - name: Install Terraform
       if: ${{ steps.cache-dependencies.outputs.cache-hit != 'true' }}
@@ -116,9 +125,9 @@ runs:
         cache-name: atmos-plan
       with:
         path: |
-          /usr/local/bin/atmos
-          /usr/local/bin/tfcmt
-          /usr/local/bin/terraform
+          /runner/_work/_temp/*/terraform
+          /runner/_work/_actions/cloudposse/github-action-setup-atmos/atmos/atmos
+          /runner/_work/_tool/suzuki-shunsuke/tfcmt/v4.6.0/linux-x64/tfcmt
         key: atmos-plan-${{ hashFiles( inputs.atmos-gitops-config-path ) }}
 
     - name: Set atmos cli config path vars
