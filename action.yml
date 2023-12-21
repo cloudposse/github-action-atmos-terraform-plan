@@ -116,7 +116,7 @@ runs:
         install-wrapper: false
 
     - name: Install tfcmt
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && steps.cache-dependencies.outputs.cache-hit != 'true' }}
+      if: ${{ steps.cache-dependencies.outputs.cache-hit != 'true' }}
       uses: jaxxstorm/action-install-gh-release@v1.10.0
       with:
         repo: suzuki-shunsuke/tfcmt
