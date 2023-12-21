@@ -233,7 +233,7 @@ runs:
           --output ${{ steps.vars.outputs.summary_file }} \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
           plan -- \
-            atmos terraform plan ${{ inputs.component }} \
+            $(which atmos) terraform plan ${{ inputs.component }} \
             --stack ${{ inputs.stack }} \
             -out="${{ steps.vars.outputs.plan_file }}" \
             -lock=false \
