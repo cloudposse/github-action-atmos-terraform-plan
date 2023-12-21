@@ -65,10 +65,10 @@ runs:
       env:
         cache-name: atmos-plan
       with:
-        path:
-          - /usr/local/bin/atmos
-          - /usr/local/bin/tfcmt
-          - /usr/local/bin/terraform
+        path: |
+          /usr/local/bin/atmos
+          /usr/local/bin/tfcmt
+          /usr/local/bin/terraform
         key: atmos-plan-${{ hashFiles( inputs.atmos-gitops-config-path ) }}
 
     - name: Install Terraform
@@ -99,10 +99,10 @@ runs:
       env:
         cache-name: atmos-plan
       with:
-        path:
-          - /usr/local/bin/atmos
-          - /usr/local/bin/tfcmt
-          - /usr/local/bin/terraform
+        path: |
+          /usr/local/bin/atmos
+          /usr/local/bin/tfcmt
+          /usr/local/bin/terraform
         key: atmos-plan-${{ hashFiles( inputs.atmos-gitops-config-path ) }}
 
     - name: config
