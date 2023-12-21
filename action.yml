@@ -72,19 +72,6 @@ runs:
       run: |-
         echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ steps.config.outputs.atmos-config-path }})" >> $GITHUB_ENV
 
-    - name: Install Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: ${{ steps.config.outputs.terraform-version }}
-        terraform_wrapper: false
-
-    - name: Install Atmos
-      uses: cloudposse/github-action-setup-atmos@v1
-      with:
-        atmos-version: ${{ steps.config.outputs.atmos-version }}
-        token: ${{ inputs.token }}
-        install-wrapper: false
-
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v1
       id: atmos-github-actions-enabled
@@ -118,13 +105,6 @@ runs:
         # Set ATMOS_BASE_PATH allow `cloudposse/utils` provider to read atmos config from the correct path 
         ATMOS_BASE_PATH="${{ steps.base-path.outputs.value }}"
         echo "ATMOS_BASE_PATH=$(realpath ${ATMOS_BASE_PATH:-./})" >> $GITHUB_ENV
-
-    - name: Install tfcmt
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      uses: jaxxstorm/action-install-gh-release@v1.10.0
-      with:
-        repo: suzuki-shunsuke/tfcmt
-        tag: v4.6.0        
 
     - name: Prepare Artifacts Directory
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
