@@ -93,9 +93,12 @@ runs:
       run: |
         for i in /runner/_work/_temp/*/terraform; do
           echo $(dirname $i) >> $GITHUB_PATH
+          cp $i /usr/local/bin/
         done
         echo "/runner/_work/_actions/cloudposse/github-action-setup-atmos/atmos" >> $GITHUB_PATH
+        cp /runner/_work/_actions/cloudposse/github-action-setup-atmos/atmos/atmos /usr/local/bin/
         echo "/runner/_work/_tool/suzuki-shunsuke/tfcmt/v4.6.0/linux-x64" >> $GITHUB_PATH
+        cp /runner/_work/_tool/suzuki-shunsuke/tfcmt/v4.6.0/linux-x64/tfcmt /usr/local/bin/
 
     - name: Install Terraform
       if: ${{ steps.cache-dependencies.outputs.cache-hit != 'true' }}
