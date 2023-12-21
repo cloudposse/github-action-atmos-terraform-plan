@@ -59,6 +59,22 @@ runs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: config
+      uses: cloudposse/github-action-config-levels@nodejs20
+      id: config
+      with:
+        output_properties: true
+        patterns: |
+          - ${{ inputs.atmos-gitops-config-path }}
+
+    - name: Filter Atmos Settings Value
+      uses: cloudposse/github-action-atmos-get-setting@v1
+      id: atmos-github-actions-enabled
+      with:
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        settings-path: settings.github.actions_enabled
+
     - name: Cache Dependencies
       id: cache-dependencies
       uses: actions/cache/restore@v3
@@ -105,26 +121,10 @@ runs:
           /usr/local/bin/terraform
         key: atmos-plan-${{ hashFiles( inputs.atmos-gitops-config-path ) }}
 
-    - name: config
-      uses: cloudposse/github-action-config-levels@nodejs20
-      id: config
-      with:
-        output_properties: true
-        patterns: |
-          - ${{ inputs.atmos-gitops-config-path }}
-
     - name: Set atmos cli config path vars
       shell: bash
       run: |-
         echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ steps.config.outputs.atmos-config-path }})" >> $GITHUB_ENV
-
-    - name: Filter Atmos Settings Value
-      uses: cloudposse/github-action-atmos-get-setting@v1
-      id: atmos-github-actions-enabled
-      with:
-        component: ${{ inputs.component }}
-        stack: ${{ inputs.stack }}
-        settings-path: settings.github.actions_enabled
 
     - name: Find component path
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
