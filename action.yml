@@ -59,6 +59,52 @@ runs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Cache Dependencies
+      id: cache-dependencies
+      uses: actions/cache/restore@v3
+      env:
+        cache-name: atmos-plan
+      with:
+        path:
+          - /usr/local/bin/atmos
+          - /usr/local/bin/tfcmt
+          - /usr/local/bin/terraform
+        key: atmos-plan-${{ hashFiles( inputs.atmos-gitops-config-path ) }}
+
+    - name: Install Terraform
+      if: ${{ steps.cache-dependencies.outputs.cache-hit != 'true' }}
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: ${{ steps.config.outputs.terraform-version }}
+        terraform_wrapper: false
+
+    - name: Install Atmos
+      if: ${{ steps.cache-dependencies.outputs.cache-hit != 'true' }}
+      uses: cloudposse/github-action-setup-atmos@v1
+      with:
+        atmos-version: ${{ steps.config.outputs.atmos-version }}
+        token: ${{ inputs.token }}
+        install-wrapper: false
+
+    - name: Install tfcmt
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && steps.cache-dependencies.outputs.cache-hit != 'true' }}
+      uses: jaxxstorm/action-install-gh-release@v1.10.0
+      with:
+        repo: suzuki-shunsuke/tfcmt
+        tag: v4.6.0
+
+    - name: Cache Dependencies
+      id: save-dependencies
+      uses: actions/cache/save@v3
+      env:
+        cache-name: atmos-plan
+      with:
+        path:
+          - /usr/local/bin/atmos
+          - /usr/local/bin/tfcmt
+          - /usr/local/bin/terraform
+        key: atmos-plan-${{ hashFiles( inputs.atmos-gitops-config-path ) }}
+
     - name: config
       uses: cloudposse/github-action-config-levels@nodejs20
       id: config
@@ -102,7 +148,7 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       shell: bash
       run: |-
-        # Set ATMOS_BASE_PATH allow `cloudposse/utils` provider to read atmos config from the correct path 
+        # Set ATMOS_BASE_PATH allow `cloudposse/utils` provider to read atmos config from the correct path
         ATMOS_BASE_PATH="${{ steps.base-path.outputs.value }}"
         echo "ATMOS_BASE_PATH=$(realpath ${ATMOS_BASE_PATH:-./})" >> $GITHUB_ENV
 
@@ -110,7 +156,7 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       shell: bash
       run: |
-        mkdir -p metadata    
+        mkdir -p metadata
 
     - name: Define Job Variables
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
@@ -127,7 +173,7 @@ runs:
         ISSUE_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/issue-description-${COMPONENT_SLUG}.md"
         STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md"
         SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/summary-${COMPONENT_SLUG}.md"
-        
+
         echo "stack_name=${STACK_NAME}" >> $GITHUB_OUTPUT
         echo "component_name=${COMPONENT_NAME}" >> $GITHUB_OUTPUT
         echo "component_slug=${COMPONENT_SLUG}" >> $GITHUB_OUTPUT
@@ -154,7 +200,7 @@ runs:
       shell: bash
       run: |
         set +e
-        
+
         TERRAFORM_OUTPUT=$( \
           tfcmt \
           --config ${{ github.action_path }}/config/summary.yaml \
@@ -183,7 +229,7 @@ runs:
         TERRAFORM_RESULT=$?
 
         set -e
-        
+
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
           # Split summary to 2 files - issue and step summary files
           # Remove \0 at the end of the grep output
@@ -193,9 +239,9 @@ runs:
         else
           mv ${{ steps.vars.outputs.summary_file }} ${{ steps.vars.outputs.step_summary_file }}
         fi
-        
+
         echo -ne "${TERRAFORM_OUTPUT}"
-        
+
         HAS_CHANGES=false
         HAS_NO_CHANGES=false
         HAS_ERROR=false
@@ -265,18 +311,18 @@ runs:
           terraform show -json "$PLAN_FILE_STORED" > "$PLAN_FILE_STORED.json"
 
           TERRAFORM_RESULT=$?
-          
+
           set -e
 
           if [[ "${TERRAFORM_RESULT}" == "0" ]]; then
             # sort and remove timestamp
             jq 'if has("relevant_attributes") then .relevant_attributes |= sort_by(.resource, .attribute) else . end' "$PLAN_FILE.json" | jq 'del(.timestamp)' > current.json
             jq 'if has("relevant_attributes") then .relevant_attributes |= sort_by(.resource, .attribute) else . end' "$PLAN_FILE_STORED.json" | jq 'del(.timestamp)' > stored.json
-          
+
             # calculate checksums of stored and current plans
             MD5_CURRENT=$(md5sum current.json | awk '{ print $1 }')
             MD5_STORED=$(md5sum stored.json | awk '{ print $1 }')
-  
+
             if [ "$MD5_CURRENT" == "$MD5_STORED" ]; then
               echo "Current plan is equal to stored plan"
             else
@@ -284,7 +330,7 @@ runs:
               NEW_PLAN_FOUND=true
             fi
           else
-            # If terraform show failed that means old plan is wrong        
+            # If terraform show failed that means old plan is wrong
             NEW_PLAN_FOUND=true
           fi
         else
@@ -339,7 +385,7 @@ runs:
           --format=json \
           --project-name "${{ inputs.stack }}-${{ inputs.component }}" \
           --out-file=/tmp/infracost.json
-        
+
         echo "finished=true" >> $GITHUB_OUTPUT
 
     - name: Debug Infracost
@@ -357,7 +403,7 @@ runs:
       run: |
         INFRACOST_DIFF_TOTAL_MONTHLY_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
         INFRACOST_DETAILS_DIFF_BREAKDOWN="$(cat /tmp/infracost.txt)"
-        
+
         if [[ "${INFRACOST_DIFF_TOTAL_MONTHLY_COST}" == "0" ]]; then
           INFRA_COST_SUMMARY="Infracost Estimate: monthly cost will not change"
         elif [[ "${INFRACOST_DIFF_TOTAL_MONTHLY_COST:0:1}" == "-" ]]; then
@@ -368,7 +414,7 @@ runs:
 
         sed -i "s/%INFRACOST_SUMMARY%/${INFRA_COST_SUMMARY}/" ${{ steps.vars.outputs.step_summary_file }}
         sed -i -e '/%INFRACOST_DIFF%/{r /tmp/infracost.txt' -e 'd}' ${{ steps.vars.outputs.step_summary_file }}
-        
+
 
     - name: Store Component Metadata to Artifacts
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && inputs.drift-detection-mode-enabled == 'true' }}
@@ -386,11 +432,11 @@ runs:
         else
           STEP_SUMMARY_FILE="${{ steps.vars.outputs.step_summary_file }}"
         fi
-        
+
         if [[ "${{ steps.atmos-plan.outputs.no-changes }}" == "true" ]]; then
           rm -f ${STEP_SUMMARY_FILE}
         fi
-        
+
         if [ -f ${STEP_SUMMARY_FILE} ]; then
           echo "${STEP_SUMMARY_FILE} found"
 
@@ -401,7 +447,7 @@ runs:
             echo "Drift detection mode disabled"
             cat $STEP_SUMMARY_FILE >> $GITHUB_STEP_SUMMARY
           fi
-        else 
+        else
           echo "${STEP_SUMMARY_FILE} not found"
           echo "result=\"\"" >> $GITHUB_OUTPUT
         fi
@@ -418,4 +464,4 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       shell: bash
       run: |
-        exit ${{ steps.atmos-plan.outputs.result }}    
+        exit ${{ steps.atmos-plan.outputs.result }}
