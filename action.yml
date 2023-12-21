@@ -121,6 +121,7 @@ runs:
 
     - name: Cache Dependencies
       id: save-dependencies
+      if: ${{ steps.cache-dependencies.outputs.cache-hit != 'true' }}
       uses: actions/cache/save@v3
       env:
         cache-name: atmos-plan
