@@ -89,6 +89,7 @@ runs:
 
     - name: Update PATH if cache-hit for each install
       if: ${{ steps.cache-dependencies.outputs.cache-hit == 'true' }}
+      shell: bash
       run: |
         for i in /runner/_work/_temp/*/terraform; do
           echo $(dirname $i) >> $GITHUB_PATH
