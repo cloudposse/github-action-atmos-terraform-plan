@@ -254,7 +254,9 @@ runs:
           mv ${{ steps.vars.outputs.summary_file }} ${{ steps.vars.outputs.step_summary_file }}
         fi
 
+        echo "::group::Terraform Plan"
         echo -ne "${TERRAFORM_OUTPUT}"
+        echo "::endgroup::"
 
         HAS_CHANGES=false
         HAS_NO_CHANGES=false
