@@ -67,6 +67,11 @@ runs:
         patterns: |
           - ${{ inputs.atmos-gitops-config-path }}
 
+    - name: Set atmos cli config path vars
+      shell: bash
+      run: |-
+        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ steps.config.outputs.atmos-config-path }})" >> $GITHUB_ENV
+
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v1
       id: atmos-github-actions-enabled
@@ -134,11 +139,6 @@ runs:
           /runner/_work/_actions/cloudposse/github-action-setup-atmos/atmos/atmos
           /runner/_work/_tool/suzuki-shunsuke/tfcmt/v4.6.0/linux-x64/tfcmt
         key: atmos-plan-${{ hashFiles( inputs.atmos-gitops-config-path ) }}
-
-    - name: Set atmos cli config path vars
-      shell: bash
-      run: |-
-        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ steps.config.outputs.atmos-config-path }})" >> $GITHUB_ENV
 
     - name: Find component path
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
