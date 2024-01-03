@@ -240,6 +240,8 @@ runs:
         echo "error=${HAS_ERROR}" >> $GITHUB_OUTPUT
 
         echo "result=${TERRAFORM_RESULT}" >> $GITHUB_OUTPUT
+        
+        rm -f ${TERRAFORM_OUTPUT_FILE}
 
     - name: Convert PLANFILE to JSON
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
