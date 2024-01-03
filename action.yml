@@ -175,31 +175,33 @@ runs:
       run: |
         set +e
         
-        TERRAFORM_OUTPUT=$( \
-          tfcmt \
-          --config ${{ github.action_path }}/config/summary.yaml \
-          -owner "${{ github.repository_owner }}" \
-          -repo "${{ github.event.repository.name }}" \
-          -var "target:${{ steps.vars.outputs.component_slug }}" \
-          -var "component:${{ inputs.component }}" \
-          -var "componentPath:${{ steps.vars.outputs.component_path }}" \
-          -var "commitSHA:${{ inputs.sha }}" \
-          -var "stack:${{ inputs.stack }}" \
-          -var "job:${{ github.job }}" \
-          -var "logoImage:${{ inputs.branding-logo-image }}" \
-          -var "logoUrl:${{ inputs.branding-logo-url }}" \
-          -var "infracost_enabled:${{ steps.config.outputs.enable-infracost }}" \
-          -var "driftModeEnabled:${{ inputs.drift-detection-mode-enabled }}" \
-          --output ${{ steps.vars.outputs.summary_file }} \
-          --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
-          plan -- \
-            atmos terraform plan ${{ inputs.component }} \
-            --stack ${{ inputs.stack }} \
-            -out="${{ steps.vars.outputs.plan_file }}" \
-            -lock=false \
-            -input=false \
-            -no-color
-        )
+        TERRAFORM_OUTPUT_FILE="./terraform-${GITHUB_RUN_ID}-output.txt"
+
+        tfcmt \
+        --config ${{ github.action_path }}/config/summary.yaml \
+        -owner "${{ github.repository_owner }}" \
+        -repo "${{ github.event.repository.name }}" \
+        -var "target:${{ steps.vars.outputs.component_slug }}" \
+        -var "component:${{ inputs.component }}" \
+        -var "componentPath:${{ steps.vars.outputs.component_path }}" \
+        -var "commitSHA:${{ inputs.sha }}" \
+        -var "stack:${{ inputs.stack }}" \
+        -var "job:${{ github.job }}" \
+        -var "logoImage:${{ inputs.branding-logo-image }}" \
+        -var "logoUrl:${{ inputs.branding-logo-url }}" \
+        -var "infracost_enabled:${{ steps.config.outputs.enable-infracost }}" \
+        -var "driftModeEnabled:${{ inputs.drift-detection-mode-enabled }}" \
+        --output ${{ steps.vars.outputs.summary_file }} \
+        --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
+        plan -- \
+          atmos terraform plan ${{ inputs.component }} \
+          --stack ${{ inputs.stack }} \
+          -out="${{ steps.vars.outputs.plan_file }}" \
+          -lock=false \
+          -input=false \
+          -no-color \
+        &> ${TERRAFORM_OUTPUT_FILE}
+
         TERRAFORM_RESULT=$?
 
         set -e
@@ -220,7 +222,7 @@ runs:
         HAS_NO_CHANGES=false
         HAS_ERROR=false
         if [[ "${TERRAFORM_RESULT}" == "0" ]]; then
-          if echo "$TERRAFORM_OUTPUT" | grep -q '^No changes. Your infrastructure matches the configuration.'; then
+          if grep -q '^No changes. Your infrastructure matches the configuration.' ${TERRAFORM_OUTPUT_FILE} ; then
             echo "No changes found"
             HAS_NO_CHANGES=true
           else
