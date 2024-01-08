@@ -243,13 +243,6 @@ runs:
         
         rm -f ${TERRAFORM_OUTPUT_FILE}
 
-    - name: Convert PLANFILE to JSON
-      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
-      shell: bash
-      working-directory: ./${{ steps.vars.outputs.component_path }}
-      run: |
-        terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
-
     - name: Configure State AWS Credentials
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       uses: aws-actions/configure-aws-credentials@v4.0.1
@@ -259,66 +252,8 @@ runs:
         role-session-name: "atmos-terraform-state-gitops"
         mask-aws-account-id: "no"
 
-    - name: Retrieve Plan
-      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
-      id: retrieve-plan
-      continue-on-error: true
-      with:
-        action: getPlan
-        planPath: "${{ steps.vars.outputs.plan_file }}.stored"
-        commitSHA: ${{ inputs.sha }}
-        component: ${{ inputs.component }}
-        stack: ${{ inputs.stack }}
-        tableName: ${{ steps.config.outputs.terraform-state-table }}
-        bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
-        failOnMissingPlan: "false"
-
-    - name: Compare Current and Stored PLANFILEs
-      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
-      id: new-plan
-      shell: bash
-      working-directory: ./${{ steps.vars.outputs.component_path }}
-      run: |
-        PLAN_FILE="${{ steps.vars.outputs.plan_file }}"
-        PLAN_FILE_STORED="${{ steps.vars.outputs.plan_file }}.stored"
-
-        NEW_PLAN_FOUND=false
-        if [ -f "$PLAN_FILE_STORED" ]; then
-          set +e
-          terraform show -json "$PLAN_FILE_STORED" > "$PLAN_FILE_STORED.json"
-
-          TERRAFORM_RESULT=$?
-          
-          set -e
-
-          if [[ "${TERRAFORM_RESULT}" == "0" ]]; then
-            # sort and remove timestamp
-            jq 'if has("relevant_attributes") then .relevant_attributes |= sort_by(.resource, .attribute) else . end' "$PLAN_FILE.json" | jq 'del(.timestamp)' > current.json
-            jq 'if has("relevant_attributes") then .relevant_attributes |= sort_by(.resource, .attribute) else . end' "$PLAN_FILE_STORED.json" | jq 'del(.timestamp)' > stored.json
-          
-            # calculate checksums of stored and current plans
-            MD5_CURRENT=$(md5sum current.json | awk '{ print $1 }')
-            MD5_STORED=$(md5sum stored.json | awk '{ print $1 }')
-  
-            if [ "$MD5_CURRENT" == "$MD5_STORED" ]; then
-              echo "Current plan is equal to stored plan"
-            else
-              echo "Current plan is different from stored plan"
-              NEW_PLAN_FOUND=true
-            fi
-          else
-            # If terraform show failed that means old plan is wrong        
-            NEW_PLAN_FOUND=true
-          fi
-        else
-          echo "New plan found"
-          NEW_PLAN_FOUND=true
-        fi
-        echo "found=${NEW_PLAN_FOUND}" >> $GITHUB_OUTPUT
-
     - name: Store New Plan
-      if: ${{ steps.new-plan.outputs.found == 'true' }}
+      if: ${{ steps.atmos-plan.outputs.error != 'true' }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       id: store-plan
       with:
@@ -331,7 +266,7 @@ runs:
         bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
 
     - name: Store Lockfile for New Plan
-      if: ${{ steps.new-plan.outputs.found == 'true' }}
+      if: ${{ steps.atmos-plan.outputs.error != 'true' }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       with:
         action: storePlan
@@ -353,6 +288,8 @@ runs:
       id: infracost
       shell: bash
       run: |
+        terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
+
         infracost diff \
           --path="${{ steps.vars.outputs.plan_file }}.json" \
           --format=diff \
