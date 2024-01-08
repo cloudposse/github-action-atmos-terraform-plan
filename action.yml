@@ -216,7 +216,7 @@ runs:
           mv ${{ steps.vars.outputs.summary_file }} ${{ steps.vars.outputs.step_summary_file }}
         fi
         
-        echo -ne "${TERRAFORM_OUTPUT}"
+        cat "${TERRAFORM_OUTPUT_FILE}"
         
         HAS_CHANGES=false
         HAS_NO_CHANGES=false
