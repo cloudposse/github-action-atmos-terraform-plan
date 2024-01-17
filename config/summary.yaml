@@ -49,6 +49,9 @@ templates:
     ```shell
     atmos terraform plan {{.Vars.component}} -s {{.Vars.stack}}
     ```
+    
+    #487
+    
     {{ template "error_messages" .}}
     {{ if eq .ExitCode 0 }}    
     {{ template "updated_resources" .}}
