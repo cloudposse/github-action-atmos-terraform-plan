@@ -50,8 +50,6 @@ templates:
     atmos terraform plan {{.Vars.component}} -s {{.Vars.stack}}
     ```
     
-    #487
-    
     {{ template "error_messages" .}}
     {{ if eq .ExitCode 0 }}    
     {{ template "updated_resources" .}}
@@ -171,6 +169,7 @@ terraform:
       {{- template "branding" .}}
       {{- template "badge" .}}
       {{- template "deletion_warning" .}}
+      #487
       {{- template "result" .}}
       {{- template "change_inside_terraform" .}}
       {{- template "change_outside_terraform" .}}
