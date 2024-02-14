@@ -79,7 +79,7 @@ runs:
       id: config
       run: |-
         echo "terraform-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["terraform-version"]')" >> $GITHUB_OUTPUT
-        echo "enable-infracost=$(atmos describe config -f json | jq -r '.integrations.github.gitops["enable-infracost"]')" >> $GITHUB_OUTPUT        
+        echo "enable-infracost=$(atmos describe config -f json | jq -r '.integrations.github.gitops["infracost-enabled"]')" >> $GITHUB_OUTPUT        
         echo "aws-region=$(atmos describe config -f json | jq -r '.integrations.github.gitops.storage.region')" >> $GITHUB_OUTPUT
         echo "terraform-state-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops.storage.role')" >> $GITHUB_OUTPUT
         echo "terraform-state-table=$(atmos describe config -f json | jq -r '.integrations.github.gitops.storage.table')" >> $GITHUB_OUTPUT
