@@ -19,10 +19,13 @@ inputs:
     description: "Indicate whether this action is used in drift detection workflow."
     required: true
     default: 'false'
-  atmos-gitops-config-path:
-    description: The path to the atmos-gitops.yaml file
+  atmos-version:
+    description: The version of atmos to install
     required: false
-    default: ./.github/config/atmos-gitops.yaml
+    default: ">= 1.63.0"
+  atmos-config-path:
+    description: The path to the atmos.yaml file
+    required: true
   infracost-api-key:
     description: "Infracost API key"
     required: false
@@ -59,31 +62,35 @@ runs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: config
-      uses: cloudposse/github-action-config-levels@nodejs20
-      id: config
-      with:
-        output_properties: true
-        patterns: |
-          - ${{ inputs.atmos-gitops-config-path }}
-
     - name: Set atmos cli config path vars
       shell: bash
       run: |-
-        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ steps.config.outputs.atmos-config-path }})" >> $GITHUB_ENV
+        echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ inputs.atmos-config-path }})" >> $GITHUB_ENV
+
+    - name: Install Atmos
+      uses: cloudposse/github-action-setup-atmos@v1
+      with:
+        atmos-version: ${{ inputs.atmos-version }}
+        token: ${{ inputs.token }}
+        install-wrapper: false
+
+    - name: config
+      shell: bash
+      id: config
+      run: |-
+        echo "terraform-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["terraform-version"]')" >> $GITHUB_OUTPUT
+        echo "enable-infracost=$(atmos describe config -f json | jq -r '.integrations.github.gitops["enable-infracost"]')" >> $GITHUB_OUTPUT        
+        echo "aws-region=$(atmos describe config -f json | jq -r '.integrations.github.gitops.storage.region')" >> $GITHUB_OUTPUT
+        echo "terraform-state-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops.storage.role')" >> $GITHUB_OUTPUT
+        echo "terraform-state-table=$(atmos describe config -f json | jq -r '.integrations.github.gitops.storage.table')" >> $GITHUB_OUTPUT
+        echo "terraform-state-bucket=$(atmos describe config -f json | jq -r '.integrations.github.gitops.storage.bucket')" >> $GITHUB_OUTPUT        
+        echo "terraform-plan-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops.role.plan')" >> $GITHUB_OUTPUT
 
     - name: Install Terraform
       uses: hashicorp/setup-terraform@v2
       with:
         terraform_version: ${{ steps.config.outputs.terraform-version }}
         terraform_wrapper: false
-
-    - name: Install Atmos
-      uses: cloudposse/github-action-setup-atmos@v1
-      with:
-        atmos-version: ${{ steps.config.outputs.atmos-version }}
-        token: ${{ inputs.token }}
-        install-wrapper: false
 
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v1
