@@ -44,7 +44,7 @@ jobs:
           component: "foobar-disabled"
           stack: "plat-ue2-sandbox"
           sha: da39a3ee5e6b4b0d3255bfef95601890afd80709
-          atmos-gitops-config-path: "${{ runner.temp }}/atmos-gitops.yaml"
+          atmos-config-path: "./tests"
 
     outputs:
       result: ${{ steps.current.outcome }}
