@@ -147,7 +147,7 @@ jobs:
             Error: Invalid function argument
             
               on main.tf line 17, in locals:
-              16:   failure = var.enabled && var.enable_failure ? file("Failed because failure mode is enabled") : null
+              17:   failure = var.enabled && var.enable_failure ? file("Failed because failure mode is enabled") : null
                 ├────────────────
                 │ while calling file(path)
             
