@@ -36,7 +36,8 @@ jobs:
           sed -i -e 's#__STORAGE_ROLE__#${{ secrets.TERRAFORM_STATE_ROLE }}#g' ./tests/atmos.yaml
           sed -i -e 's#__PLAN_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ./tests/atmos.yaml
           sed -i -e 's#__APPLY_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ./tests/atmos.yaml
-
+          
+          cat ./tests/atmos.yaml
 
       - name: Plan Atmos Component
         id: current
