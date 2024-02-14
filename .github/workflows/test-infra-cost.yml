@@ -29,20 +29,14 @@ jobs:
 
       - shell: bash
         run: |
-          mkdir -p ${{ runner.temp }}
-          cat > ${{ runner.temp }}/atmos-gitops.yaml <<EOL
-          atmos-version: 1.45.3
-          atmos-config-path: ./tests/
-          terraform-state-bucket: ${{ secrets.TERRAFORM_STATE_BUCKET }}
-          terraform-state-table: ${{ secrets.TERRAFORM_STATE_TABLE }}
-          terraform-state-role: ${{ secrets.TERRAFORM_STATE_ROLE }}
-          terraform-plan-role: ${{ secrets.TERRAFORM_PLAN_ROLE }}
-          terraform-version: 1.5.2
-          enable-infracost: true          
-          aws-region: ${{ env.AWS_REGION }}
-          sort-by: .stack_slug
-          group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")          
-          EOL
+          sed -i -e 's#__STORAGE_REGION__#${{ env.AWS_REGION }}#g' ./tests/atmos.yaml          
+          sed -i -e 's#__STORAGE_BUCKET__#${{ secrets.TERRAFORM_STATE_BUCKET }}#g' ./tests/atmos.yaml
+          sed -i -e 's#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g' ./tests/atmos.yaml          
+          sed -i -e 's#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g' ./tests/atmos.yaml
+          sed -i -e 's#__STORAGE_ROLE__#${{ secrets.TERRAFORM_STATE_ROLE }}#g' ./tests/atmos.yaml
+          sed -i -e 's#__PLAN_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ./tests/atmos.yaml
+          sed -i -e 's#__APPLY_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ./tests/atmos.yaml
+
 
       - name: Plan Atmos Component
         id: current
