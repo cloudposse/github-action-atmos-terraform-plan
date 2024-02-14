@@ -29,6 +29,8 @@ jobs:
 
       - shell: bash
         run: |
+          mkdir -p ${{ runner.temp }}
+          cp ./tests/atmos.yaml ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__STORAGE_REGION__#${{ env.AWS_REGION }}#g' ./tests/atmos.yaml          
           sed -i -e 's#__STORAGE_BUCKET__#${{ secrets.TERRAFORM_STATE_BUCKET }}#g' ./tests/atmos.yaml
           sed -i -e 's#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g' ./tests/atmos.yaml          
@@ -37,8 +39,6 @@ jobs:
           sed -i -e 's#__PLAN_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ./tests/atmos.yaml
           sed -i -e 's#__APPLY_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ./tests/atmos.yaml
           
-          cat ./tests/atmos.yaml
-
       - name: Plan Atmos Component
         id: current
         uses: ./
@@ -46,7 +46,7 @@ jobs:
           component: "foobar"
           stack: "plat-ue2-sandbox"
           sha: da39a3ee5e6b4b0d3255bfef95601890afd80709
-          atmos-config-path: "./tests"
+          atmos-config-path: ${{ runner.temp }}
 
     outputs:
       result: ${{ steps.current.outcome }}
