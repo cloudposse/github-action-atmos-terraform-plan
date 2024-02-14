@@ -64,7 +64,7 @@ workflows:
   # Supports both absolute and relative paths
   base_path: "stacks/workflows"
 
-integration:
+integrations:
   github:
     gitops:
       terraform-version: 1.5.2
