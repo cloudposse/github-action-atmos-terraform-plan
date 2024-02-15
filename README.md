@@ -119,7 +119,7 @@ integrations:
           with:
             component: "foobar"
             stack: "plat-ue2-sandbox"
-            atmos-config-path: ./atmos.yaml
+            atmos-config-path: ./
             atmos-version: 1.63.0
 ```
 
@@ -188,7 +188,7 @@ integrations:
     with:
       component: "foobar"
       stack: "plat-ue2-sandbox"
-      atmos-config-path: ./atmos.yaml
+      atmos-config-path: ./
       atmos-version: 1.63.0
 ``` 
 
