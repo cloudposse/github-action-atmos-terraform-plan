@@ -7,7 +7,8 @@ import:
 terraform:
   backend_type: local
   backend:
-    local: ./terraform.tfstate
+    local:
+      path: "terraform.tfstate"
 
   vars:
     environment: ue2
