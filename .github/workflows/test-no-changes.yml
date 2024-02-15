@@ -86,7 +86,48 @@ jobs:
       - uses: nick-fields/assert-action@v1
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
-          expected: ""
+          expected: |
+            ## Changes Found for `foobar` in `plat-ue2-sandbox`
+            
+            <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
+             [![no changes](https://shields.io/badge/-NO_CHANGE-inactive?style=for-the-badge)](#user-content-plat-ue2-sandbox-foobar)
+            
+            
+            
+            <details><summary><a id="result-plat-ue2-sandbox-foobar" />Only Outputs will be changed.</summary>
+            
+            <br/>      
+            To reproduce this locally, run:<br/><br/>
+            
+            ```shell
+            atmos terraform plan foobar -s plat-ue2-sandbox
+            ```
+                
+            
+            
+                
+            ---
+                
+            </details>
+            
+            <details><summary>Terraform <strong>Plan</strong> Summary</summary>
+            
+            ```hcl
+            Changes to Outputs:
+              - result           = "x1aPcbbqXTo" -> null
+              - sensitive_value  = (sensitive value) -> null
+              - structured_value = {
+                  - test  = "test"
+                  - value = {
+                      - result = "x1aPcbbqXTo"
+                    }
+                } -> null
+            
+            You can apply this plan to save these new output values to the Terraform
+            state, without changing any real infrastructure.
+            ```
+            
+            </details>
 
   teardown:
     runs-on: ubuntu-latest
