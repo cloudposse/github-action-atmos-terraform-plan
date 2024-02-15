@@ -184,6 +184,8 @@ runs:
         
         TERRAFORM_OUTPUT_FILE="./terraform-${GITHUB_RUN_ID}-output.txt"
 
+        atmos terraform state ${{ inputs.component }} -s ${{ inputs.stack }} | grep lineage
+
         tfcmt \
         --config ${{ github.action_path }}/config/summary.yaml \
         -owner "${{ github.repository_owner }}" \
