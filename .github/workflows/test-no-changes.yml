@@ -94,7 +94,7 @@ jobs:
             
             
             
-            <details><summary><a id="result-plat-ue2-sandbox-foobar" />Only Outputs will be changed.</summary>
+            <details><summary><a id="result-plat-ue2-sandbox-foobar" />No changes. Your infrastructure matches the configuration.</summary>
             
             <br/>      
             To reproduce this locally, run:<br/><br/>
@@ -108,25 +108,6 @@ jobs:
                 
             ---
                 
-            </details>
-            
-            <details><summary>Terraform <strong>Plan</strong> Summary</summary>
-            
-            ```hcl
-            Changes to Outputs:
-              - result           = "x1aPcbbqXTo" -> null
-              - sensitive_value  = (sensitive value) -> null
-              - structured_value = {
-                  - test  = "test"
-                  - value = {
-                      - result = "x1aPcbbqXTo"
-                    }
-                } -> null
-            
-            You can apply this plan to save these new output values to the Terraform
-            state, without changing any real infrastructure.
-            ```
-            
             </details>
 
   teardown:
