@@ -73,7 +73,7 @@ runs:
         echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ steps.config.outputs.atmos-config-path }})" >> $GITHUB_ENV
 
     - name: Install Terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{ steps.config.outputs.terraform-version }}
         terraform_wrapper: false
