@@ -6,3 +6,4 @@ components:
           actions_enabled: false
       vars:
         example: blue
+        enabled: true
