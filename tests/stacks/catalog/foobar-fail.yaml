@@ -7,4 +7,5 @@ components:
           actions_enabled: true
       vars:
         example: blue
+        enabled: true
         enable_failure: true

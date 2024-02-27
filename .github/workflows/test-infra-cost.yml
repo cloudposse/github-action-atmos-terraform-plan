@@ -109,7 +109,7 @@ jobs:
             ---
             ### <a id="create-plat-ue2-sandbox-foobar_changes" />Create
             ```diff
-            + random_id.foo
+            + random_id.foo[0]
             ```
                 
             </details>
@@ -118,7 +118,7 @@ jobs:
             
             ```hcl
             
-              # random_id.foo will be created
+              # random_id.foo[0] will be created
               + resource "random_id" "foo" {
                   + b64_std     = (known after apply)
                   + b64_url     = (known after apply)
