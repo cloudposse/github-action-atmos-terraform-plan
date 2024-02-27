@@ -349,11 +349,6 @@ runs:
       run: |
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
           STEP_SUMMARY_FILE="${{ steps.vars.outputs.issue_file }}"
-
-          if [[ "${{ steps.atmos-plan.outputs.no-changes }}" == "true" ]]; then
-            rm -f ${STEP_SUMMARY_FILE}
-          fi
-
         else
           STEP_SUMMARY_FILE="${{ steps.vars.outputs.step_summary_file }}"
         fi
