@@ -38,7 +38,7 @@ jobs:
           terraform-state-role: ${{ secrets.TERRAFORM_STATE_ROLE }}
           terraform-plan-role: ${{ secrets.TERRAFORM_PLAN_ROLE }}
           terraform-version: 1.5.2
-          enable-infracost: true          
+          enable-infracost: false          
           aws-region: ${{ env.AWS_REGION }}
           sort-by: .stack_slug
           group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")          
@@ -61,13 +61,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test]
     steps:
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v2
         with:
           expected: 'success'
           actual: "${{ needs.test.outputs.result }}"
 
       - name: Download Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
 
       - name: Display structure of downloaded files
         id: metadata
@@ -78,15 +78,37 @@ jobs:
           DIR_EXISTS=$?
           echo "dir_exists=${DIR_EXISTS}" >> $GITHUB_OUTPUT
 
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v2
         with:
           actual: "${{ steps.metadata.outputs.dir_exists }}"
           expected: "1"
 
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v2
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
-          expected: ""
+          expected: |
+            ## Changes Found for `foobar` in `plat-ue2-sandbox`
+            
+            <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
+             [![no changes](https://shields.io/badge/-NO_CHANGE-inactive?style=for-the-badge)](#user-content-plat-ue2-sandbox-foobar)
+            
+            
+            
+            <details><summary><a id="result-plat-ue2-sandbox-foobar" />No changes. Your infrastructure matches the configuration.</summary>
+            
+            <br/>      
+            To reproduce this locally, run:<br/><br/>
+            
+            ```shell
+            atmos terraform plan foobar -s plat-ue2-sandbox
+            ```
+                
+            
+            
+                
+            ---
+                
+            </details>
 
   teardown:
     runs-on: ubuntu-latest
