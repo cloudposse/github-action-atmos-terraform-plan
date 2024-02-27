@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test]
     steps:
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v2
         with:
           expected: 'success'
           actual: "${{ needs.test.outputs.result }}"
@@ -77,13 +77,13 @@ jobs:
           DIR_EXISTS=$?
           echo "dir_exists=${DIR_EXISTS}" >> $GITHUB_OUTPUT
 
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v2
         with:
           actual: "${{ steps.metadata.outputs.dir_exists }}"
           expected: "1"
 
 
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v2
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
@@ -109,7 +109,7 @@ jobs:
             ---
             ### <a id="create-plat-ue2-sandbox-foobar_changes" />Create
             ```diff
-            + random_id.foo
+            + random_id.foo[0]
             ```
                 
             </details>
@@ -118,7 +118,7 @@ jobs:
             
             ```hcl
             
-              # random_id.foo will be created
+              # random_id.foo[0] will be created
               + resource "random_id" "foo" {
                   + b64_std     = (known after apply)
                   + b64_url     = (known after apply)

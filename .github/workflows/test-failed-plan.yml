@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test]
     steps:
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v2
         with:
           expected: 'failure'
           actual: "${{ needs.test.outputs.result }}"
@@ -74,12 +74,12 @@ jobs:
           DIR_EXISTS=$?
           echo "dir_exists=${DIR_EXISTS}" >> $GITHUB_OUTPUT
 
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v2
         with:
           actual: "${{ steps.metadata.outputs.dir_exists }}"
           expected: "1"
 
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v2
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
@@ -105,8 +105,8 @@ jobs:
             ```hcl
             Error: Invalid function argument
             
-              on main.tf line 16, in locals:
-              16:   failure = var.enable_failure ? file("Failed because failure mode is enabled") : null
+              on main.tf line 17, in locals:
+              17:   failure = var.enabled && var.enable_failure ? file("Failed because failure mode is enabled") : null
                 ├────────────────
                 │ while calling file(path)
             
