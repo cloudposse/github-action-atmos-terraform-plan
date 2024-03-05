@@ -69,7 +69,7 @@ integrations:
     gitops:
       terraform-version: 1.5.2
       infracost-enabled: __INFRACOST_ENABLED__
-      storage:
+      artifact-storage:
         region: __STORAGE_REGION__
         bucket: __STORAGE_BUCKET__
         table: __STORAGE_TABLE__

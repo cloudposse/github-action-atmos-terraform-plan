@@ -73,7 +73,7 @@ integrations:
     gitops:
       terraform-version: 1.5.2
       infracost-enabled: false
-      storage:
+      artifact-storage:
         region: us-east-2
         bucket: cptest-core-ue2-auto-gitops
         table: cptest-core-ue2-auto-gitops-plan-storage
@@ -143,10 +143,10 @@ The following configuration fields moved to the `atmos.yaml` configuration file.
 
 |              name        |   YAML path in `atmos.yaml`                     |
 |--------------------------|-------------------------------------------------|
-| `aws-region`             | `integrations.github.gitops.storage.region`     | 
-| `terraform-state-bucket` | `integrations.github.gitops.storage.bucket`     |
-| `terraform-state-table`  | `integrations.github.gitops.storage.table`      |
-| `terraform-state-role`   | `integrations.github.gitops.storage.role`       |
+| `aws-region`             | `integrations.github.gitops.artifact-storage.region`     | 
+| `terraform-state-bucket` | `integrations.github.gitops.artifact-storage.bucket`     |
+| `terraform-state-table`  | `integrations.github.gitops.artifact-storage.table`      |
+| `terraform-state-role`   | `integrations.github.gitops.artifact-storage.role`       |
 | `terraform-plan-role`    | `integrations.github.gitops.role.plan`          |
 | `terraform-apply-role`   | `integrations.github.gitops.role.apply`         |
 | `terraform-version`      | `integrations.github.gitops.terraform-version`  |
@@ -166,7 +166,7 @@ integrations:
     gitops:
       terraform-version: 1.5.2
       infracost-enabled: false
-      storage:
+      artifact-storage:
         region: us-east-2
         bucket: cptest-core-ue2-auto-gitops
         table: cptest-core-ue2-auto-gitops-plan-storage
