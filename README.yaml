@@ -116,11 +116,11 @@ usage: |-
   
   ### Migrating from `v1` to `v2`
   
-  `v2` works only with `atmos >= 1.63.0`
-  
-  `v2` drops `install-terraform` input because terraform is not required for affected stacks call
-  
-  `v2` drop `atmos-gitops-config-path` input and  `./.github/config/atmos-gitops.yaml`  config. Now you have to use GitHub actions inputs and `atmos.yaml` to specify that configuration.
+  The notable changes in `v2` are:
+
+  - `v2` works only with `atmos >= 1.63.0`
+  - `v2` drops `install-terraform` input because terraform is not required for affected stacks call
+  - `v2` drops `atmos-gitops-config-path` input and the `./.github/config/atmos-gitops.yaml` config file. Now you have to use GitHub Actions environment variables to specify the location of the `atmos.yaml`.
   
   The following configuration fields now moved to GitHub action inputs with the same names
   
@@ -130,9 +130,9 @@ usage: |-
   | `atmos-config-path`     |
   
   
-  The following configuration fields are now moved to `atmos.yaml` 
+  The following configuration fields moved to the `atmos.yaml` configuration file. 
   
-  |              name        |    path in `atmos.yaml`                         |
+  |              name        |   YAML path in `atmos.yaml`                     |
   |--------------------------|-------------------------------------------------|
   | `aws-region`             | `integrations.github.gitops.storage.region`     | 
   | `terraform-state-bucket` | `integrations.github.gitops.storage.bucket`     |
@@ -146,11 +146,11 @@ usage: |-
   | `group-by`               |  `integrations.github.gitops.matrix.group-by`   |
   
   
-  If you want `v2` having the same behaviour as `v1` you should  have 
+  For example, to migrate from `v1` to `v2`, you should have something similar to the following in your `atmos.yaml`: 
   
-  `./.github/config/atmos-gitops.yaml`
+  `./.github/config/atmos.yaml`
   ```yaml
-  ...
+  # ... your existing configuration
   
   integrations:
     github:
@@ -168,8 +168,6 @@ usage: |-
         matrix:
           sort-by: .stack_slug
           group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
-  
-  ...
   ```
   
   `.github/workflows/main.yaml`
@@ -183,9 +181,9 @@ usage: |-
         atmos-version: 1.63.0
   ``` 
   
-  same behaviour as
+  This corresponds to the `v1` configuration (deprecated) below.
   
-  `./.github/config/atmos-gitops.yaml`
+  The `v1` configuration file `./.github/config/atmos-gitops.yaml` looked like this:
   ```yaml
   atmos-version: 1.45.3
   atmos-config-path: ./rootfs/usr/local/etc/atmos/
@@ -200,6 +198,8 @@ usage: |-
   sort-by: .stack_slug
   group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")  
   ```
+  
+  And the `v1` GitHub Action Workflow looked like this.
   
   `.github/workflows/main.yaml`
   ```yaml
