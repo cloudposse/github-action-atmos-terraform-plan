@@ -87,7 +87,7 @@ integrations:
 ```
 
 > [!IMPORTANT]
-> **Please note!** the action works only with `atmos >= 1.63.0`. If you are using `atmos < 1.63.0` please use `v2` of the action.    
+> **Please note!** This GitHub Action only works with `atmos >= 1.63.0`. If you are using `atmos < 1.63.0` please use `v1` version of this action.    
 
 
 ### Workflow example
