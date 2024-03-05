@@ -87,7 +87,7 @@ runs:
         echo "terraform-plan-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops.role.plan')" >> $GITHUB_OUTPUT
 
     - name: Install Terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{ steps.config.outputs.terraform-version }}
         terraform_wrapper: false
@@ -128,7 +128,7 @@ runs:
 
     - name: Install tfcmt
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      uses: jaxxstorm/action-install-gh-release@v1.10.0
+      uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
         repo: suzuki-shunsuke/tfcmt
         tag: v4.6.0        
@@ -168,7 +168,7 @@ runs:
 
     - name: Configure Plan AWS Credentials
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      uses: aws-actions/configure-aws-credentials@v4.0.1
+      uses: aws-actions/configure-aws-credentials@v4.0.2
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}
         role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
@@ -252,7 +252,7 @@ runs:
 
     - name: Configure State AWS Credentials
       if: ${{ steps.atmos-plan.outputs.error == 'false' }}
-      uses: aws-actions/configure-aws-credentials@v4.0.1
+      uses: aws-actions/configure-aws-credentials@v4.0.2
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}
         role-to-assume: ${{ steps.config.outputs.terraform-state-role }}
@@ -286,7 +286,7 @@ runs:
 
     - name: Setup Infracost
       if: ${{ steps.config.outputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
-      uses: infracost/actions/setup@v2
+      uses: infracost/actions/setup@v3
       with:
         api-key: ${{ inputs.infracost-api-key }}
 
