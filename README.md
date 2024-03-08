@@ -64,7 +64,7 @@ this action. For more on setting up those components, see the `gitops` component
 
 ### Config
 
-The action expects the atmos configuration file `atmos.yaml` to be present in the repository and contains.
+The action expects the atmos configuration file `atmos.yaml` to be present in the repository.
 The config should have the following structure:
 
 ```yaml
