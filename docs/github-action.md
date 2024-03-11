@@ -4,7 +4,8 @@
 
 | Name | Description | Default | Required |
 |------|-------------|---------|----------|
-| atmos-gitops-config-path | The path to the atmos-gitops.yaml file | ./.github/config/atmos-gitops.yaml | false |
+| atmos-config-path | The path to the atmos.yaml file | N/A | true |
+| atmos-version | The version of atmos to install | >= 1.63.0 | false |
 | branding-logo-image | Branding logo image url | https://cloudposse.com/logo-300x69.svg | false |
 | branding-logo-url | Branding logo url | https://cloudposse.com/ | false |
 | component | The name of the component to plan. | N/A | true |
