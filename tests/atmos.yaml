@@ -64,6 +64,23 @@ workflows:
   # Supports both absolute and relative paths
   base_path: "stacks/workflows"
 
+integrations:
+  github:
+    gitops:
+      terraform-version: 1.5.2
+      infracost-enabled: __INFRACOST_ENABLED__
+      artifact-storage:
+        region: __STORAGE_REGION__
+        bucket: __STORAGE_BUCKET__
+        table: __STORAGE_TABLE__
+        role: __STORAGE_ROLE__
+      role:
+        plan: __PLAN_ROLE__
+        apply: __APPLY_ROLE__
+      matrix:
+        sort-by: .stack_slug
+        group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
+
 logs:
   verbose: false
   colors: true
