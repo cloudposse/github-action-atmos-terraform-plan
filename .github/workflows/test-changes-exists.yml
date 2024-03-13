@@ -30,18 +30,15 @@ jobs:
       - shell: bash
         run: |
           mkdir -p ${{ runner.temp }}
-          cat > ${{ runner.temp }}/atmos-gitops.yaml <<EOL
-          atmos-version: 1.45.3
-          atmos-config-path: ./tests/
-          terraform-state-bucket: ${{ secrets.TERRAFORM_STATE_BUCKET }}
-          terraform-state-table: ${{ secrets.TERRAFORM_STATE_TABLE }}
-          terraform-state-role: ${{ secrets.TERRAFORM_STATE_ROLE }}
-          terraform-plan-role: ${{ secrets.TERRAFORM_PLAN_ROLE }}
-          terraform-version: 1.5.2
-          aws-region: ${{ env.AWS_REGION }}
-          sort-by: .stack_slug
-          group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")          
-          EOL
+          cp ./tests/atmos.yaml ${{ runner.temp }}/atmos.yaml          
+          sed -i -e 's#__INFRACOST_ENABLED__#false#g' ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__STORAGE_REGION__#${{ env.AWS_REGION }}#g' ${{ runner.temp }}/atmos.yaml          
+          sed -i -e 's#__STORAGE_BUCKET__#${{ secrets.TERRAFORM_STATE_BUCKET }}#g' ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g' ${{ runner.temp }}/atmos.yaml          
+          sed -i -e 's#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g' ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__STORAGE_ROLE__#${{ secrets.TERRAFORM_STATE_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__PLAN_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__APPLY_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
 
       - name: Plan Atmos Component
         id: current
@@ -50,7 +47,8 @@ jobs:
           component: "foobar/changes"
           stack: "plat-ue2-sandbox"
           sha: da39a3ee5e6b4b0d3255bfef95601890afd80709
-          atmos-gitops-config-path: "${{ runner.temp }}/atmos-gitops.yaml"
+          atmos-config-path: ${{ runner.temp }}
+          atmos-version: 1.63.0
 
     outputs:
       result: ${{ steps.current.outcome }}
@@ -60,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test]
     steps:
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v2
         with:
           expected: 'success'
           actual: "${{ needs.test.outputs.result }}"
@@ -74,12 +72,12 @@ jobs:
           DIR_EXISTS=$?
           echo "dir_exists=${DIR_EXISTS}" >> $GITHUB_OUTPUT
 
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v2
         with:
           actual: "${{ steps.metadata.outputs.dir_exists }}"
           expected: "1"
 
-      - uses: nick-fields/assert-action@v1
+      - uses: nick-fields/assert-action@v2
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
@@ -105,7 +103,7 @@ jobs:
             ---
             ### <a id="create-plat-ue2-sandbox-foobar_changes" />Create
             ```diff
-            + random_id.foo
+            + random_id.foo[0]
             ```
                 
             </details>
@@ -114,7 +112,7 @@ jobs:
             
             ```hcl
             
-              # random_id.foo will be created
+              # random_id.foo[0] will be created
               + resource "random_id" "foo" {
                   + b64_std     = (known after apply)
                   + b64_url     = (known after apply)
