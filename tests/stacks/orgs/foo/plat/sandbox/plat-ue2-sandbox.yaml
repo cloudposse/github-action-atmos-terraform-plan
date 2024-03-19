@@ -5,17 +5,11 @@ import:
   - catalog/foobar-disabled
 
 terraform:
-  backend_type: s3
+  backend_type: local
   backend:
-    s3:
-      bucket: cptest-core-ue2-root-tfstate-plat
-      dynamodb_table: cptest-core-ue2-root-tfstate-plat-lock
-      role_arn: arn:aws:iam::822777368227:role/cptest-core-gbl-root-tfstate-plat
-      encrypt: true
-      key: terraform.tfstate
-      acl: bucket-owner-full-control
-      region: us-east-2
-  
+    local:
+      path: "terraform.tfstate"
+
   vars:
     environment: ue2
     namespace: foo

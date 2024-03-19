@@ -1,4 +1,5 @@
 resource "random_id" "foo" {
+  count = var.enabled ? 1 : 0
   keepers = {
     # Generate a new id each time we switch to a new seed
     seed = "${module.this.id}-${var.example}"
@@ -13,5 +14,5 @@ resource "random_id" "foo" {
 }
 
 locals {
-  failure = var.enable_failure ? file("Failed because failure mode is enabled") : null
+  failure = var.enabled && var.enable_failure ? file("Failed because failure mode is enabled") : null
 }

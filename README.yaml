@@ -55,26 +55,30 @@ usage: |-
 
   ### Config
 
-  The action expects the atmos gitops configuration file to be present in the repository in `./.github/config/atmos-gitops.yaml`.
+  The action expects the atmos configuration file `atmos.yaml` to be present in the repository.
   The config should have the following structure:
   
   ```yaml
-    atmos-version: 1.45.3
-    atmos-config-path: ./rootfs/usr/local/etc/atmos/
-    terraform-state-bucket: cptest-core-ue2-auto-gitops
-    terraform-state-table: cptest-core-ue2-auto-gitops
-    terraform-state-role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
-    terraform-plan-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
-    terraform-apply-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
-    terraform-version: 1.5.2
-    aws-region: us-east-2
-    enable-infracost: false
-    sort-by: .stack_slug
-    group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")  
+  integrations:
+    github:
+      gitops:
+        terraform-version: 1.5.2
+        infracost-enabled: false
+        artifact-storage:
+          region: us-east-2
+          bucket: cptest-core-ue2-auto-gitops
+          table: cptest-core-ue2-auto-gitops-plan-storage
+          role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
+        role:
+          plan: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+          apply: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+        matrix:
+          sort-by: .stack_slug
+          group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
   ```
-
+  
   > [!IMPORTANT]
-  > **Please note!** the `terraform-state-*` parameters refer to the S3 Bucket and corresponding meta storage DynamoDB table used to store the Terraform Plan files, and not the "Terraform State". These parameters will be renamed in a subsequent release.  
+  > **Please note!** This GitHub Action only works with `atmos >= 1.63.0`. If you are using `atmos < 1.63.0` please use `v1` version of this action.    
 
 
   ### Workflow example
@@ -102,19 +106,111 @@ usage: |-
         runs-on: ubuntu-latest
         steps:
           - name: Plan Atmos Component
-            uses: cloudposse/github-action-atmos-terraform-plan@v1
+            uses: cloudposse/github-action-atmos-terraform-plan@v2
             with:
               component: "foobar"
               stack: "plat-ue2-sandbox"
-              component-path: "components/terraform/s3-bucket"
-              terraform-plan-role: "arn:aws:iam::111111111111:role/acme-core-gbl-identity-gitops"
-              terraform-state-bucket: "acme-core-ue2-auto-gitops"
-              terraform-state-role: "arn:aws:iam::999999999999:role/acme-core-ue2-auto-gitops-gha"
-              terraform-state-table: "acme-core-ue2-auto-gitops"
-              aws-region: "us-east-2"
-
+              atmos-config-path: ./rootfs/usr/local/etc/atmos/
+              atmos-version: 1.63.0
   ```
   
+  ### Migrating from `v1` to `v2`
+  
+  The notable changes in `v2` are:
+
+  - `v2` works only with `atmos >= 1.63.0`
+  - `v2` drops `install-terraform` input because terraform is not required for affected stacks call
+  - `v2` drops `atmos-gitops-config-path` input and the `./.github/config/atmos-gitops.yaml` config file. Now you have to use GitHub Actions environment variables to specify the location of the `atmos.yaml`.
+  
+  The following configuration fields now moved to GitHub action inputs with the same names
+  
+  |         name            |
+  |-------------------------|
+  | `atmos-version`         |
+  | `atmos-config-path`     |
+  
+  
+  The following configuration fields moved to the `atmos.yaml` configuration file. 
+  
+  |              name        |   YAML path in `atmos.yaml`                     |
+  |--------------------------|-------------------------------------------------|
+  | `aws-region`             | `integrations.github.gitops.artifact-storage.region`     | 
+  | `terraform-state-bucket` | `integrations.github.gitops.artifact-storage.bucket`     |
+  | `terraform-state-table`  | `integrations.github.gitops.artifact-storage.table`      |
+  | `terraform-state-role`   | `integrations.github.gitops.artifact-storage.role`       |
+  | `terraform-plan-role`    | `integrations.github.gitops.role.plan`          |
+  | `terraform-apply-role`   | `integrations.github.gitops.role.apply`         |
+  | `terraform-version`      | `integrations.github.gitops.terraform-version`  |
+  | `enable-infracost`       |  `integrations.github.gitops.infracost-enabled` |
+  | `sort-by`                |  `integrations.github.gitops.matrix.sort-by`    |
+  | `group-by`               |  `integrations.github.gitops.matrix.group-by`   |
+  
+  
+  For example, to migrate from `v1` to `v2`, you should have something similar to the following in your `atmos.yaml`: 
+  
+  `./.github/config/atmos.yaml`
+  ```yaml
+  # ... your existing configuration
+  
+  integrations:
+    github:
+      gitops:
+        terraform-version: 1.5.2
+        infracost-enabled: false
+        artifact-storage:
+          region: us-east-2
+          bucket: cptest-core-ue2-auto-gitops
+          table: cptest-core-ue2-auto-gitops-plan-storage
+          role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
+        role:
+          plan: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+          apply: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+        matrix:
+          sort-by: .stack_slug
+          group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
+  ```
+  
+  `.github/workflows/main.yaml`
+  ```yaml
+    - name: Plan Atmos Component
+      uses: cloudposse/github-action-atmos-terraform-plan@v2
+      with:
+        component: "foobar"
+        stack: "plat-ue2-sandbox"
+        atmos-config-path: ./rootfs/usr/local/etc/atmos/
+        atmos-version: 1.63.0
+  ``` 
+  
+  This corresponds to the `v1` configuration (deprecated) below.
+  
+  The `v1` configuration file `./.github/config/atmos-gitops.yaml` looked like this:
+  ```yaml
+  atmos-version: 1.45.3
+  atmos-config-path: ./rootfs/usr/local/etc/atmos/
+  terraform-state-bucket: cptest-core-ue2-auto-gitops
+  terraform-state-table: cptest-core-ue2-auto-gitops
+  terraform-state-role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
+  terraform-plan-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+  terraform-apply-role: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+  terraform-version: 1.5.2
+  aws-region: us-east-2
+  enable-infracost: false
+  sort-by: .stack_slug
+  group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")  
+  ```
+  
+  And the `v1` GitHub Action Workflow looked like this.
+  
+  `.github/workflows/main.yaml`
+  ```yaml
+    - name: Plan Atmos Component
+      uses: cloudposse/github-action-atmos-terraform-plan@v1
+      with:
+        component: "foobar"
+        stack: "plat-ue2-sandbox"
+        atmos-gitops-config-path: ./.github/config/atmos-gitops.yaml
+  ```
+    
   ### Migrating from `v1` to `v2`
   
   1.  `v2` drops the `component-path` variable and instead fetches if directly from the [`atmos.yaml` file](https://atmos.tools/cli/configuration/) automatically. Simply remove the `component-path` argument from your invocations of the `cloudposse/github-action-atmos-terraform-plan` action.
