@@ -86,11 +86,65 @@ runs:
         echo "terraform-state-bucket=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].bucket')" >> $GITHUB_OUTPUT        
         echo "terraform-plan-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops.role.plan')" >> $GITHUB_OUTPUT
 
+    - name: Cache Dependencies
+      id: cache-dependencies
+      uses: actions/cache/restore@v3
+      env:
+        cache-name: atmos-plan
+      with:
+        path: |
+          /runner/_work/_temp/*/terraform
+          /runner/_work/_actions/cloudposse/github-action-setup-atmos/atmos/atmos
+          /runner/_work/_tool/suzuki-shunsuke/tfcmt/v4.6.0/linux-x64/tfcmt
+        key: atmos-plan-${{ hashFiles( inputs.atmos-gitops-config-path ) }}
+
+    - name: Update PATH if cache-hit for each install
+      if: ${{ steps.cache-dependencies.outputs.cache-hit == 'true' }}
+      shell: bash
+      run: |
+        for i in /runner/_work/_temp/*/terraform; do
+          echo $(dirname $i) >> $GITHUB_PATH
+          cp $i /usr/local/bin/
+        done
+        echo "/runner/_work/_actions/cloudposse/github-action-setup-atmos/atmos" >> $GITHUB_PATH
+        cp /runner/_work/_actions/cloudposse/github-action-setup-atmos/atmos/atmos /usr/local/bin/
+        echo "/runner/_work/_tool/suzuki-shunsuke/tfcmt/v4.6.0/linux-x64" >> $GITHUB_PATH
+        cp /runner/_work/_tool/suzuki-shunsuke/tfcmt/v4.6.0/linux-x64/tfcmt /usr/local/bin/
+
     - name: Install Terraform
+      if: ${{ steps.cache-dependencies.outputs.cache-hit != 'true' }}
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{ steps.config.outputs.terraform-version }}
         terraform_wrapper: false
+
+    - name: Install Atmos
+      if: ${{ steps.cache-dependencies.outputs.cache-hit != 'true' }}
+      uses: cloudposse/github-action-setup-atmos@v1
+      with:
+        atmos-version: ${{ steps.config.outputs.atmos-version }}
+        token: ${{ inputs.token }}
+        install-wrapper: false
+
+    - name: Install tfcmt
+      if: ${{ steps.cache-dependencies.outputs.cache-hit != 'true' }}
+      uses: jaxxstorm/action-install-gh-release@v1.10.0
+      with:
+        repo: suzuki-shunsuke/tfcmt
+        tag: v4.6.0
+
+    - name: Cache Dependencies
+      id: save-dependencies
+      if: ${{ steps.cache-dependencies.outputs.cache-hit != 'true' }}
+      uses: actions/cache/save@v3
+      env:
+        cache-name: atmos-plan
+      with:
+        path: |
+          /runner/_work/_temp/*/terraform
+          /runner/_work/_actions/cloudposse/github-action-setup-atmos/atmos/atmos
+          /runner/_work/_tool/suzuki-shunsuke/tfcmt/v4.6.0/linux-x64/tfcmt
+        key: atmos-plan-${{ hashFiles( inputs.atmos-gitops-config-path ) }}
 
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v1
@@ -122,9 +176,10 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       shell: bash
       run: |-
-        # Set ATMOS_BASE_PATH allow `cloudposse/utils` provider to read atmos config from the correct path 
+        # Set ATMOS_BASE_PATH allow `cloudposse/utils` provider to read atmos config from the correct path
         ATMOS_BASE_PATH="${{ steps.base-path.outputs.value }}"
         echo "ATMOS_BASE_PATH=$(realpath ${ATMOS_BASE_PATH:-./})" >> $GITHUB_ENV
+
 
     - name: Install tfcmt
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
@@ -137,7 +192,7 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       shell: bash
       run: |
-        mkdir -p metadata    
+        mkdir -p metadata
 
     - name: Define Job Variables
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
@@ -154,7 +209,7 @@ runs:
         ISSUE_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/issue-description-${COMPONENT_SLUG}.md"
         STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md"
         SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/summary-${COMPONENT_SLUG}.md"
-        
+
         echo "stack_name=${STACK_NAME}" >> $GITHUB_OUTPUT
         echo "component_name=${COMPONENT_NAME}" >> $GITHUB_OUTPUT
         echo "component_slug=${COMPONENT_SLUG}" >> $GITHUB_OUTPUT
@@ -181,7 +236,7 @@ runs:
       shell: bash
       run: |
         set +e
-        
+
         TERRAFORM_OUTPUT_FILE="./terraform-${GITHUB_RUN_ID}-output.txt"
 
         tfcmt \
@@ -212,7 +267,7 @@ runs:
         TERRAFORM_RESULT=$?
 
         set -e
-        
+
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
           # Split summary to 2 files - issue and step summary files
           # Remove \0 at the end of the grep output
@@ -222,8 +277,10 @@ runs:
         else
           mv ${{ steps.vars.outputs.summary_file }} ${{ steps.vars.outputs.step_summary_file }}
         fi
-        
+
+        echo "::group::Terraform Plan"
         cat "${TERRAFORM_OUTPUT_FILE}"
+        echo "::endgroup::"
         
         HAS_CHANGES=false
         HAS_NO_CHANGES=false
@@ -258,6 +315,64 @@ runs:
         role-to-assume: ${{ steps.config.outputs.terraform-state-role }}
         role-session-name: "atmos-terraform-state-gitops"
         mask-aws-account-id: "no"
+
+    - name: Retrieve Plan
+      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
+      uses: cloudposse/github-action-terraform-plan-storage@v1
+      id: retrieve-plan
+      continue-on-error: true
+      with:
+        action: getPlan
+        planPath: "${{ steps.vars.outputs.plan_file }}.stored"
+        commitSHA: ${{ inputs.sha }}
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        tableName: ${{ steps.config.outputs.terraform-state-table }}
+        bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
+        failOnMissingPlan: "false"
+
+    - name: Compare Current and Stored PLANFILEs
+      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
+      id: new-plan
+      shell: bash
+      working-directory: ./${{ steps.vars.outputs.component_path }}
+      run: |
+        PLAN_FILE="${{ steps.vars.outputs.plan_file }}"
+        PLAN_FILE_STORED="${{ steps.vars.outputs.plan_file }}.stored"
+
+        NEW_PLAN_FOUND=false
+        if [ -f "$PLAN_FILE_STORED" ]; then
+          set +e
+          terraform show -json "$PLAN_FILE_STORED" > "$PLAN_FILE_STORED.json"
+
+          TERRAFORM_RESULT=$?
+
+          set -e
+
+          if [[ "${TERRAFORM_RESULT}" == "0" ]]; then
+            # sort and remove timestamp
+            jq 'if has("relevant_attributes") then .relevant_attributes |= sort_by(.resource, .attribute) else . end' "$PLAN_FILE.json" | jq 'del(.timestamp)' > current.json
+            jq 'if has("relevant_attributes") then .relevant_attributes |= sort_by(.resource, .attribute) else . end' "$PLAN_FILE_STORED.json" | jq 'del(.timestamp)' > stored.json
+
+            # calculate checksums of stored and current plans
+            MD5_CURRENT=$(md5sum current.json | awk '{ print $1 }')
+            MD5_STORED=$(md5sum stored.json | awk '{ print $1 }')
+
+            if [ "$MD5_CURRENT" == "$MD5_STORED" ]; then
+              echo "Current plan is equal to stored plan"
+            else
+              echo "Current plan is different from stored plan"
+              NEW_PLAN_FOUND=true
+            fi
+          else
+            # If terraform show failed that means old plan is wrong
+            NEW_PLAN_FOUND=true
+          fi
+        else
+          echo "New plan found"
+          NEW_PLAN_FOUND=true
+        fi
+        echo "found=${NEW_PLAN_FOUND}" >> $GITHUB_OUTPUT
 
     - name: Store New Plan
       if: ${{ steps.atmos-plan.outputs.error == 'false' }}
@@ -312,7 +427,7 @@ runs:
           --format=json \
           --project-name "${{ inputs.stack }}-${{ inputs.component }}" \
           --out-file=/tmp/infracost.json
-        
+
         echo "finished=true" >> $GITHUB_OUTPUT
 
     - name: Debug Infracost
@@ -330,7 +445,7 @@ runs:
       run: |
         INFRACOST_DIFF_TOTAL_MONTHLY_COST=$(cat /tmp/infracost.json | jq --raw-output .diffTotalMonthlyCost)
         INFRACOST_DETAILS_DIFF_BREAKDOWN="$(cat /tmp/infracost.txt)"
-        
+
         if [[ "${INFRACOST_DIFF_TOTAL_MONTHLY_COST}" == "0" ]]; then
           INFRA_COST_SUMMARY="Infracost Estimate: monthly cost will not change"
         elif [[ "${INFRACOST_DIFF_TOTAL_MONTHLY_COST:0:1}" == "-" ]]; then
@@ -341,7 +456,7 @@ runs:
 
         sed -i "s/%INFRACOST_SUMMARY%/${INFRA_COST_SUMMARY}/" ${{ steps.vars.outputs.step_summary_file }}
         sed -i -e '/%INFRACOST_DIFF%/{r /tmp/infracost.txt' -e 'd}' ${{ steps.vars.outputs.step_summary_file }}
-        
+
 
     - name: Store Component Metadata to Artifacts
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && inputs.drift-detection-mode-enabled == 'true' }}
@@ -364,8 +479,11 @@ runs:
         else
           STEP_SUMMARY_FILE="${{ steps.vars.outputs.step_summary_file }}"
         fi
-        
-        
+
+        if [[ "${{ steps.atmos-plan.outputs.no-changes }}" == "true" ]]; then
+          rm -f ${STEP_SUMMARY_FILE}
+        fi
+
         if [ -f ${STEP_SUMMARY_FILE} ]; then
           echo "${STEP_SUMMARY_FILE} found"
 
@@ -376,7 +494,7 @@ runs:
             echo "Drift detection mode disabled"
             cat $STEP_SUMMARY_FILE >> $GITHUB_STEP_SUMMARY
           fi
-        else 
+        else
           echo "${STEP_SUMMARY_FILE} not found"
           echo "result=\"\"" >> $GITHUB_OUTPUT
         fi
@@ -393,4 +511,4 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       shell: bash
       run: |
-        exit ${{ steps.atmos-plan.outputs.result }}    
+        exit ${{ steps.atmos-plan.outputs.result }}
