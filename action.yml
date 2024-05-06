@@ -87,6 +87,7 @@ runs:
         echo "terraform-state-table=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].table')" >> $GITHUB_OUTPUT
         echo "terraform-state-bucket=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].bucket')" >> $GITHUB_OUTPUT        
         echo "terraform-plan-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops.role.plan')" >> $GITHUB_OUTPUT
+        echo "aws-role-chaining=$(atmos describe config -f json | jq -r '.integrations.github.gitops."aws-role-chaining" == true')" >> $GITHUB_OUTPUT
 
     - name: Install Terraform
       uses: hashicorp/setup-terraform@v3
@@ -176,6 +177,7 @@ runs:
         role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
         role-session-name: "atmos-terraform-plan-gitops"
         mask-aws-account-id: "no"
+        role-chaining: ${{ steps.config.outputs.aws-role-chaining }}
 
     - name: Atmos Terraform Plan
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
@@ -260,6 +262,8 @@ runs:
         role-to-assume: ${{ steps.config.outputs.terraform-state-role }}
         role-session-name: "atmos-terraform-state-gitops"
         mask-aws-account-id: "no"
+        role-chaining: ${{ steps.config.outputs.aws-role-chaining }}
+        unset-current-credentials: ${{ steps.config.outputs.aws-role-chaining }}
 
     - name: Store New Plan
       if: ${{ steps.atmos-plan.outputs.error == 'false' }}
