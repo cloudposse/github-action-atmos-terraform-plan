@@ -83,6 +83,7 @@ integrations:
       role:
         plan: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
         apply: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+      aws-role-chaining: false
       matrix:
         sort-by: .stack_slug
         group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
