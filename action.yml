@@ -95,7 +95,7 @@ runs:
         terraform_wrapper: false
 
     - name: Find atmos cli base path
-      uses: cloudposse/github-action-atmos-get-setting@v1
+      uses: cloudposse/github-action-atmos-get-setting@v1.1.0
       id: base-path
       with:
         component: ${{ inputs.component }}
@@ -111,7 +111,7 @@ runs:
         echo "ATMOS_BASE_PATH=$(realpath ${ATMOS_BASE_PATH:-./})" >> $GITHUB_ENV
 
     - name: Filter Atmos Settings Value
-      uses: cloudposse/github-action-atmos-get-setting@v1
+      uses: cloudposse/github-action-atmos-get-setting@v1.1.0
       id: atmos-github-actions-enabled
       with:
         component: ${{ inputs.component }}
@@ -120,7 +120,7 @@ runs:
 
     - name: Find component path
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      uses: cloudposse/github-action-atmos-get-setting@v1
+      uses: cloudposse/github-action-atmos-get-setting@v1.1.0
       id: component-path
       with:
         component: ${{ inputs.component }}
