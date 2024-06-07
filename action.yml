@@ -61,6 +61,8 @@ runs:
   steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.sha }}
 
     - name: Set atmos cli config path vars
       shell: bash
