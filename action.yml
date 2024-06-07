@@ -87,6 +87,8 @@ runs:
         echo "terraform-plan-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops.role.plan')" >> $GITHUB_OUTPUT
         
         atmos describe component ${{ inputs.component }} -s ${{ inputs.stack }} --format json
+        atmos describe component foobar/changes -s ${{ inputs.stack }} --format json
+        
 
     - name: Install Terraform
       uses: hashicorp/setup-terraform@v3
