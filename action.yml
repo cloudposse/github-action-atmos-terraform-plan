@@ -61,8 +61,6 @@ runs:
   steps:
     - name: Checkout
       uses: actions/checkout@v4
-      with:
-        ref: ${{ inputs.sha }}
 
     - name: Set atmos cli config path vars
       shell: bash
@@ -94,8 +92,26 @@ runs:
         terraform_version: ${{ steps.config.outputs.terraform-version }}
         terraform_wrapper: false
 
+    - name: Filter Atmos Settings Value
+      uses: cloudposse/github-action-atmos-get-setting@v1
+      id: atmos-github-actions-enabled
+      with:
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        settings-path: settings.github.actions_enabled
+
+    - name: Find component path
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      uses: cloudposse/github-action-atmos-get-setting@v1
+      id: component-path
+      with:
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        settings-path: component_info.component_path
+
     - name: Find atmos cli base path
-      uses: cloudposse/github-action-atmos-get-setting@1.1.0
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      uses: cloudposse/github-action-atmos-get-setting@v1
       id: base-path
       with:
         component: ${{ inputs.component }}
@@ -110,29 +126,12 @@ runs:
         ATMOS_BASE_PATH="${{ steps.base-path.outputs.value }}"
         echo "ATMOS_BASE_PATH=$(realpath ${ATMOS_BASE_PATH:-./})" >> $GITHUB_ENV
 
-    - name: Filter Atmos Settings Value
-      uses: cloudposse/github-action-atmos-get-setting@1.1.0
-      id: atmos-github-actions-enabled
-      with:
-        component: ${{ inputs.component }}
-        stack: ${{ inputs.stack }}
-        settings-path: settings.github.actions_enabled
-
-    - name: Find component path
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      uses: cloudposse/github-action-atmos-get-setting@1.1.0
-      id: component-path
-      with:
-        component: ${{ inputs.component }}
-        stack: ${{ inputs.stack }}
-        settings-path: component_info.component_path
-
     - name: Install tfcmt
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
         repo: suzuki-shunsuke/tfcmt
-        tag: v4.6.0        
+        tag: v4.6.0
 
     - name: Prepare Artifacts Directory
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
@@ -342,7 +341,7 @@ runs:
 
         sed -i "s/%INFRACOST_SUMMARY%/${INFRA_COST_SUMMARY}/" ${{ steps.vars.outputs.step_summary_file }}
         sed -i -e '/%INFRACOST_DIFF%/{r /tmp/infracost.txt' -e 'd}' ${{ steps.vars.outputs.step_summary_file }}
-        
+
 
     - name: Store Component Metadata to Artifacts
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && inputs.drift-detection-mode-enabled == 'true' }}
@@ -394,4 +393,4 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       shell: bash
       run: |
-        exit ${{ steps.atmos-plan.outputs.result }}    
+        exit ${{ steps.atmos-plan.outputs.result }}
