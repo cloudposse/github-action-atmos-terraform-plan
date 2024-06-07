@@ -94,6 +94,22 @@ runs:
         terraform_version: ${{ steps.config.outputs.terraform-version }}
         terraform_wrapper: false
 
+    - name: Find atmos cli base path
+      uses: cloudposse/github-action-atmos-get-setting@v1
+      id: base-path
+      with:
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        settings-path: atmos_cli_config.base_path
+
+    - name: Set atmos cli base path vars
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      shell: bash
+      run: |-
+        # Set ATMOS_BASE_PATH allow `cloudposse/utils` provider to read atmos config from the correct path 
+        ATMOS_BASE_PATH="${{ steps.base-path.outputs.value }}"
+        echo "ATMOS_BASE_PATH=$(realpath ${ATMOS_BASE_PATH:-./})" >> $GITHUB_ENV
+
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v1
       id: atmos-github-actions-enabled
@@ -110,23 +126,6 @@ runs:
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
         settings-path: component_info.component_path
-
-    - name: Find atmos cli base path
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      uses: cloudposse/github-action-atmos-get-setting@v1
-      id: base-path
-      with:
-        component: ${{ inputs.component }}
-        stack: ${{ inputs.stack }}
-        settings-path: atmos_cli_config.base_path
-
-    - name: Set atmos cli base path vars
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      shell: bash
-      run: |-
-        # Set ATMOS_BASE_PATH allow `cloudposse/utils` provider to read atmos config from the correct path 
-        ATMOS_BASE_PATH="${{ steps.base-path.outputs.value }}"
-        echo "ATMOS_BASE_PATH=$(realpath ${ATMOS_BASE_PATH:-./})" >> $GITHUB_ENV
 
     - name: Install tfcmt
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
