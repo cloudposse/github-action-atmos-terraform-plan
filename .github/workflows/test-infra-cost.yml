@@ -47,7 +47,7 @@ jobs:
         with:
           component: "foobar/changes"
           stack: "plat-ue2-sandbox"
-          sha: 55bfef95601890afd80709da39a3ee5e6b4b0d32
+          sha: ${{ github.sha }}
           infracost-api-key: ${{ secrets.INFRACOST_API_KEY }}
           debug: true
           atmos-config-path: ${{ runner.temp }}
