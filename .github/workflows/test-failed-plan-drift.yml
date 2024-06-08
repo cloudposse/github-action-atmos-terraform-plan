@@ -47,7 +47,7 @@ jobs:
         with:
           component: "foobar-fail"
           stack: "plat-ue2-sandbox"
-          sha: da39a3ee5e6b4b0d3255bfef95601890afd80709
+          sha: ${{ github.sha }}
           drift-detection-mode-enabled: true
           atmos-config-path: ${{ runner.temp }}
           atmos-version: 1.63.0
@@ -178,7 +178,7 @@ jobs:
               "component": "foobar-fail",
               "stack": "plat-ue2-sandbox",
               "componentPath": "tests/components/terraform/foobar",
-              "commitSHA": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+              "commitSHA": "${{ github.sha }}"
             }
             ```
             </details>
