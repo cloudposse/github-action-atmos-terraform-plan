@@ -46,7 +46,7 @@ jobs:
         with:
           component: "foobar-disabled"
           stack: "plat-ue2-sandbox"
-          sha: da39a3ee5e6b4b0d3255bfef95601890afd80709
+          sha: ${{ github.sha }}
           atmos-config-path: ${{ runner.temp }}
           atmos-version: 1.63.0
 

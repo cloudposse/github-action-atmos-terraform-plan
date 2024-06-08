@@ -61,6 +61,8 @@ runs:
   steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.sha }}
 
     - name: Set atmos cli config path vars
       shell: bash
@@ -131,7 +133,7 @@ runs:
       uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
         repo: suzuki-shunsuke/tfcmt
-        tag: v4.6.0        
+        tag: v4.6.0
 
     - name: Prepare Artifacts Directory
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
@@ -341,7 +343,7 @@ runs:
 
         sed -i "s/%INFRACOST_SUMMARY%/${INFRA_COST_SUMMARY}/" ${{ steps.vars.outputs.step_summary_file }}
         sed -i -e '/%INFRACOST_DIFF%/{r /tmp/infracost.txt' -e 'd}' ${{ steps.vars.outputs.step_summary_file }}
-        
+
 
     - name: Store Component Metadata to Artifacts
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && inputs.drift-detection-mode-enabled == 'true' }}
@@ -393,4 +395,4 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       shell: bash
       run: |
-        exit ${{ steps.atmos-plan.outputs.result }}    
+        exit ${{ steps.atmos-plan.outputs.result }}
