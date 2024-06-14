@@ -115,8 +115,8 @@ templates:
     {{end}}
   warning: |
     {{if .Warning}}
-    ## :warning: Warnings :warning:
-    {{wrapCode .Warning}}
+    > [!WARNING]
+    > {{wrapCode .Warning}}
     {{end}}
   error_messages: |
     {{ if eq .ExitCode 1 }}
