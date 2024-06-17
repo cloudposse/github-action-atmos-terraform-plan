@@ -119,10 +119,10 @@ templates:
     > ```
     {{- range ( .Warning | splitList "\n") }}
     > {{ . -}}
-    {{- end}} 
-    {{end}}
+    {{- end}}
     > ```
-    
+    {{end}}
+
   error_messages: |
     {{ if eq .ExitCode 1 }}
     ---
