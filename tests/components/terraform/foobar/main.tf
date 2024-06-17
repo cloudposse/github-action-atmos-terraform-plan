@@ -18,7 +18,7 @@ locals {
 }
 
 data "validation_warning" "warn" {
-  count     = var.enabled ? 1 : 0
+  count     = var.enable_warning ? 1 : 0
   condition = true
   summary   = "Test warning summary"
   details   = "Test warning details"
