@@ -94,8 +94,8 @@ templates:
   deletion_warning: |
     {{if .HasDestroy}}
     > [!CAUTION]
-    **Terraform will delete resources!** 
-    This plan contains resource delete operations. Please check the plan result very carefully.
+    > **Terraform will delete resources!** 
+    > This plan contains resource delete operations. Please check the plan result very carefully.
     {{end}}
 
   change_inside_terraform: |
@@ -116,7 +116,9 @@ templates:
   warning: |
     {{if .Warning}}
     > [!WARNING]
-    {{ wrapCode .Warning }}
+    {{ range (wrapCode .Warning | splitList "\n") }}
+    > {{ . -}}
+    {{- end}}    
     {{end}}
   error_messages: |
     {{ if eq .ExitCode 1 }}
