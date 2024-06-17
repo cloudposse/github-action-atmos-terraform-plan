@@ -186,12 +186,31 @@ jobs:
                 }
             
             Plan: 1 to add, 0 to change, 0 to destroy.
+            
+            Warning: Test warning summary
+            
+              with data.validation_warning.warn[0],
+              on main.tf line 20, in data "validation_warning" "warn":
+              20: data "validation_warning" "warn" {
+            
+            Test warning details
             ```
             
             </details>
                   
             
             
+            
+            > [!WARNING]
+            > ```
+            > Warning: Test warning summary
+            > 
+            >   with data.validation_warning.warn[0],
+            >   on main.tf line 20, in data "validation_warning" "warn":
+            >   20: data "validation_warning" "warn" {
+            > 
+            > Test warning details
+            > ```
             
             
             <details><summary>Metadata</summary>
@@ -201,7 +220,7 @@ jobs:
               "component": "foobar/changes",
               "stack": "plat-ue2-sandbox",
               "componentPath": "tests/components/terraform/foobar",
-              "commitSHA": "${{ github.sha }}"
+              "commitSHA": "8da9912cbe52c76b5ddd6c7d2c9466328f8e5198"
             }
             ```
             </details>
