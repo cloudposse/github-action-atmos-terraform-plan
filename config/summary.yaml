@@ -129,9 +129,10 @@ templates:
     {{wrapCode .Result }}
     {{end}}    
     {{if .ErrorMessages}}
-    ## :warning: Errors
-    {{range .ErrorMessages}}
-    * {{. -}}
+    > [!CAUTION]
+    > :warning: Errors
+    {{- range .ErrorMessages}}
+    > * {{. -}}
     {{- end}}{{end}}
 
   infracost: |
