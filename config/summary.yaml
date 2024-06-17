@@ -117,7 +117,7 @@ templates:
     {{if .Warning}}
     > [!WARNING]
     > ```
-    {{- range ( .Warning | splitList "\n") }}
+    {{- range ( .Warning | wrapCode | splitList "\n") }}
     > {{ . -}}
     {{- end}}
     > ```
