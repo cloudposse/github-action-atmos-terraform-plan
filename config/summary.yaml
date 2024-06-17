@@ -116,10 +116,13 @@ templates:
   warning: |
     {{if .Warning}}
     > [!WARNING]
-    {{ range ( .Warning | splitList "\n") }}
+    > ```
+    {{- range ( .Warning | splitList "\n") }}
     > {{ . -}}
     {{- end}} 
     {{end}}
+    > ```
+    
   error_messages: |
     {{ if eq .ExitCode 1 }}
     ---
