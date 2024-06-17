@@ -116,7 +116,7 @@ templates:
   warning: |
     {{if .Warning}}
     > [!WARNING]
-    {{ regexReplaceAll "^(.*)" .Warning "> ${1}" }}
+    {{ regexReplaceAll "^(.)" (wrapCode .Warning) "> ${1}" }}
     {{end}}
   error_messages: |
     {{ if eq .ExitCode 1 }}
