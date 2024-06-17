@@ -133,7 +133,6 @@ jobs:
 
       - uses: nick-fields/assert-action@v2
         with:
-          comparison: startsWith
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
             ## Drift Detected for `foobar/changes` in `plat-ue2-sandbox`
@@ -221,7 +220,10 @@ jobs:
               "component": "foobar/changes",
               "stack": "plat-ue2-sandbox",
               "componentPath": "tests/components/terraform/foobar",
-
+              "commitSHA": "${{ github.sha }}"
+            }
+            ```
+            </details>
 
   teardown:
     runs-on: ubuntu-latest
