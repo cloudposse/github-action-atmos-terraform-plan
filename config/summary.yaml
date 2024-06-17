@@ -116,10 +116,9 @@ templates:
   warning: |
     {{if .Warning}}
     > [!WARNING]
-    {{ $warnings := wrapCode .Warning | splitList "\n" }}
-    {{ range $warnings }}
+    {{ range ( .Warning | splitList "\n") }}
     > {{ . -}}
-    {{- end}}    
+    {{- end}} 
     {{end}}
   error_messages: |
     {{ if eq .ExitCode 1 }}
