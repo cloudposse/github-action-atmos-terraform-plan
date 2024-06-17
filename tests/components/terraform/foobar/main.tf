@@ -18,9 +18,10 @@ locals {
 }
 
 data "validation_warning" "warn" {
+  count     = var.enabled ? 1 : 0
   condition = true
-  summary   = "Test warning"
-  details   = "Test warning"
+  summary   = "Test warning summary"
+  details   = "Test warning details"
 }
 
 provider "validation" {
