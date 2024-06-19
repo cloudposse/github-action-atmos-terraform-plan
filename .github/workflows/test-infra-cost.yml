@@ -130,10 +130,29 @@ jobs:
                 }
             
             Plan: 1 to add, 0 to change, 0 to destroy.
+            
+            Warning: Test warning summary
+            
+              with data.validation_warning.warn[0],
+              on main.tf line 20, in data "validation_warning" "warn":
+              20: data "validation_warning" "warn" {
+            
+            Test warning details
             ```
             
             </details>
             
+            
+            > [!WARNING]
+            > ```
+            > Warning: Test warning summary
+            > 
+            >   with data.validation_warning.warn[0],
+            >   on main.tf line 20, in data "validation_warning" "warn":
+            >   20: data "validation_warning" "warn" {
+            > 
+            > Test warning details
+            > ```
             
                 
             <details><summary>Infracost Estimate: monthly cost will not change</summary>
@@ -145,6 +164,8 @@ jobs:
               ```
             
             </details>
+            
+
 
   teardown:
     runs-on: ubuntu-latest

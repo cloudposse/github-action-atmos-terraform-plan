@@ -16,3 +16,14 @@ resource "random_id" "foo" {
 locals {
   failure = var.enabled && var.enable_failure ? file("Failed because failure mode is enabled") : null
 }
+
+data "validation_warning" "warn" {
+  count     = var.enable_warning ? 1 : 0
+  condition = true
+  summary   = "Test warning summary"
+  details   = "Test warning details"
+}
+
+provider "validation" {
+  # Configuration options
+}
