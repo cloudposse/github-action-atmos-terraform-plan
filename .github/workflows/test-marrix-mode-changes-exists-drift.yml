@@ -1,4 +1,4 @@
-name: "Test - Changes exists - Drift"
+name: "Test - Matrix Mode - Changes exists - Drift"
 
 on:
   workflow_dispatch: {}
@@ -40,14 +40,23 @@ jobs:
           sed -i -e 's#__PLAN_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__APPLY_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
 
+      - name: Plan matrix 2 - Atmos Component
+        uses: ./
+        with:
+          component: "foobar/changes-2"
+          stack: "plat-ue2-sandbox"
+          sha: da39a3ee5e6b4b0d3255bfef95601890afd80709
+          drift-detection-mode-enabled: true
+          atmos-config-path: ${{ runner.temp }}
+          atmos-version: 1.63.0
 
-      - name: Plan Atmos Component
+      - name: Plan matrix 1 - Atmos Component
         id: current
         uses: ./
         with:
           component: "foobar/changes"
           stack: "plat-ue2-sandbox"
-          sha: ${{ github.sha }}
+          sha: da39a3ee5e6b4b0d3255bfef95601890afd80709
           drift-detection-mode-enabled: true
           atmos-config-path: ${{ runner.temp }}
           atmos-version: 1.63.0
@@ -186,31 +195,12 @@ jobs:
                 }
             
             Plan: 1 to add, 0 to change, 0 to destroy.
-            
-            Warning: Test warning summary
-            
-              with data.validation_warning.warn[0],
-              on main.tf line 20, in data "validation_warning" "warn":
-              20: data "validation_warning" "warn" {
-            
-            Test warning details
             ```
             
             </details>
                   
             
             
-            
-            > [!WARNING]
-            > ```
-            > Warning: Test warning summary
-            > 
-            >   with data.validation_warning.warn[0],
-            >   on main.tf line 20, in data "validation_warning" "warn":
-            >   20: data "validation_warning" "warn" {
-            > 
-            > Test warning details
-            > ```
             
             
             <details><summary>Metadata</summary>
@@ -220,7 +210,7 @@ jobs:
               "component": "foobar/changes",
               "stack": "plat-ue2-sandbox",
               "componentPath": "tests/components/terraform/foobar",
-              "commitSHA": "${{ github.sha }}"
+              "commitSHA": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
             }
             ```
             </details>
