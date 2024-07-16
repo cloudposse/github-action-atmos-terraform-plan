@@ -19,6 +19,7 @@ base_path: "./tests/terraform"
 
 components:
   terraform:
+    command: "tofu"
     # Can also be set using `ATMOS_COMPONENTS_TERRAFORM_BASE_PATH` ENV var, or `--terraform-dir` command-line argument
     # Supports both absolute and relative paths
     base_path: "components/terraform"
@@ -67,6 +68,7 @@ workflows:
 integrations:
   github:
     gitops:
+      opentofu-version: 1.7.3
       terraform-version: 1.5.2
       infracost-enabled: __INFRACOST_ENABLED__
       artifact-storage:
