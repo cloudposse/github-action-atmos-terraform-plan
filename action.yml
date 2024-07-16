@@ -151,7 +151,7 @@ runs:
       uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
         repo: suzuki-shunsuke/tfcmt
-        tag: v4.6.0
+        tag: v4.11.0
 
     - name: Prepare Artifacts Directory
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
