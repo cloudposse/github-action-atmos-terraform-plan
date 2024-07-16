@@ -113,7 +113,7 @@ jobs:
         with:
           actual: "${{ fromJSON(steps.metadata.outputs.file_json) }}"
           expected: |
-            { "stack": "plat-ue2-sandbox", "component": "foobar-fail", "componentPath": "tests/components/terraform/foobar", "drifted": false, "error": true }
+            { "stack": "plat-ue2-sandbox", "component": "foobar-fail", "componentPath": "tests/terraform/components/terraform/foobar", "drifted": false, "error": true }
 
       - uses: nick-fields/assert-action@v2
         with:
@@ -177,7 +177,7 @@ jobs:
             {
               "component": "foobar-fail",
               "stack": "plat-ue2-sandbox",
-              "componentPath": "tests/components/terraform/foobar",
+              "componentPath": "tests/terraform/components/terraform/foobar",
               "commitSHA": "${{ github.sha }}"
             }
             ```
