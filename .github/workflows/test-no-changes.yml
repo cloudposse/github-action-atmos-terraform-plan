@@ -48,7 +48,7 @@ jobs:
           stack: "plat-ue2-sandbox"
           sha: ${{ github.sha }}
           atmos-config-path: ${{ runner.temp }}
-          atmos-version: 1.63.0
+          atmos-version: 1.81.0
 
     outputs:
       result: ${{ steps.current.outcome }}
