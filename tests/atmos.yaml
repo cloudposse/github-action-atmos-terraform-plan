@@ -67,7 +67,6 @@ workflows:
 integrations:
   github:
     gitops:
-      opentofu-version: 
       terraform-version: 1.5.2
       infracost-enabled: __INFRACOST_ENABLED__
       artifact-storage:
