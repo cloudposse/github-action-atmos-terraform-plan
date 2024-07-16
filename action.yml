@@ -129,6 +129,15 @@ runs:
         stack: ${{ inputs.stack }}
         settings-path: atmos_cli_config.base_path
 
+    - name: Find command in config
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      uses: cloudposse/github-action-atmos-get-setting@v1
+      id: command
+      with:
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        settings-path: command
+
     - name: Set atmos cli base path vars
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       shell: bash
@@ -306,7 +315,7 @@ runs:
       shell: bash
       working-directory: ./${{ steps.vars.outputs.component_path }}
       run: |
-        terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
+        ${{ steps.command.outputs.value }} show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Generate Infracost Diff
       if: ${{ steps.config.outputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}

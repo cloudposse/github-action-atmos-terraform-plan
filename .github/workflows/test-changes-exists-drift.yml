@@ -30,7 +30,7 @@ jobs:
       - shell: bash
         run: |
           mkdir -p ${{ runner.temp }}
-          cp ./tests/terraform/atmos.yaml ${{ runner.temp }}/atmos.yaml
+          cp ./tests/opentofu/atmos.yaml ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__INFRACOST_ENABLED__#false#g' ${{ runner.temp }}/atmos.yaml          
           sed -i -e 's#__STORAGE_REGION__#${{ env.AWS_REGION }}#g' ${{ runner.temp }}/atmos.yaml          
           sed -i -e 's#__STORAGE_BUCKET__#${{ secrets.TERRAFORM_STATE_BUCKET }}#g' ${{ runner.temp }}/atmos.yaml
@@ -129,7 +129,7 @@ jobs:
         with:
           actual: "${{ fromJSON(steps.metadata.outputs.file_json) }}"
           expected: |
-            { "stack": "plat-ue2-sandbox", "component": "foobar/changes", "componentPath": "tests/terraform/components/terraform/foobar", "drifted": true, "error": false }
+            { "stack": "plat-ue2-sandbox", "component": "foobar/changes", "componentPath": "tests/opentofu/components/terraform/foobar", "drifted": true, "error": false }
 
       - uses: nick-fields/assert-action@v2
         with:
@@ -219,7 +219,7 @@ jobs:
             {
               "component": "foobar/changes",
               "stack": "plat-ue2-sandbox",
-              "componentPath": "tests/terraform/components/terraform/foobar",
+              "componentPath": "tests/opentofu/components/terraform/foobar",
               "commitSHA": "${{ github.sha }}"
             }
             ```
