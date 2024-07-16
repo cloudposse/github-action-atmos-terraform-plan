@@ -80,6 +80,7 @@ runs:
       shell: bash
       id: config
       run: |-
+        echo "opentofu-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["opentofu-version"]')" >> $GITHUB_OUTPUT
         echo "terraform-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["terraform-version"]')" >> $GITHUB_OUTPUT
         echo "enable-infracost=$(atmos describe config -f json | jq -r '.integrations.github.gitops["infracost-enabled"]')" >> $GITHUB_OUTPUT        
         echo "aws-region=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].region')" >> $GITHUB_OUTPUT
@@ -89,10 +90,18 @@ runs:
         echo "terraform-plan-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops.role.plan')" >> $GITHUB_OUTPUT
 
     - name: Install Terraform
+      if: ${{ steps.config.outputs.terraform-version != '' && steps.config.outputs.terraform-version != 'null' }}
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{ steps.config.outputs.terraform-version }}
         terraform_wrapper: false
+
+    - name: Install OpenTofu
+      if: ${{ steps.config.outputs.opentofu-version != '' && steps.config.outputs.opentofu-version != 'null' }}
+      uses: opentofu/setup-opentofu@v1
+      with:
+        tofu_version: ${{ steps.config.outputs.opentofu-version }}
+        tofu_wrapper: false
 
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v1

@@ -64,9 +64,13 @@ workflows:
   # Supports both absolute and relative paths
   base_path: "stacks/workflows"
 
+aliases:
+  tofu: terraform
+
 integrations:
   github:
     gitops:
+      opentofu-version: 1.7.3
       terraform-version: 1.5.2
       infracost-enabled: __INFRACOST_ENABLED__
       artifact-storage:
