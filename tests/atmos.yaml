@@ -19,6 +19,7 @@ base_path: "./tests"
 
 components:
   terraform:
+    command: "tofu"
     # Can also be set using `ATMOS_COMPONENTS_TERRAFORM_BASE_PATH` ENV var, or `--terraform-dir` command-line argument
     # Supports both absolute and relative paths
     base_path: "components/terraform"
