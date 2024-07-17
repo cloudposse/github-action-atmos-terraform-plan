@@ -83,7 +83,7 @@ usage: |-
 
   ### Support OpenTofu
   
-  This action supports [OpenTofu]().
+  This action supports [OpenTofu](https://opentofu.org/).
   
   > [!IMPORTANT]
   > **Please note!** OpenTofu supported by Atmos `>= 1.73.0`.
