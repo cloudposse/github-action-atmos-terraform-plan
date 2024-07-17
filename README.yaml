@@ -89,7 +89,7 @@ usage: |-
   > **Please note!** OpenTofu supported by Atmos `>= 1.73.0`.
   > For details [read](https://atmos.tools/core-concepts/projects/configuration/opentofu/)
   
-  To enable OpenTofu add the following settings to `atmos.yamk`
+  To enable OpenTofu add the following settings to `atmos.yaml`
     * Set the `opentofu-version` in the `atmos.yaml` to the desired version
     * Set `components.terraform.command` to `tofu`
   
