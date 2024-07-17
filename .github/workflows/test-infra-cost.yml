@@ -30,7 +30,7 @@ jobs:
       - shell: bash
         run: |
           mkdir -p ${{ runner.temp }}
-          cp ./tests/atmos.yaml ${{ runner.temp }}/atmos.yaml
+          cp ./tests/terraform/atmos.yaml ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__INFRACOST_ENABLED__#true#g' ${{ runner.temp }}/atmos.yaml          
           sed -i -e 's#__STORAGE_REGION__#${{ env.AWS_REGION }}#g' ${{ runner.temp }}/atmos.yaml          
           sed -i -e 's#__STORAGE_BUCKET__#${{ secrets.TERRAFORM_STATE_BUCKET }}#g' ${{ runner.temp }}/atmos.yaml
@@ -51,7 +51,7 @@ jobs:
           infracost-api-key: ${{ secrets.INFRACOST_API_KEY }}
           debug: true
           atmos-config-path: ${{ runner.temp }}
-          atmos-version: 1.63.0
+          atmos-version: 1.81.0
 
     outputs:
       result: ${{ steps.current.outcome }}

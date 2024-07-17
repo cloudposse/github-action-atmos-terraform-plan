@@ -1,0 +1,9 @@
+components:
+  terraform:
+    foobar:
+      settings:
+        github:
+          actions_enabled: true
+      vars:
+        example: blue
+        enabled: false
