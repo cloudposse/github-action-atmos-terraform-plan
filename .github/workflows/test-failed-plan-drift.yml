@@ -30,7 +30,7 @@ jobs:
       - shell: bash
         run: |
           mkdir -p ${{ runner.temp }}
-          cp ./tests/atmos.yaml ${{ runner.temp }}/atmos.yaml
+          cp ./tests/terraform/atmos.yaml ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__INFRACOST_ENABLED__#false#g' ${{ runner.temp }}/atmos.yaml          
           sed -i -e 's#__STORAGE_REGION__#${{ env.AWS_REGION }}#g' ${{ runner.temp }}/atmos.yaml          
           sed -i -e 's#__STORAGE_BUCKET__#${{ secrets.TERRAFORM_STATE_BUCKET }}#g' ${{ runner.temp }}/atmos.yaml
@@ -50,7 +50,7 @@ jobs:
           sha: ${{ github.sha }}
           drift-detection-mode-enabled: true
           atmos-config-path: ${{ runner.temp }}
-          atmos-version: 1.63.0
+          atmos-version: 1.81.0
 
     outputs:
       result: ${{ steps.current.outcome }}
@@ -113,7 +113,7 @@ jobs:
         with:
           actual: "${{ fromJSON(steps.metadata.outputs.file_json) }}"
           expected: |
-            { "stack": "plat-ue2-sandbox", "component": "foobar-fail", "componentPath": "tests/components/terraform/foobar", "drifted": false, "error": true }
+            { "stack": "plat-ue2-sandbox", "component": "foobar-fail", "componentPath": "tests/terraform/components/terraform/foobar", "drifted": false, "error": true }
 
       - uses: nick-fields/assert-action@v2
         with:
@@ -177,7 +177,7 @@ jobs:
             {
               "component": "foobar-fail",
               "stack": "plat-ue2-sandbox",
-              "componentPath": "tests/components/terraform/foobar",
+              "componentPath": "tests/terraform/components/terraform/foobar",
               "commitSHA": "${{ github.sha }}"
             }
             ```
