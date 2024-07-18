@@ -5,6 +5,9 @@ branding:
   icon: 'server'
   color: 'white'
 inputs:
+  profile-name:
+    description: "The name of the aws profile to pass to the provider."
+    required: false
   component:
     description: "The name of the component to plan."
     required: true
@@ -177,6 +180,13 @@ runs:
         role-session-name: "atmos-terraform-plan-gitops"
         mask-aws-account-id: "no"
 
+    - name: Add profile credentials to ~/.aws/credentials 
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && inputs.profile-name }} 
+      uses: mcblair/configure-aws-profile-action@v1.0.0
+      with:
+        role-arn: ${{ steps.config.outputs.terraform-plan-role }}
+        profile-name: ${{ inputs.profile-name }}
+        
     - name: Atmos Terraform Plan
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       id: atmos-plan
