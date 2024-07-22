@@ -1,4 +1,4 @@
-name: "Test - Failed plan - Drift"
+name: "Test - Matrix Mode - Changes exists - Drift"
 
 on:
   workflow_dispatch: {}
@@ -30,7 +30,7 @@ jobs:
       - shell: bash
         run: |
           mkdir -p ${{ runner.temp }}
-          cp ./tests/terraform/atmos.yaml ${{ runner.temp }}/atmos.yaml
+          cp ./tests/atmos.yaml ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__INFRACOST_ENABLED__#false#g' ${{ runner.temp }}/atmos.yaml          
           sed -i -e 's#__STORAGE_REGION__#${{ env.AWS_REGION }}#g' ${{ runner.temp }}/atmos.yaml          
           sed -i -e 's#__STORAGE_BUCKET__#${{ secrets.TERRAFORM_STATE_BUCKET }}#g' ${{ runner.temp }}/atmos.yaml
@@ -40,17 +40,26 @@ jobs:
           sed -i -e 's#__PLAN_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__APPLY_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
 
+      - name: Plan matrix 2 - Atmos Component
+        uses: ./
+        with:
+          component: "foobar/changes-2"
+          stack: "plat-ue2-sandbox"
+          sha: da39a3ee5e6b4b0d3255bfef95601890afd80709
+          drift-detection-mode-enabled: true
+          atmos-config-path: ${{ runner.temp }}
+          atmos-version: 1.63.0
 
-      - name: Plan Atmos Component
+      - name: Plan matrix 1 - Atmos Component
         id: current
         uses: ./
         with:
-          component: "foobar-fail"
+          component: "foobar/changes"
           stack: "plat-ue2-sandbox"
-          sha: ${{ github.sha }}
+          sha: da39a3ee5e6b4b0d3255bfef95601890afd80709
           drift-detection-mode-enabled: true
           atmos-config-path: ${{ runner.temp }}
-          atmos-version: 1.81.0
+          atmos-version: 1.63.0
 
     outputs:
       result: ${{ steps.current.outcome }}
@@ -62,7 +71,7 @@ jobs:
     steps:
       - uses: nick-fields/assert-action@v2
         with:
-          expected: 'failure'
+          expected: 'success'
           actual: "${{ needs.test.outputs.result }}"
 
       - name: Download Artifacts
@@ -77,17 +86,23 @@ jobs:
           DIR_EXISTS=$?
           echo "dir_exists=${DIR_EXISTS}" >> $GITHUB_OUTPUT
 
-          test -f ./metadata/plat-ue2-sandbox-foobar-fail.metadata.json
+          test -f ./metadata/plat-ue2-sandbox-foobar_changes.metadata.json
           FILE_EXISTS=$?
           echo "file_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
 
-          test -f ./metadata/issue-description-plat-ue2-sandbox-foobar-fail.md
+          test -f ./metadata/step-summary-plat-ue2-sandbox-foobar_changes.md
+          FILE_EXISTS=$?
+          echo "file_summary_md_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
+
+          test -f ./metadata/issue-description-plat-ue2-sandbox-foobar_changes.md
           FILE_EXISTS=$?
           echo "file_md_exists=${FILE_EXISTS}" >> $GITHUB_OUTPUT
           
-          echo "file_md=$(cat ./metadata/issue-description-plat-ue2-sandbox-foobar-fail.md | jq -Rs .)" >> $GITHUB_OUTPUT
+          echo "file_md=$(cat ./metadata/issue-description-plat-ue2-sandbox-foobar_changes.md | jq -Rs .)" >> $GITHUB_OUTPUT
           
-          echo "file_json=$(cat ./metadata/plat-ue2-sandbox-foobar-fail.metadata.json | jq -Rs . )" >> $GITHUB_OUTPUT          
+          echo "file_json=$(cat ./metadata/plat-ue2-sandbox-foobar_changes.metadata.json | jq -Rs . )" >> $GITHUB_OUTPUT
+          
+          echo files_json_count=$(ls -lA ./metadata/*.json | wc -l) >> $GITHUB_OUTPUT
 
       - uses: nick-fields/assert-action@v2
         with:
@@ -106,66 +121,83 @@ jobs:
 
       - uses: nick-fields/assert-action@v2
         with:
+          actual: "${{ steps.metadata.outputs.file_summary_md_exists }}"
+          expected: "0"
+
+      - uses: nick-fields/assert-action@v2
+        with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: "${{ fromJSON(steps.metadata.outputs.file_md) }}"
 
       - uses: nick-fields/assert-action@v2
         with:
+          actual: "${{ steps.metadata.outputs.files_json_count }}"
+          expected: "1"
+
+      - uses: nick-fields/assert-action@v2
+        with:
           actual: "${{ fromJSON(steps.metadata.outputs.file_json) }}"
           expected: |
-            { "stack": "plat-ue2-sandbox", "component": "foobar-fail", "componentPath": "tests/terraform/components/terraform/foobar", "drifted": false, "error": true }
+            { "stack": "plat-ue2-sandbox", "component": "foobar/changes", "componentPath": "tests/components/terraform/foobar", "drifted": true, "error": false }
 
       - uses: nick-fields/assert-action@v2
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
-            ## Drift Detection Failed for `foobar-fail` in `plat-ue2-sandbox`!
+            ## Drift Detected for `foobar/changes` in `plat-ue2-sandbox`
             
             
             
             <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
             
-            
-            [![failed](https://shields.io/badge/PLAN-FAILED-ff0000?style=for-the-badge)](#user-content-result-plat-ue2-sandbox-foobar-fail)
-            
+            [![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#user-content-create-plat-ue2-sandbox-foobar_changes)
             
             
             
             
-            <details><summary><a id="result-plat-ue2-sandbox-foobar-fail" />:warning: Error summary</summary>
+            
+            <details><summary><a id="result-plat-ue2-sandbox-foobar_changes" />Plan: 1 to add, 0 to change, 0 to destroy.</summary>
             
             <br/>      
             To reproduce this locally, run:<br/><br/>
             
             ```shell
-            atmos terraform plan foobar-fail -s plat-ue2-sandbox
+            atmos terraform plan foobar/changes -s plat-ue2-sandbox
             ```
-            
-            ---
-            
-            ```hcl
-            Error: Invalid function argument
-            
-              on main.tf line 17, in locals:
-              17:   failure = var.enabled && var.enable_failure ? file("Failed because failure mode is enabled") : null
-                ├────────────────
-                │ while calling file(path)
-            
-            Invalid value for "path" parameter: no file exists at "Failed because failure
-            mode is enabled"; this function works only with files that are distributed as
-            part of the configuration source code, so if this file will be created by a
-            resource in this configuration you must instead obtain this result from an
-            attribute of that resource.
-            exit status 1
-            ```
-            
                 
             
             
+                
+            ---
+            ### <a id="create-plat-ue2-sandbox-foobar_changes" />Create
+            ```diff
+            + random_id.foo[0]
+            ```
                 
             </details>
             
             
+            <details><summary>Terraform <strong>Plan</strong> Summary</summary>
+            
+            ```hcl
+            
+              # random_id.foo[0] will be created
+              + resource "random_id" "foo" {
+                  + b64_std     = (known after apply)
+                  + b64_url     = (known after apply)
+                  + byte_length = 8
+                  + dec         = (known after apply)
+                  + hex         = (known after apply)
+                  + id          = (known after apply)
+                  + keepers     = {
+                      + "seed" = "foo-plat-ue2-sandbox-blue"
+                    }
+                }
+            
+            Plan: 1 to add, 0 to change, 0 to destroy.
+            ```
+            
+            </details>
                   
             
             
@@ -175,10 +207,10 @@ jobs:
             
             ```json
             {
-              "component": "foobar-fail",
+              "component": "foobar/changes",
               "stack": "plat-ue2-sandbox",
-              "componentPath": "tests/terraform/components/terraform/foobar",
-              "commitSHA": "${{ github.sha }}"
+              "componentPath": "tests/components/terraform/foobar",
+              "commitSHA": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
             }
             ```
             </details>
