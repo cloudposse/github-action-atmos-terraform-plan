@@ -405,7 +405,7 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && inputs.drift-detection-mode-enabled == 'true' }}
       uses: actions/upload-artifact@v4
       with:
-        name: metadata
+        name: metadata-${{ github.run_id }}
         path: metadata
         retention-days: ${{ inputs.metadata-retention-days }}
 
