@@ -2,7 +2,6 @@ import:
   - catalog/foobar
   - catalog/foobar-fail
   - catalog/foobar-changes
-  - catalog/foobar-changes-2
   - catalog/foobar-disabled
 
 terraform:
