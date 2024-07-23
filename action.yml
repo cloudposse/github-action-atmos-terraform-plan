@@ -148,7 +148,7 @@ runs:
 
     - name: Install tfcmt
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      uses: jaxxstorm/action-install-gh-release@v1.11.0
+      uses: jaxxstorm/action-install-gh-release@v1.12.0
       with:
         repo: suzuki-shunsuke/tfcmt
         tag: v4.11.0
