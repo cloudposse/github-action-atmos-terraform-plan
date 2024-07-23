@@ -405,7 +405,10 @@ runs:
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && inputs.drift-detection-mode-enabled == 'true' }}
       uses: actions/upload-artifact@v4
       with:
-        name: metadata-${{ github.run_id }}-${{ github.job }}
+        # The name of the artifact needs to be unique for every job run.
+        # This name is filtered in cloudposse/github-action-atmos-terraform-drift-detection
+        # by the "metadata-*" prefix
+        name: metadata-${{ github.run_id }}-${{ inputs.stack }}-${{ inputs.component }} 
         path: metadata
         retention-days: ${{ inputs.metadata-retention-days }}
 
