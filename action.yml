@@ -403,6 +403,7 @@ runs:
 
     - name: Generate a unique id
       id: generate
+      shell: bash
       run: |
         echo "rand=$(openssl rand -hex 5)" >> "$GITHUB_OUTPUT"
 
