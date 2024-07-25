@@ -214,6 +214,7 @@ runs:
           ./${{ steps.vars.outputs.component_path }}/.terraform/modules
           ./${{ steps.vars.outputs.component_path }}/.terraform/providers
         key: ${{ steps.vars.outputs.component_name }}
+        save-always: true
 
     - name: Atmos Terraform Plan
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
