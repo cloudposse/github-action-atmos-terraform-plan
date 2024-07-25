@@ -282,7 +282,7 @@ runs:
 
     - name: Cache .terraform
       id: cache-save
-      uses: actions/cache/restore@v4
+      uses: actions/cache/save@v4
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       with:
         path: |
