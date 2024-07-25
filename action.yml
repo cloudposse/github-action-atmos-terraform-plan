@@ -195,26 +195,15 @@ runs:
         role-session-name: "atmos-terraform-plan-gitops"
         mask-aws-account-id: "no"
 
-#    - name: Restore .terraform from cache
-#      id: cache-restore
-#      uses: actions/cache/restore@v4
-#      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-#      with:
-#        path: |
-#          ./${{ steps.vars.outputs.component_path }}/.terraform/modules
-#          ./${{ steps.vars.outputs.component_path }}/.terraform/providers
-#        key: ${{ steps.vars.outputs.component_name }}
-
     - name: Restore .terraform from cache
-      id: cache
-      uses: actions/cache@v4
+      id: cache-restore
+      uses: actions/cache/restore@v4
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       with:
         path: |
           ./${{ steps.vars.outputs.component_path }}/.terraform/modules
           ./${{ steps.vars.outputs.component_path }}/.terraform/providers
         key: ${{ steps.vars.outputs.component_name }}
-        save-always: true
 
     - name: Atmos Terraform Plan
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
@@ -291,15 +280,27 @@ runs:
         
         rm -f ${TERRAFORM_OUTPUT_FILE}
 
-#    - name: Cache .terraform
-#      id: cache-save
-#      uses: actions/cache/save@v4
-#      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-#      with:
-#        path: |
-#          ./${{ steps.vars.outputs.component_path }}/.terraform/modules
-#          ./${{ steps.vars.outputs.component_path }}/.terraform/providers
-#        key: ${{ steps.cache-restore.outputs.cache-primary-key }}
+    # only execute this step when cache was restored
+    # do not fail hard here, as the $KEY might not exist; cache could have been restored from $KEY-something
+    - name: clear
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && steps.cache-restore.outputs.cache-hit }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh extension install actions/gh-actions-cache
+        gh actions-cache delete ${{ steps.cache-restore.outputs.cache-primary-key }} --confirm
+      continue-on-error: true
+
+    - name: Cache .terraform
+      id: cache-save
+      uses: actions/cache/save@v4
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      with:
+        path: |
+          ./${{ steps.vars.outputs.component_path }}/.terraform/modules
+          ./${{ steps.vars.outputs.component_path }}/.terraform/providers
+        key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
     - name: Configure State AWS Credentials
       if: ${{ steps.atmos-plan.outputs.error == 'false' }}
