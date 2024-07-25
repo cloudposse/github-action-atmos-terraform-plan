@@ -282,6 +282,13 @@ runs:
         
         rm -f ${TERRAFORM_OUTPUT_FILE}
 
+    - name: Install gh
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      uses: jaxxstorm/action-install-gh-release@v1.11.0
+      with:
+        repo: cli/cli
+        tag: v2.53.0
+
     - name: clear
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && steps.cache-restore.outputs.cache-hit }}
       shell: bash
