@@ -195,9 +195,19 @@ runs:
         role-session-name: "atmos-terraform-plan-gitops"
         mask-aws-account-id: "no"
 
+#    - name: Restore .terraform from cache
+#      id: cache-restore
+#      uses: actions/cache/restore@v4
+#      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+#      with:
+#        path: |
+#          ./${{ steps.vars.outputs.component_path }}/.terraform/modules
+#          ./${{ steps.vars.outputs.component_path }}/.terraform/providers
+#        key: ${{ steps.vars.outputs.component_name }}
+
     - name: Restore .terraform from cache
-      id: cache-restore
-      uses: actions/cache/restore@v4
+      id: cache
+      uses: actions/cache@v4
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       with:
         path: |
@@ -280,15 +290,15 @@ runs:
         
         rm -f ${TERRAFORM_OUTPUT_FILE}
 
-    - name: Cache .terraform
-      id: cache-save
-      uses: actions/cache/save@v4
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      with:
-        path: |
-          ./${{ steps.vars.outputs.component_path }}/.terraform/modules
-          ./${{ steps.vars.outputs.component_path }}/.terraform/providers
-        key: ${{ steps.cache-restore.outputs.cache-primary-key }}
+#    - name: Cache .terraform
+#      id: cache-save
+#      uses: actions/cache/save@v4
+#      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+#      with:
+#        path: |
+#          ./${{ steps.vars.outputs.component_path }}/.terraform/modules
+#          ./${{ steps.vars.outputs.component_path }}/.terraform/providers
+#        key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
     - name: Configure State AWS Credentials
       if: ${{ steps.atmos-plan.outputs.error == 'false' }}
