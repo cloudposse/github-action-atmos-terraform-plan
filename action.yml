@@ -198,7 +198,7 @@ runs:
         mask-aws-account-id: "no"
 
     - name: Cache .terraform
-      id: cache-restore
+      id: cache
       uses: actions/cache@v4
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       with:
