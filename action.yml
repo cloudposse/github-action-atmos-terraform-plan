@@ -168,6 +168,7 @@ runs:
         COMPONENT_PATH=${{ steps.component-path.outputs.value }}
         COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
         COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
+        COMPONENT_CACHE_KEY=$(basename "${{ steps.component-path.outputs.value }}") 
         PLAN_FILE="$( realpath ${COMPONENT_PATH})/$COMPONENT_SLUG-${{ inputs.sha }}.planfile"
         LOCK_FILE="$( realpath ${COMPONENT_PATH})/.terraform.lock.hcl"
 
@@ -179,6 +180,7 @@ runs:
         echo "component_name=${COMPONENT_NAME}" >> $GITHUB_OUTPUT
         echo "component_slug=${COMPONENT_SLUG}" >> $GITHUB_OUTPUT
         echo "component_path=${COMPONENT_PATH}" >> $GITHUB_OUTPUT
+        echo "cache-key=${COMPONENT_CACHE_KEY}" >> $GITHUB_OUTPUT
         echo "plan_file=${PLAN_FILE}" >> $GITHUB_OUTPUT
         echo "lock_file=${LOCK_FILE}" >> $GITHUB_OUTPUT
 
@@ -203,7 +205,7 @@ runs:
         path: |
           ./${{ steps.vars.outputs.component_path }}/.terraform/modules
           ./${{ steps.vars.outputs.component_path }}/.terraform/providers
-        key: ${{ steps.vars.outputs.component_name }}
+        key: ${{ steps.vars.outputs.cache-key }}
 
     - name: Atmos Terraform Plan
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
@@ -280,8 +282,6 @@ runs:
         
         rm -f ${TERRAFORM_OUTPUT_FILE}
 
-    # only execute this step when cache was restored
-    # do not fail hard here, as the $KEY might not exist; cache could have been restored from $KEY-something
     - name: clear
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && steps.cache-restore.outputs.cache-hit }}
       shell: bash
