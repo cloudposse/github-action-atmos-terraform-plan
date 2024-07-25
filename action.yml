@@ -197,9 +197,9 @@ runs:
         role-session-name: "atmos-terraform-plan-gitops"
         mask-aws-account-id: "no"
 
-    - name: Restore .terraform from cache
+    - name: Cache .terraform
       id: cache-restore
-      uses: actions/cache/restore@v4
+      uses: actions/cache@v4
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       with:
         path: |
@@ -281,33 +281,6 @@ runs:
         echo "result=${TERRAFORM_RESULT}" >> $GITHUB_OUTPUT
         
         rm -f ${TERRAFORM_OUTPUT_FILE}
-
-    - name: Install gh
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      uses: jaxxstorm/action-install-gh-release@v1.11.0
-      with:
-        repo: cli/cli
-        tag: v2.53.0
-
-    - name: clear
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && steps.cache-restore.outputs.cache-hit }}
-      shell: bash
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        gh extension install actions/gh-actions-cache
-        gh actions-cache delete ${{ steps.cache-restore.outputs.cache-primary-key }} --confirm
-      continue-on-error: true
-
-    - name: Cache .terraform
-      id: cache-save
-      uses: actions/cache/save@v4
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      with:
-        path: |
-          ./${{ steps.vars.outputs.component_path }}/.terraform/modules
-          ./${{ steps.vars.outputs.component_path }}/.terraform/providers
-        key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
     - name: Configure State AWS Credentials
       if: ${{ steps.atmos-plan.outputs.error == 'false' }}
