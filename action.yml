@@ -74,6 +74,7 @@ runs:
       with:
         repo: cloudposse/atmos
         tag: ${{ inputs.atmos-version }}
+        extension: ""
         cache: enable
     
     - name: config
