@@ -73,7 +73,7 @@ runs:
       uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
         repo: cloudposse/atmos
-        tag: v${{ inputs.atmos-version }}
+        tag: ${{ startsWith(inputs.atmos-version, 'v') && inputs.atmos-version || format('v{0}', inputs.atmos-version) }}
         extension-matching: false
         rename-to: atmos
         chmod: "0755"
@@ -104,7 +104,7 @@ runs:
       uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
         repo: opentofu/opentofu
-        tag: v${{ steps.config.outputs.opentofu-version }}
+        tag: ${{ startsWith(steps.config.outputs.opentofu-version, 'v') && steps.config.outputs.opentofu-version || format('v{0}', steps.config.outputs.opentofu-version) }}
         cache: enable
 
     - name: Get atmos settings
