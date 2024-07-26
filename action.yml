@@ -70,12 +70,12 @@ runs:
         echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ inputs.atmos-config-path }})" >> $GITHUB_ENV
 
     - name: Install Atmos
-      uses: cloudposse/github-action-setup-atmos@v2
+      uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
-        atmos-version: ${{ inputs.atmos-version }}
-        token: ${{ inputs.token }}
-        install-wrapper: false
-
+        repo: cloudposse/atmos
+        tag: v${{ inputs.atmos-version }}
+        cache: enable
+    
     - name: config
       shell: bash
       id: config
@@ -102,6 +102,7 @@ runs:
       with:
         repo: opentofu/opentofu
         tag: v${{ steps.config.outputs.opentofu-version }}
+        cache: enable
 
     - name: Get atmos settings
       uses: cloudposse/github-action-atmos-get-setting@v1
@@ -139,6 +140,7 @@ runs:
       with:
         repo: suzuki-shunsuke/tfcmt
         tag: v4.11.0
+        cache: enable
 
     - name: Prepare Artifacts Directory
       if: ${{ fromJson(steps.component.outputs.settings).enabled }}
