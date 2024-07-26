@@ -185,13 +185,12 @@ runs:
         mask-aws-account-id: "no"
 
     - name: Cache .terraform
-      id: cache-restore
+      id: cache
       uses: actions/cache@v4
       if: ${{ steps.component.outputs.settings.enabled == 'true' }}
       with:
         path: |
-          ./${{ steps.vars.outputs.component_path }}/.terraform/modules
-          ./${{ steps.vars.outputs.component_path }}/.terraform/providers
+          ./${{ steps.vars.outputs.component_path }}/.terraform
         key: ${{ steps.vars.outputs.cache-key }}
 
     - name: Atmos Terraform Plan
