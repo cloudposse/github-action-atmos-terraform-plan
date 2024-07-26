@@ -91,10 +91,10 @@ runs:
 
     - name: Install Terraform
       if: ${{ steps.config.outputs.terraform-version != '' && steps.config.outputs.terraform-version != 'null' }}
-      uses: jaxxstorm/action-install-gh-release@v1.11.0
+      uses: hashicorp/setup-terraform@v3
       with:
-        repo: hashicorp/terraform
-        tag: v${{ steps.config.outputs.terraform-version }}
+        terraform_version: ${{ steps.config.outputs.terraform-version }}
+        terraform_wrapper: false
 
     - name: Install OpenTofu
       if: ${{ steps.config.outputs.opentofu-version != '' && steps.config.outputs.opentofu-version != 'null' }}
