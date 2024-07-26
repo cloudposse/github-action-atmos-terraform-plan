@@ -128,8 +128,8 @@ runs:
     - name: Test
       shell: bash
       run: |
-        echo "${{ steps.component.outputs.settings }}"
-      
+        echo "${{ fromJson(steps.component.outputs.settings).enabled }}"
+
     - name: Set atmos cli base path vars
       if: ${{ fromJson(steps.component.outputs.settings).enabled == 'true' }}
       shell: bash
