@@ -125,11 +125,6 @@ runs:
             settingsPath: command
             outputPath: command
 
-    - name: Test
-      shell: bash
-      run: |
-        echo "${{ fromJson(steps.component.outputs.settings).component-path }}"
-
     - name: Set atmos cli base path vars
       if: ${{ fromJson(steps.component.outputs.settings).enabled }}
       shell: bash
