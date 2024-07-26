@@ -75,6 +75,7 @@ runs:
         repo: cloudposse/atmos
         tag: v${{ inputs.atmos-version }}
         extension-matching: false
+        rename-to: atmos
         cache: enable
     
     - name: config
