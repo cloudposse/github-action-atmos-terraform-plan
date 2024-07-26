@@ -73,7 +73,7 @@ runs:
       uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
         repo: cloudposse/atmos
-        tag: ${{ inputs.atmos-version }}
+        tag: v${{ inputs.atmos-version }}
         extension-matching: false
         cache: enable
     
