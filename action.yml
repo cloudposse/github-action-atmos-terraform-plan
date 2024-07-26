@@ -76,6 +76,7 @@ runs:
         tag: v${{ inputs.atmos-version }}
         extension-matching: false
         rename-to: atmos
+        chmod: "0755"
         cache: enable
     
     - name: config
