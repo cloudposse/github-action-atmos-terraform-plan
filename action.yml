@@ -103,72 +103,59 @@ runs:
         tofu_version: ${{ steps.config.outputs.opentofu-version }}
         tofu_wrapper: false
 
-    - name: Filter Atmos Settings Value
+    - name: Get atmos settings
       uses: cloudposse/github-action-atmos-get-setting@v1
-      id: atmos-github-actions-enabled
+      id: component
       with:
-        component: ${{ inputs.component }}
-        stack: ${{ inputs.stack }}
-        settings-path: settings.github.actions_enabled
-
-    - name: Find component path
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      uses: cloudposse/github-action-atmos-get-setting@v1
-      id: component-path
-      with:
-        component: ${{ inputs.component }}
-        stack: ${{ inputs.stack }}
-        settings-path: component_info.component_path
-
-    - name: Find atmos cli base path
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      uses: cloudposse/github-action-atmos-get-setting@v1
-      id: base-path
-      with:
-        component: ${{ inputs.component }}
-        stack: ${{ inputs.stack }}
-        settings-path: atmos_cli_config.base_path
-
-    - name: Find command in config
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
-      uses: cloudposse/github-action-atmos-get-setting@v1
-      id: command
-      with:
-        component: ${{ inputs.component }}
-        stack: ${{ inputs.stack }}
-        settings-path: command
+        settings: |
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: settings.github.actions_enabled
+            outputPath: enabled
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: component_info.component_path
+            outputPath: component-path
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: atmos_cli_config.base_path
+            outputPath: base-path
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: command
+            outputPath: command
 
     - name: Set atmos cli base path vars
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.component.outputs.settings.enabled == 'true' }}
       shell: bash
       run: |-
         # Set ATMOS_BASE_PATH allow `cloudposse/utils` provider to read atmos config from the correct path 
-        ATMOS_BASE_PATH="${{ steps.base-path.outputs.value }}"
+        ATMOS_BASE_PATH="${{ steps.component.outputs.settings.base-path }}"
         echo "ATMOS_BASE_PATH=$(realpath ${ATMOS_BASE_PATH:-./})" >> $GITHUB_ENV
 
     - name: Install tfcmt
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.component.outputs.settings.enabled == 'true' }}
       uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
         repo: suzuki-shunsuke/tfcmt
         tag: v4.11.0
 
     - name: Prepare Artifacts Directory
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.component.outputs.settings.enabled == 'true' }}
       shell: bash
       run: |
         mkdir -p metadata    
 
     - name: Define Job Variables
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.component.outputs.settings.enabled == 'true' }}
       id: vars
       shell: bash
       run: |
         STACK_NAME=$(echo "${{ inputs.stack }}" | sed 's#/#_#g')
-        COMPONENT_PATH=${{ steps.component-path.outputs.value }}
+        COMPONENT_PATH=${{ steps.component.outputs.settings.component-path }}
         COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
         COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
-        COMPONENT_CACHE_KEY=$(basename "${{ steps.component-path.outputs.value }}") 
+        COMPONENT_CACHE_KEY=$(basename "${{ steps.component.outputs.settings.component-path }}") 
         PLAN_FILE="$( realpath ${COMPONENT_PATH})/$COMPONENT_SLUG-${{ inputs.sha }}.planfile"
         LOCK_FILE="$( realpath ${COMPONENT_PATH})/.terraform.lock.hcl"
 
@@ -189,7 +176,7 @@ runs:
         echo "issue_file=${ISSUE_SUMMARY_FILE}" >> $GITHUB_OUTPUT
 
     - name: Configure Plan AWS Credentials
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.component.outputs.settings.enabled == 'true' }}
       uses: aws-actions/configure-aws-credentials@v4.0.2
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}
@@ -200,7 +187,7 @@ runs:
     - name: Cache .terraform
       id: cache-restore
       uses: actions/cache@v4
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.component.outputs.settings.enabled == 'true' }}
       with:
         path: |
           ./${{ steps.vars.outputs.component_path }}/.terraform/modules
@@ -208,7 +195,7 @@ runs:
         key: ${{ steps.vars.outputs.cache-key }}
 
     - name: Atmos Terraform Plan
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.component.outputs.settings.enabled == 'true' }}
       id: atmos-plan
       shell: bash
       run: |
@@ -327,7 +314,7 @@ runs:
       shell: bash
       working-directory: ./${{ steps.vars.outputs.component_path }}
       run: |
-        ${{ steps.command.outputs.value }} show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
+        ${{ steps.component.outputs.settings.command }} show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Generate Infracost Diff
       if: ${{ steps.config.outputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
@@ -376,7 +363,7 @@ runs:
 
 
     - name: Store Component Metadata to Artifacts
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && inputs.drift-detection-mode-enabled == 'true' }}
+      if: ${{ steps.component.outputs.settings.enabled == 'true' && inputs.drift-detection-mode-enabled == 'true' }}
       shell: bash
       run: |
         echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ steps.vars.outputs.component_path }}", "drifted": '"${{ steps.atmos-plan.outputs.changes }}"', "error": '"${{ steps.atmos-plan.outputs.error }}"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
@@ -420,7 +407,7 @@ runs:
         echo "rand=$(openssl rand -hex 5)" >> "$GITHUB_OUTPUT"
 
     - name: Upload Artifacts
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && inputs.drift-detection-mode-enabled == 'true' }}
+      if: ${{ steps.component.outputs.settings.enabled == 'true' && inputs.drift-detection-mode-enabled == 'true' }}
       uses: actions/upload-artifact@v4
       with:
         # The name of the artifact needs to be unique for every job run!
@@ -430,7 +417,7 @@ runs:
         retention-days: ${{ inputs.metadata-retention-days }}
 
     - name: Exit status
-      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      if: ${{ steps.component.outputs.settings.enabled == 'true' }}
       shell: bash
       run: |
         exit ${{ steps.atmos-plan.outputs.result }}
