@@ -25,7 +25,7 @@ jobs:
       - shell: bash
         run: |
           mkdir -p ${{ runner.temp }}
-          cp ./tests/atmos.yaml ${{ runner.temp }}/atmos.yaml          
+          cp ./tests/terraform/atmos.yaml ${{ runner.temp }}/atmos.yaml          
           sed -i -e 's#__INFRACOST_ENABLED__#false#g' ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__STORAGE_REGION__#${{ env.AWS_REGION }}#g' ${{ runner.temp }}/atmos.yaml          
           sed -i -e 's#__STORAGE_BUCKET__#${{ secrets.TERRAFORM_STATE_BUCKET }}#g' ${{ runner.temp }}/atmos.yaml
@@ -41,4 +41,4 @@ jobs:
           component: "foobar"
           stack: "plat-ue2-sandbox"
           atmos-config-path: ${{ runner.temp }}
-          atmos-version: v1.72.0
+          atmos-version: v1.81.0

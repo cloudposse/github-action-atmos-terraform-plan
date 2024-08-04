@@ -73,6 +73,7 @@ The config should have the following structure:
 integrations:
   github:
     gitops:
+      opentofu-version: 1.7.3
       terraform-version: 1.5.2
       infracost-enabled: false
       artifact-storage:
@@ -92,7 +93,35 @@ integrations:
 > [!IMPORTANT]
 > **Please note!** This GitHub Action only works with `atmos >= 1.63.0`. If you are using `atmos < 1.63.0` please use `v1` version of this action.    
 
+### Support OpenTofu
 
+This action supports [OpenTofu](https://opentofu.org/).
+
+> [!IMPORTANT]
+> **Please note!** OpenTofu supported by Atmos `>= 1.73.0`.
+> For details [read](https://atmos.tools/core-concepts/projects/configuration/opentofu/)
+
+To enable OpenTofu add the following settings to `atmos.yaml`
+  * Set the `opentofu-version` in the `atmos.yaml` to the desired version
+  * Set `components.terraform.command` to `tofu`
+
+#### Example
+
+```yaml
+
+components:
+  terraform:
+    command: tofu
+
+...
+
+integrations:
+  github:
+    gitops:
+      opentofu-version: 1.7.3
+      ...
+```
+  
 ### Workflow example
 
 ```yaml
@@ -123,7 +152,7 @@ integrations:
             component: "foobar"
             stack: "plat-ue2-sandbox"
             atmos-config-path: ./rootfs/usr/local/etc/atmos/
-            atmos-version: 1.63.0
+            atmos-version: 1.81.0
 ```
 
 ### Migrating from `v1` to `v2`

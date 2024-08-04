@@ -80,6 +80,7 @@ runs:
       shell: bash
       id: config
       run: |-
+        echo "opentofu-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["opentofu-version"]')" >> $GITHUB_OUTPUT
         echo "terraform-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["terraform-version"]')" >> $GITHUB_OUTPUT
         echo "enable-infracost=$(atmos describe config -f json | jq -r '.integrations.github.gitops["infracost-enabled"]')" >> $GITHUB_OUTPUT        
         echo "aws-region=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].region')" >> $GITHUB_OUTPUT
@@ -90,10 +91,18 @@ runs:
         echo "aws-role-chaining=$(atmos describe config -f json | jq -r '.integrations.github.gitops."aws-role-chaining" == true')" >> $GITHUB_OUTPUT
 
     - name: Install Terraform
+      if: ${{ steps.config.outputs.terraform-version != '' && steps.config.outputs.terraform-version != 'null' }}
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{ steps.config.outputs.terraform-version }}
         terraform_wrapper: false
+
+    - name: Install OpenTofu
+      if: ${{ steps.config.outputs.opentofu-version != '' && steps.config.outputs.opentofu-version != 'null' }}
+      uses: opentofu/setup-opentofu@v1
+      with:
+        tofu_version: ${{ steps.config.outputs.opentofu-version }}
+        tofu_wrapper: false
 
     - name: Filter Atmos Settings Value
       uses: cloudposse/github-action-atmos-get-setting@v1
@@ -121,6 +130,15 @@ runs:
         stack: ${{ inputs.stack }}
         settings-path: atmos_cli_config.base_path
 
+    - name: Find command in config
+      if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
+      uses: cloudposse/github-action-atmos-get-setting@v1
+      id: command
+      with:
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        settings-path: command
+
     - name: Set atmos cli base path vars
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
       shell: bash
@@ -134,7 +152,7 @@ runs:
       uses: jaxxstorm/action-install-gh-release@v1.11.0
       with:
         repo: suzuki-shunsuke/tfcmt
-        tag: v4.6.0
+        tag: v4.11.0
 
     - name: Prepare Artifacts Directory
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' }}
@@ -301,7 +319,7 @@ runs:
       shell: bash
       working-directory: ./${{ steps.vars.outputs.component_path }}
       run: |
-        terraform show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
+        ${{ steps.command.outputs.value }} show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Generate Infracost Diff
       if: ${{ steps.config.outputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
@@ -387,11 +405,19 @@ runs:
           echo "result=\"\"" >> $GITHUB_OUTPUT
         fi
 
+    - name: Generate a unique id
+      id: generate
+      shell: bash
+      run: |
+        echo "rand=$(openssl rand -hex 5)" >> "$GITHUB_OUTPUT"
+
     - name: Upload Artifacts
       if: ${{ steps.atmos-github-actions-enabled.outputs.value == 'true' && inputs.drift-detection-mode-enabled == 'true' }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: metadata
+        # The name of the artifact needs to be unique for every job run!
+        # This name is filtered in cloudposse/github-action-atmos-terraform-drift-detection by the "metadata-*" prefix
+        name: metadata-${{ github.run_id }}-${{ steps.generate.outputs.rand }}
         path: metadata
         retention-days: ${{ inputs.metadata-retention-days }}
 
