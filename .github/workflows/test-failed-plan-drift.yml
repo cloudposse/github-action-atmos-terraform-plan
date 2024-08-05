@@ -66,7 +66,11 @@ jobs:
           actual: "${{ needs.test.outputs.result }}"
 
       - name: Download Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
+        with:
+          path: metadata
+          pattern: metadata-*
+          merge-multiple: true
 
       - name: Display structure of downloaded files
         id: metadata
