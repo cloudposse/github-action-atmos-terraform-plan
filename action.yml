@@ -70,14 +70,11 @@ runs:
         echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ inputs.atmos-config-path }})" >> $GITHUB_ENV
 
     - name: Install Atmos
-      uses: jaxxstorm/action-install-gh-release@v1.11.0
+      uses: cloudposse/github-action-setup-atmos@v2
       with:
-        repo: cloudposse/atmos
-        tag: ${{ startsWith(inputs.atmos-version, 'v') && inputs.atmos-version || format('v{0}', inputs.atmos-version) }}
-        extension-matching: false
-        rename-to: atmos
-        chmod: "0755"
-        cache: enable
+        atmos-version: ${{ inputs.atmos-version }}
+        token: ${{ inputs.token }}
+        install-wrapper: false
     
     - name: config
       shell: bash
@@ -99,13 +96,17 @@ runs:
         terraform_version: ${{ steps.config.outputs.terraform-version }}
         terraform_wrapper: false
 
-    - name: Install OpenTofu
-      if: ${{ steps.config.outputs.opentofu-version != '' && steps.config.outputs.opentofu-version != 'null' }}
-      uses: jaxxstorm/action-install-gh-release@v1.11.0
+    - name: Install Dependencies
+      uses: cloudposse-github-actions/install-gh-releases@v1
+      if: ${{ fromJson(steps.component.outputs.settings).enabled }}
       with:
-        repo: opentofu/opentofu
-        tag: ${{ startsWith(steps.config.outputs.opentofu-version, 'v') && steps.config.outputs.opentofu-version || format('v{0}', steps.config.outputs.opentofu-version) }}
-        cache: enable
+        cache: true
+        config: |-
+          opentofu/opentofu: 
+            tag: ${{ startsWith(steps.config.outputs.opentofu-version, 'v') && steps.config.outputs.opentofu-version || format('v{0}', steps.config.outputs.opentofu-version) }}
+            skip: ${{ steps.config.outputs.opentofu-version == '' || steps.config.outputs.opentofu-version == 'null' }}
+          suzuki-shunsuke/tfcmt:
+            tag: v4.11.0  
 
     - name: Get atmos settings
       uses: cloudposse/github-action-atmos-get-setting@v1
@@ -136,14 +137,6 @@ runs:
         # Set ATMOS_BASE_PATH allow `cloudposse/utils` provider to read atmos config from the correct path 
         ATMOS_BASE_PATH="${{ fromJson(steps.component.outputs.settings).base-path }}"
         echo "ATMOS_BASE_PATH=$(realpath ${ATMOS_BASE_PATH:-./})" >> $GITHUB_ENV
-
-    - name: Install tfcmt
-      if: ${{ fromJson(steps.component.outputs.settings).enabled }}
-      uses: jaxxstorm/action-install-gh-release@v1.11.0
-      with:
-        repo: suzuki-shunsuke/tfcmt
-        tag: v4.11.0
-        cache: enable
 
     - name: Prepare Artifacts Directory
       if: ${{ fromJson(steps.component.outputs.settings).enabled }}
@@ -364,7 +357,6 @@ runs:
 
         sed -i "s/%INFRACOST_SUMMARY%/${INFRA_COST_SUMMARY}/" ${{ steps.vars.outputs.step_summary_file }}
         sed -i -e '/%INFRACOST_DIFF%/{r /tmp/infracost.txt' -e 'd}' ${{ steps.vars.outputs.step_summary_file }}
-
 
     - name: Store Component Metadata to Artifacts
       if: ${{ fromJson(steps.component.outputs.settings).enabled && inputs.drift-detection-mode-enabled == 'true' }}
