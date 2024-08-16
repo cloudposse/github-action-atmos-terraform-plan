@@ -98,7 +98,6 @@ runs:
 
     - name: Install Dependencies
       uses: cloudposse-github-actions/install-gh-releases@v1
-      if: ${{ fromJson(steps.component.outputs.settings).enabled }}
       with:
         cache: true
         config: |-
