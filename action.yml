@@ -322,7 +322,7 @@ runs:
 
     - name: Atmos Unlock Stack
       if: ${{ fromJson(steps.component.outputs.settings).enabled && inputs.lock-stack == 'true' }}
-      id: atmos-lock-stack
+      id: atmos-unlock-stack
       shell: bash
       env:
         ATMOS_PRO_TOKEN: ${{ inputs.atmos-pro-token }}
