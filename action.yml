@@ -108,7 +108,7 @@ runs:
             tag: v4.11.0  
 
     - name: Get atmos settings
-      uses: cloudposse/github-action-atmos-get-setting@v1
+      uses: cloudposse/github-action-atmos-get-setting@fix/process-templates-flag
       id: component
       with:
         settings: |
