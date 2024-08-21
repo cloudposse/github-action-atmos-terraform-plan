@@ -107,6 +107,15 @@ runs:
           suzuki-shunsuke/tfcmt:
             tag: v4.11.0  
 
+    - name: Configure Plan AWS Credentials
+      if: ${{ fromJson(steps.component.outputs.settings).enabled }}
+      uses: aws-actions/configure-aws-credentials@v4.0.2
+      with:
+        aws-region: ${{ steps.config.outputs.aws-region }}
+        role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
+        role-session-name: "atmos-terraform-plan-gitops"
+        mask-aws-account-id: "no"
+
     - name: Get atmos settings
       uses: cloudposse/github-action-atmos-get-setting@v1
       id: component
@@ -171,15 +180,6 @@ runs:
         echo "summary_file=${SUMMARY_FILE}" >> $GITHUB_OUTPUT
         echo "step_summary_file=${STEP_SUMMARY_FILE}" >> $GITHUB_OUTPUT
         echo "issue_file=${ISSUE_SUMMARY_FILE}" >> $GITHUB_OUTPUT
-
-    - name: Configure Plan AWS Credentials
-      if: ${{ fromJson(steps.component.outputs.settings).enabled }}
-      uses: aws-actions/configure-aws-credentials@v4.0.2
-      with:
-        aws-region: ${{ steps.config.outputs.aws-region }}
-        role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
-        role-session-name: "atmos-terraform-plan-gitops"
-        mask-aws-account-id: "no"
 
     - name: Cache .terraform
       id: cache
