@@ -111,6 +111,7 @@ runs:
       uses: cloudposse/github-action-atmos-get-setting@fix/process-templates-flag
       id: component
       with:
+        process-templates: false
         settings: |
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
@@ -128,7 +129,6 @@ runs:
             stack: ${{ inputs.stack }}
             settingsPath: command
             outputPath: command
-        process-templates: false
 
     - name: Set atmos cli base path vars
       if: ${{ fromJson(steps.component.outputs.settings).enabled }}
