@@ -128,6 +128,7 @@ runs:
             stack: ${{ inputs.stack }}
             settingsPath: command
             outputPath: command
+        process-templates: false
 
     - name: Set atmos cli base path vars
       if: ${{ fromJson(steps.component.outputs.settings).enabled }}
