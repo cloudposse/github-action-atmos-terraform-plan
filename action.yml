@@ -111,7 +111,7 @@ runs:
       uses: cloudposse/github-action-atmos-get-setting@fix/process-templates-flag
       id: component
       with:
-        process-templates: false
+        #process-templates: false
         settings: |
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
