@@ -108,7 +108,6 @@ runs:
             tag: v4.11.0  
 
     - name: Configure Plan AWS Credentials
-      if: ${{ fromJson(steps.component.outputs.settings).enabled }}
       uses: aws-actions/configure-aws-credentials@v4.0.2
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}
