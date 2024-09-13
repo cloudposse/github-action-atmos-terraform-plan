@@ -56,7 +56,7 @@ jobs:
           sha: ${{ github.sha }}
           atmos-config-path: ${{ runner.temp }}
           atmos-version: 1.81.0
-          iam-auth-enabled: false
+          iam-auth-enabled: true
 
     outputs:
       result: ${{ steps.current.outcome }}
