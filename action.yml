@@ -19,6 +19,10 @@ inputs:
     description: "Indicate whether this action is used in drift detection workflow."
     required: true
     default: 'false'
+  iam-auth-enabled:
+    description: Whether to assume the Terraform plan IAM role prior to running atmos commands
+    required: false
+    default: "true"
   atmos-version:
     description: The version of atmos to install
     required: false
@@ -109,6 +113,7 @@ runs:
 
     - name: Configure Plan AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4.0.2
+      if: ${{ inputs.iam-auth-enabled == 'true' }}
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}
         role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
