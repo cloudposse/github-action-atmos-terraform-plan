@@ -1,9 +1,7 @@
-name: "Test - Changes exists"
+name: "Test - IAM auth skipped"
 
 on:
   workflow_dispatch: {}
-  pull_request:
-    types: [opened, synchronize]
 
 env:
   AWS_REGION: us-east-2
