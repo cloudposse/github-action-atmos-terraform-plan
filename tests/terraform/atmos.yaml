@@ -74,13 +74,13 @@ integrations:
         bucket: __STORAGE_BUCKET__
         table: __STORAGE_TABLE__
         role: __STORAGE_ROLE__
-        plan-repository-type:
-        blob-account-name:
-        blob-container-name:
-        metadata-repository-type:
-        cosmos-container-name:
-        cosmos-database-name:
-        cosmos-endpoint:
+        plan-repository-type: azureblob
+        blob-account-name: tfplans
+        blob-container-name: plans
+        metadata-repository-type: cosmos
+        cosmos-container-name: terraform-plan-storage
+        cosmos-database-name: terraform-plan-storage
+        cosmos-endpoint: "https://my-cosmo-account.documents.azure.com:443/"
       role:
         plan: __PLAN_ROLE__
         apply: __APPLY_ROLE__
