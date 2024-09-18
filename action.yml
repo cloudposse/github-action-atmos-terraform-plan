@@ -82,12 +82,22 @@ runs:
       run: |-
         echo "opentofu-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["opentofu-version"]')" >> $GITHUB_OUTPUT
         echo "terraform-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["terraform-version"]')" >> $GITHUB_OUTPUT
-        echo "enable-infracost=$(atmos describe config -f json | jq -r '.integrations.github.gitops["infracost-enabled"]')" >> $GITHUB_OUTPUT        
+        echo "enable-infracost=$(atmos describe config -f json | jq -r '.integrations.github.gitops["infracost-enabled"]')" >> $GITHUB_OUTPUT
+        # AWS IAM role for Terraform plan
+        echo "terraform-plan-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops.role.plan')" >> $GITHUB_OUTPUT
+        # AWS plan storage settings
         echo "aws-region=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].region')" >> $GITHUB_OUTPUT
         echo "terraform-state-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].role')" >> $GITHUB_OUTPUT
         echo "terraform-state-table=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].table')" >> $GITHUB_OUTPUT
         echo "terraform-state-bucket=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].bucket')" >> $GITHUB_OUTPUT        
-        echo "terraform-plan-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops.role.plan')" >> $GITHUB_OUTPUT
+        # Azure plan storage settings
+        echo "plan-repository-type=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]["plan-repository-type"]')" >> $GITHUB_OUTPUT        
+        echo "blob-account-name=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]["blob-account-name"]')" >> $GITHUB_OUTPUT
+        echo "blob-container-name=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]["blob-container-name"]')" >> $GITHUB_OUTPUT
+        echo "metadata-repository-type=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]["metadata-repository-type"]')" >> $GITHUB_OUTPUT
+        echo "cosmos-container-name=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]["cosmos-container-name"]')" >> $GITHUB_OUTPUT
+        echo "cosmos-database-name=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]["cosmos-database-name"]')" >> $GITHUB_OUTPUT
+        echo "cosmos-endpoint=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]["cosmos-endpoint"]')" >> $GITHUB_OUTPUT        
 
     - name: Install Terraform
       if: ${{ steps.config.outputs.terraform-version != '' && steps.config.outputs.terraform-version != 'null' }}
@@ -108,7 +118,11 @@ runs:
             tag: v4.11.0  
 
     - name: Configure Plan AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4.0.2
+      uses: aws-actions/configure-aws-credentials@v4
+      if: ${{ steps.config.outputs.aws-region != '' &&
+        steps.config.outputs.aws-region != 'null' &&
+        steps.config.outputs.terraform-plan-role != '' &&
+        steps.config.outputs.terraform-plan-role != 'null' }}
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}
         role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
@@ -265,8 +279,12 @@ runs:
         rm -f ${TERRAFORM_OUTPUT_FILE}
 
     - name: Configure State AWS Credentials
-      if: ${{ steps.atmos-plan.outputs.error == 'false' }}
-      uses: aws-actions/configure-aws-credentials@v4.0.2
+      uses: aws-actions/configure-aws-credentials@v4
+      if: ${{ steps.atmos-plan.outputs.error == 'false' && 
+        steps.config.outputs.aws-region != '' &&
+        steps.config.outputs.aws-region != 'null' &&
+        steps.config.outputs.terraform-state-role != '' &&
+        steps.config.outputs.terraform-state-role != 'null' }}
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}
         role-to-assume: ${{ steps.config.outputs.terraform-state-role }}
@@ -283,8 +301,18 @@ runs:
         planPath: ${{ steps.vars.outputs.plan_file }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
+        # AWS settings
         tableName: ${{ steps.config.outputs.terraform-state-table }}
         bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
+        # Azure settings
+        planRepositoryType: ${{ steps.config.outputs.plan-repository-type }}
+        blobAccountName: ${{ steps.config.outputs.blob-account-name }}
+        blobContainerName: ${{ steps.config.outputs.blob-container-name }}
+        metadataRepositoryType: ${{ steps.config.outputs.metadata-repository-type }}
+        cosmosContainerName: ${{ steps.config.outputs.cosmos-container-name }}
+        cosmosDatabaseName: ${{ steps.config.outputs.cosmos-database-name }}
+        cosmosEndpoint: ${{ steps.config.outputs.cosmos-endpoint }}
+
 
     - name: Store Lockfile for New Plan
       if: ${{ steps.atmos-plan.outputs.error == 'false' }}
@@ -295,8 +323,17 @@ runs:
         planPath: ${{ steps.vars.outputs.lock_file }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}-lockfile
+        # AWS settings
         tableName: ${{ steps.config.outputs.terraform-state-table }}
         bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
+        # Azure settings
+        planRepositoryType: ${{ steps.config.outputs.plan-repository-type }}
+        blobAccountName: ${{ steps.config.outputs.blob-account-name }}
+        blobContainerName: ${{ steps.config.outputs.blob-container-name }}
+        metadataRepositoryType: ${{ steps.config.outputs.metadata-repository-type }}
+        cosmosContainerName: ${{ steps.config.outputs.cosmos-container-name }}
+        cosmosDatabaseName: ${{ steps.config.outputs.cosmos-database-name }}
+        cosmosEndpoint: ${{ steps.config.outputs.cosmos-endpoint }}
 
     - name: Setup Infracost
       if: ${{ steps.config.outputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
