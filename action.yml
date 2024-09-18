@@ -314,15 +314,15 @@ runs:
         steps.config.outputs.plan-repository-type != '' &&
         steps.config.outputs.plan-repository-type != 'null' &&
         steps.config.outputs.blob-account-name != '' &&
-        steps.config.outputs.blob-account-name != 'null'
+        steps.config.outputs.blob-account-name != 'null' &&
         steps.config.outputs.blob-container-name != '' &&
-        steps.config.outputs.blob-container-name != 'null'
+        steps.config.outputs.blob-container-name != 'null' &&
         steps.config.outputs.metadata-repository-type != '' &&
-        steps.config.outputs.metadata-repository-type != 'null'
+        steps.config.outputs.metadata-repository-type != 'null' &&
         steps.config.outputs.cosmos-container-name != '' &&
-        steps.config.outputs.cosmos-container-name != 'null'
+        steps.config.outputs.cosmos-container-name != 'null' &&
         steps.config.outputs.cosmos-database-name != '' &&
-        steps.config.outputs.cosmos-database-name != 'null'
+        steps.config.outputs.cosmos-database-name != 'null' &&
         steps.config.outputs.cosmos-endpoint != '' &&
         steps.config.outputs.cosmos-endpoint != 'null' }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
@@ -365,15 +365,15 @@ runs:
         steps.config.outputs.plan-repository-type != '' &&
         steps.config.outputs.plan-repository-type != 'null' &&
         steps.config.outputs.blob-account-name != '' &&
-        steps.config.outputs.blob-account-name != 'null'
+        steps.config.outputs.blob-account-name != 'null' &&
         steps.config.outputs.blob-container-name != '' &&
-        steps.config.outputs.blob-container-name != 'null'
+        steps.config.outputs.blob-container-name != 'null' &&
         steps.config.outputs.metadata-repository-type != '' &&
-        steps.config.outputs.metadata-repository-type != 'null'
+        steps.config.outputs.metadata-repository-type != 'null' &&
         steps.config.outputs.cosmos-container-name != '' &&
-        steps.config.outputs.cosmos-container-name != 'null'
+        steps.config.outputs.cosmos-container-name != 'null' &&
         steps.config.outputs.cosmos-database-name != '' &&
-        steps.config.outputs.cosmos-database-name != 'null'
+        steps.config.outputs.cosmos-database-name != 'null' &&
         steps.config.outputs.cosmos-endpoint != '' &&
         steps.config.outputs.cosmos-endpoint != 'null' }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
