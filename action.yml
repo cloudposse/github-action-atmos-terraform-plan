@@ -298,7 +298,6 @@ runs:
         steps.config.outputs.terraform-state-bucket != '' &&
         steps.config.outputs.terraform-state-bucket != 'null' }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
-      id: store-plan
       with:
         action: storePlan
         commitSHA: ${{ inputs.sha }}
@@ -326,7 +325,6 @@ runs:
         steps.config.outputs.cosmos-endpoint != '' &&
         steps.config.outputs.cosmos-endpoint != 'null' }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
-      id: store-plan
       with:
         action: storePlan
         commitSHA: ${{ inputs.sha }}
