@@ -80,7 +80,7 @@ integrations:
         metadata-repository-type:
         cosmos-container-name:
         cosmos-database-name:
-        cosmos-endpoint: 
+        cosmos-endpoint:
       role:
         plan: __PLAN_ROLE__
         apply: __APPLY_ROLE__

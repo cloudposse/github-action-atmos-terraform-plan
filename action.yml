@@ -291,8 +291,12 @@ runs:
         role-session-name: "atmos-terraform-state-gitops"
         mask-aws-account-id: "no"
 
-    - name: Store New Plan
-      if: ${{ steps.atmos-plan.outputs.error == 'false' }}
+    - name: Store New Plan (AWS)
+      if: ${{ steps.atmos-plan.outputs.error == 'false' &&
+        steps.config.outputs.terraform-state-table != '' &&
+        steps.config.outputs.terraform-state-table != 'null' &&
+        steps.config.outputs.terraform-state-bucket != '' &&
+        steps.config.outputs.terraform-state-bucket != 'null' }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       id: store-plan
       with:
@@ -304,6 +308,31 @@ runs:
         # AWS settings
         tableName: ${{ steps.config.outputs.terraform-state-table }}
         bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
+
+    - name: Store New Plan (Azure)
+      if: ${{ steps.atmos-plan.outputs.error == 'false' &&
+        steps.config.outputs.plan-repository-type != '' &&
+        steps.config.outputs.plan-repository-type != 'null' &&
+        steps.config.outputs.blob-account-name != '' &&
+        steps.config.outputs.blob-account-name != 'null'
+        steps.config.outputs.blob-container-name != '' &&
+        steps.config.outputs.blob-container-name != 'null'
+        steps.config.outputs.metadata-repository-type != '' &&
+        steps.config.outputs.metadata-repository-type != 'null'
+        steps.config.outputs.cosmos-container-name != '' &&
+        steps.config.outputs.cosmos-container-name != 'null'
+        steps.config.outputs.cosmos-database-name != '' &&
+        steps.config.outputs.cosmos-database-name != 'null'
+        steps.config.outputs.cosmos-endpoint != '' &&
+        steps.config.outputs.cosmos-endpoint != 'null' }}
+      uses: cloudposse/github-action-terraform-plan-storage@v1
+      id: store-plan
+      with:
+        action: storePlan
+        commitSHA: ${{ inputs.sha }}
+        planPath: ${{ steps.vars.outputs.plan_file }}
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
         # Azure settings
         planRepositoryType: ${{ steps.config.outputs.plan-repository-type }}
         blobAccountName: ${{ steps.config.outputs.blob-account-name }}
@@ -314,8 +343,12 @@ runs:
         cosmosEndpoint: ${{ steps.config.outputs.cosmos-endpoint }}
 
 
-    - name: Store Lockfile for New Plan
-      if: ${{ steps.atmos-plan.outputs.error == 'false' }}
+    - name: Store Lockfile for New Plan (AWS)
+      if: ${{ steps.atmos-plan.outputs.error == 'false' &&
+        steps.config.outputs.terraform-state-table != '' &&
+        steps.config.outputs.terraform-state-table != 'null' &&
+        steps.config.outputs.terraform-state-bucket != '' &&
+        steps.config.outputs.terraform-state-bucket != 'null' }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       with:
         action: storePlan
@@ -326,6 +359,30 @@ runs:
         # AWS settings
         tableName: ${{ steps.config.outputs.terraform-state-table }}
         bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
+
+    - name: Store Lockfile for New Plan (Azure)
+      if: ${{ steps.atmos-plan.outputs.error == 'false' &&
+        steps.config.outputs.plan-repository-type != '' &&
+        steps.config.outputs.plan-repository-type != 'null' &&
+        steps.config.outputs.blob-account-name != '' &&
+        steps.config.outputs.blob-account-name != 'null'
+        steps.config.outputs.blob-container-name != '' &&
+        steps.config.outputs.blob-container-name != 'null'
+        steps.config.outputs.metadata-repository-type != '' &&
+        steps.config.outputs.metadata-repository-type != 'null'
+        steps.config.outputs.cosmos-container-name != '' &&
+        steps.config.outputs.cosmos-container-name != 'null'
+        steps.config.outputs.cosmos-database-name != '' &&
+        steps.config.outputs.cosmos-database-name != 'null'
+        steps.config.outputs.cosmos-endpoint != '' &&
+        steps.config.outputs.cosmos-endpoint != 'null' }}
+      uses: cloudposse/github-action-terraform-plan-storage@v1
+      with:
+        action: storePlan
+        commitSHA: ${{ inputs.sha }}
+        planPath: ${{ steps.vars.outputs.lock_file }}
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}-lockfile
         # Azure settings
         planRepositoryType: ${{ steps.config.outputs.plan-repository-type }}
         blobAccountName: ${{ steps.config.outputs.blob-account-name }}
