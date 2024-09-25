@@ -116,7 +116,7 @@ runs:
         mask-aws-account-id: "no"
 
     - name: Get atmos settings
-      uses: cloudposse/github-action-atmos-get-setting@v1
+      uses: cloudposse/github-action-atmos-get-setting@v2
       id: component
       with:
         settings: |
