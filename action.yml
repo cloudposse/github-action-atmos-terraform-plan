@@ -63,17 +63,17 @@ outputs:
 runs:
   using: "composite"
   steps:
-    # - name: Checkout
-    #   uses: actions/checkout@v4
-    #   with:
-    #     ref: ${{ inputs.sha }}
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.sha }}
     
-    # - name: Restore cache
-    #   if: ${{ inputs.restore-cache == 'true' }}
-    #   uses: actions/cache/restore@v4
-    #   with:
-    #     path: atmos
-    #     key: ${{ runner.os }}-${{ inputs.sha}}
+    - name: Restore cache
+      if: ${{ inputs.restore-cache == 'true' }}
+      uses: actions/cache/restore@v4
+      with:
+        path: atmos
+        key: ${{ runner.os }}-${{ inputs.sha}}
 
     - name: Set atmos cli config path vars
       shell: bash
@@ -189,7 +189,7 @@ runs:
 
     - name: Configure Plan AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).plan-repository-type == 'aws' }}
+      if: ${{ fromJson(steps.atmos-settings.outputs.settings).plan-repository-type == 's3' }}
       with:
         aws-region: ${{ fromJson(steps.atmos-settings.outputs.settings).aws-region }}
         role-to-assume: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-plan-role }}
@@ -325,7 +325,7 @@ runs:
 
     - name: Configure State AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
-      if: ${{ steps.atmos-plan.outputs.error == 'false' && fromJson(steps.atmos-settings.outputs.settings).plan-repository-type == 'aws' }}
+      if: ${{ steps.atmos-plan.outputs.error == 'false' && fromJson(steps.atmos-settings.outputs.settings).plan-repository-type == 's3' }}
       with:
         aws-region: ${{ fromJson(steps.atmos-settings.outputs.settings).aws-region }}
         role-to-assume: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-role }}

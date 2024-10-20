@@ -12,7 +12,7 @@ components:
               bucket: __STORAGE_BUCKET__
               table: __STORAGE_TABLE__
               role: __STORAGE_ROLE__
-              plan-repository-type: aws
+              plan-repository-type: s3
               blob-account-name: 
               blob-container-name: 
               metadata-repository-type: dynamo
