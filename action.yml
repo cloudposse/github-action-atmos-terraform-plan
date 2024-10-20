@@ -473,8 +473,17 @@ runs:
         echo "rand=$(openssl rand -hex 5)" >> "$GITHUB_OUTPUT"
 
     - name: Upload Artifacts
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).enabled && inputs.drift-detection-mode-enabled == 'true' }}
+      if: ${{ fromJson(steps.component.outputs.settings).enabled && inputs.drift-detection-mode-enabled == 'true' }}
       uses: actions/upload-artifact@v4
       with:
         # The name of the artifact needs to be unique for every job run!
-        # This name is filtered in cloudposse/github-action-atmos-terraform
+        # This name is filtered in cloudposse/github-action-atmos-terraform-drift-detection by the "metadata-*" prefix
+        name: metadata-${{ github.run_id }}-${{ steps.generate.outputs.rand }}
+        path: metadata
+        retention-days: ${{ inputs.metadata-retention-days }}
+
+    - name: Exit status
+      if: ${{ fromJson(steps.component.outputs.settings).enabled }}
+      shell: bash
+      run: |
+        exit ${{ steps.atmos-plan.outputs.result }}
