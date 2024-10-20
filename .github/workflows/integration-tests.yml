@@ -38,6 +38,7 @@ jobs:
             sed -i -e 's#__APPLY_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' "$file"
           fi
           done
+          ls -l ${{ runner.temp }}/
 
       - name: Plan Atmos Component
         uses: ./
