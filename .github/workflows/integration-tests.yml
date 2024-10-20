@@ -41,6 +41,12 @@ jobs:
           done
           cat ./tests/terraform/stacks/catalog/foobar.yaml
 
+      - name: Cache atmos files
+        uses: actions/cache@v4
+        with:
+          path: atmos
+          key: ${{ runner.os }}-${{ github.event.pull_request.head.sha }}
+
       - name: Plan Atmos Component
         uses: ./
         with:
@@ -48,3 +54,4 @@ jobs:
           stack: "plat-ue2-sandbox"
           atmos-config-path: ${{ runner.temp }}
           atmos-version: 1.92.0
+          restore-cache: true

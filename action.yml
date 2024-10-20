@@ -73,7 +73,7 @@ runs:
       uses: actions/cache/restore@v4
       with:
         path: atmos
-        key: ${{ runner.os }}-${{ inputs.sha}}
+        key: ${{ runner.os }}-${{ inputs.sha }}
 
     - name: Set atmos cli config path vars
       shell: bash
