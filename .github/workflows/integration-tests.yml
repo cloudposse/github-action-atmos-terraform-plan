@@ -29,7 +29,7 @@ jobs:
 
           for file in ./tests/terraform/stacks/catalog/*.yaml; do
           if [ -f "$file" ]; then
-            sed -i -e "s#__INFRACOST_ENABLED__#false#g' "$file"
+            sed -i -e "s#__INFRACOST_ENABLED__#false#g" "$file"
             sed -i -e "s#__STORAGE_REGION__#${{ env.AWS_REGION }}#g" "$file"          
             sed -i -e "s#__STORAGE_BUCKET__#${{ secrets.TERRAFORM_STATE_BUCKET }}#g" "$file"
             sed -i -e "s#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g" "$file"          
