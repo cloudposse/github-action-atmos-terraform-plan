@@ -44,8 +44,8 @@ jobs:
       - name: Cache atmos files
         uses: actions/cache@v4
         with:
-          path: atmos
-          key: ${{ runner.os }}-${{ github.event.pull_request.head.sha }}
+          path: ./
+          key: ${{ runner.os }}-${{ github.sha }}
 
       - name: Plan Atmos Component
         uses: ./
@@ -55,3 +55,4 @@ jobs:
           atmos-config-path: ${{ runner.temp }}
           atmos-version: 1.92.0
           restore-cache: true
+          sha: ${{ github.sha }}
