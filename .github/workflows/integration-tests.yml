@@ -26,7 +26,8 @@ jobs:
         run: |
           mkdir -p ${{ runner.temp }}
           cp ./tests/terraform/atmos.yaml ${{ runner.temp }}/atmos.yaml 
-          for file in ${{ runner.temp }}/*.yaml; do
+
+          for file in ./tests/terraform/stacks/catalog/*.yaml; do
           if [ -f "$file" ]; then
             sed -i -e 's#__INFRACOST_ENABLED__#false#g' "$file"
             sed -i -e 's#__STORAGE_REGION__#${{ env.AWS_REGION }}#g' "$file"          
@@ -38,7 +39,7 @@ jobs:
             sed -i -e 's#__APPLY_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' "$file"
           fi
           done
-          ls -l ${{ runner.temp }}/
+          cat ./tests/terraform/stacks/catalog/foobar.yaml
 
       - name: Plan Atmos Component
         uses: ./
