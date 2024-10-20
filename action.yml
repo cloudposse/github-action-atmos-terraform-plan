@@ -63,10 +63,17 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ inputs.sha }}
+    # - name: Checkout
+    #   uses: actions/checkout@v4
+    #   with:
+    #     ref: ${{ inputs.sha }}
+    
+    # - name: Restore cache
+    #   if: ${{ inputs.restore-cache == 'true' }}
+    #   uses: actions/cache/restore@v4
+    #   with:
+    #     path: atmos
+    #     key: ${{ runner.os }}-${{ inputs.sha}}
 
     - name: Set atmos cli config path vars
       shell: bash
@@ -188,13 +195,6 @@ runs:
         role-to-assume: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-plan-role }}
         role-session-name: "atmos-terraform-plan-gitops"
         mask-aws-account-id: "no"
-
-    - name: Restore cache
-      if: ${{ inputs.restore-cache == 'true' }}
-      uses: actions/cache/restore@v4
-      with:
-        path: atmos
-        key: ${{ runner.os }}-${{ inputs.sha}}
 
     - name: Set atmos cli base path vars
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).enabled }}
