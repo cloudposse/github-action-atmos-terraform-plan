@@ -103,63 +103,63 @@ runs:
             outputPath: command
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.opentofu-version
+            settingsPath: settings.github.gitops.opentofu-version
             outputPath: opentofu-version
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.terraform-version
+            settingsPath: settings.github.gitops.terraform-version
             outputPath: terraform-version
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.infracost-enabled
+            settingsPath: settings.github.gitops.infracost-enabled
             outputPath: enable-infracost
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.role.plan
+            settingsPath: settings.github.gitops.role.plan
             outputPath: terraform-plan-role
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.region
+            settingsPath: settings.github.gitops.artifact-storage.region
             outputPath: aws-region
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.role
+            settingsPath: settings.github.gitops.artifact-storage.role
             outputPath: terraform-state-role
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.table
+            settingsPath: settings.github.gitops.artifact-storage.table
             outputPath: terraform-state-table
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.bucket
+            settingsPath: settings.github.gitops.artifact-storage.bucket
             outputPath: terraform-state-bucket
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.plan-repository-type
+            settingsPath: settings.github.gitops.artifact-storage.plan-repository-type
             outputPath: plan-repository-type
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.blob-account-name
+            settingsPath: settings.github.gitops.artifact-storage.blob-account-name
             outputPath: blob-account-name
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.blob-container-name
+            settingsPath: settings.github.gitops.artifact-storage.blob-container-name
             outputPath: blob-container-name
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.metadata-repository-type
+            settingsPath: settings.github.gitops.artifact-storage.metadata-repository-type
             outputPath: metadata-repository-type
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.cosmos-container-name
+            settingsPath: settings.github.gitops.artifact-storage.cosmos-container-name
             outputPath: cosmos-container-name
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.cosmos-database-name
+            settingsPath: settings.github.gitops.artifact-storage.cosmos-database-name
             outputPath: cosmos-database-name
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.cosmos-endpoint
+            settingsPath: settings.github.gitops.artifact-storage.cosmos-endpoint
             outputPath: cosmos-endpoint
 
     - name: Install Terraform
