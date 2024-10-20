@@ -15,7 +15,7 @@ components:
               plan-repository-type: aws
               blob-account-name: 
               blob-container-name: 
-              metadata-repository-type: dynamodb
+              metadata-repository-type: dynamo
               cosmos-container-name: 
               cosmos-database-name: 
               cosmos-endpoint: 
