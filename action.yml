@@ -182,7 +182,7 @@ runs:
 
     - name: Configure Plan AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).plan-repository-type != 'azureblob' }}
+      if: ${{ fromJson(steps.atmos-settings.outputs.settings).plan-repository-type == 'aws' }}
       with:
         aws-region: ${{ fromJson(steps.atmos-settings.outputs.settings).aws-region }}
         role-to-assume: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-plan-role }}
@@ -325,7 +325,7 @@ runs:
 
     - name: Configure State AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
-      if: ${{ steps.atmos-plan.outputs.error == 'false' && fromJson(steps.atmos-settings.outputs.settings).plan-repository-type != 'azureblob' }}
+      if: ${{ steps.atmos-plan.outputs.error == 'false' && fromJson(steps.atmos-settings.outputs.settings).plan-repository-type == 'aws' }}
       with:
         aws-region: ${{ fromJson(steps.atmos-settings.outputs.settings).aws-region }}
         role-to-assume: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-role }}

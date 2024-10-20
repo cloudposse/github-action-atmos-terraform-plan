@@ -12,10 +12,10 @@ components:
               bucket: __STORAGE_BUCKET__
               table: __STORAGE_TABLE__
               role: __STORAGE_ROLE__
-              plan-repository-type: azureblob
+              plan-repository-type: aws
               blob-account-name: 
               blob-container-name: 
-              metadata-repository-type: cosmos
+              metadata-repository-type: dynamodb
               cosmos-container-name: 
               cosmos-database-name: 
               cosmos-endpoint: 
