@@ -41,4 +41,4 @@ jobs:
           component: "foobar"
           stack: "plat-ue2-sandbox"
           atmos-config-path: ${{ runner.temp }}
-          atmos-version: v1.81.0
+          atmos-version: 1.92.0

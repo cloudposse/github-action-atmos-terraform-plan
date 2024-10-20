@@ -50,7 +50,7 @@ jobs:
           sha: ${{ github.sha }}
           drift-detection-mode-enabled: true
           atmos-config-path: ${{ runner.temp }}
-          atmos-version: 1.81.0
+          atmos-version: 1.92.0
 
     outputs:
       result: ${{ steps.current.outcome }}

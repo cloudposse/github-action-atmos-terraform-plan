@@ -51,7 +51,7 @@ jobs:
           infracost-api-key: ${{ secrets.INFRACOST_API_KEY }}
           debug: true
           atmos-config-path: ${{ runner.temp }}
-          atmos-version: 1.81.0
+          atmos-version: 1.92.0
 
     outputs:
       result: ${{ steps.current.outcome }}
