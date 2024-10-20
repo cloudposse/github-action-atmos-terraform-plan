@@ -16,7 +16,7 @@ components:
               plan-repository-type: azureblob
               blob-account-name: 
               blob-container-name: 
-              metadata-repository-type: 
+              metadata-repository-type: azureblob
               cosmos-container-name: 
               cosmos-database-name: 
               cosmos-endpoint: 
