@@ -57,4 +57,4 @@ jobs:
           atmos-config-path: ${{ runner.temp }}
           atmos-version: 1.92.0
           restore-cache: true
-          #sha: ${{ github.sha }}
+          sha: ${{ github.sha }}
