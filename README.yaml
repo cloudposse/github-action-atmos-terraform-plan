@@ -55,14 +55,24 @@ usage: |-
 
   ### Config
 
+  > [!IMPORTANT]
+  > **Please note!** This GitHub Action only works with `atmos >= 1.63.0`. If you are using `atmos < 1.63.0` please use `v1` version of this action.      
+
   The action expects the atmos configuration file `atmos.yaml` to be present in the repository.
+  
+  The action supports AWS and Azure to store Terraform plan files. 
+  You can read more about plan storage in the [cloudposse/github-action-terraform-plan-storage](https://github.com/cloudposse/github-action-terraform-plan-storage?tab=readme-ov-file#aws-default) documentation. 
+  Depends of cloud provider the following fields should be set in the `atmos.yaml`:
+  
+  #### AWS
+  
   The config should have the following structure:
   
   ```yaml
   integrations:
     github:
       gitops:
-        opentofu-version: 1.7.3
+        opentofu-version: 1.7.3  
         terraform-version: 1.5.2
         infracost-enabled: false
         artifact-storage:
@@ -71,15 +81,38 @@ usage: |-
           table: cptest-core-ue2-auto-gitops-plan-storage
           role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
         role:
+          # Set `plan` empty if you don't want to assume IAM role before terraform plan  
           plan: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
           apply: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
         matrix:
           sort-by: .stack_slug
           group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
   ```
+
+  #### Azure
   
-  > [!IMPORTANT]
-  > **Please note!** This GitHub Action only works with `atmos >= 1.63.0`. If you are using `atmos < 1.63.0` please use `v1` version of this action.    
+  The config should have the following structure:
+  
+  ```yaml
+  integrations:
+    github:
+      gitops:
+        opentofu-version: 1.7.3  
+        terraform-version: 1.5.2
+        infracost-enabled: false
+        artifact-storage:
+          plan-repository-type: azureblob
+          blob-account-name: tfplans
+          blob-container-name: plans
+          metadata-repository-type: cosmos
+          cosmos-container-name: terraform-plan-storage
+          cosmos-database-name: terraform-plan-storage
+          cosmos-endpoint: "https://my-cosmo-account.documents.azure.com:443/"
+        # We remove the `role` section as it is AWS specific
+        matrix:
+          sort-by: .stack_slug
+          group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
+  ```
 
   ### Support OpenTofu
   
