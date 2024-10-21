@@ -46,7 +46,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./
-          key: ${{ github.sha }}
+          key: atmos
 
       - name: Plan Atmos Component
         uses: ./
