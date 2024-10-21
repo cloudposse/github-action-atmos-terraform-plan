@@ -72,7 +72,7 @@ runs:
       if: ${{ inputs.restore-cache == 'true' }}
       uses: actions/cache/restore@v4
       with:
-        path: ./
+        path: ./stacks
         key: ${{ runner.os }}-${{ inputs.sha }}
 
     - name: Set atmos cli config path vars
