@@ -13,6 +13,7 @@ env:
 permissions:
   id-token: write
   contents: read
+  actions: write
 
 jobs:
   test:
@@ -44,7 +45,7 @@ jobs:
       - name: Cache atmos files
         uses: actions/cache@v4
         with:
-          path: ./
+          path: ./stacks
           key: ${{ runner.os }}-${{ github.sha }}
 
       - name: Plan Atmos Component
