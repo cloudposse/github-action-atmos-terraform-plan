@@ -45,8 +45,8 @@ jobs:
       - name: Cache atmos files
         uses: actions/cache@v4
         with:
-          path: ./stacks
-          key: ${{ runner.os }}-${{ github.sha }}
+          path: ./
+          key: ${{ github.sha }}
 
       - name: Plan Atmos Component
         uses: ./
