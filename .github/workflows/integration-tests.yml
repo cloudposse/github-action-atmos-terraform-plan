@@ -43,6 +43,12 @@ jobs:
           done
           cat ./tests/terraform/stacks/catalog/foobar.yaml
 
+      - name: Cache atmos files
+        uses: actions/cache@v4
+        with:
+          path: ./
+          key: atmos-${{ github.sha }}
+
       - name: Plan Atmos Component
         uses: ./
         with:
