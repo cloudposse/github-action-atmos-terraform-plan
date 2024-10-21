@@ -67,14 +67,8 @@ runs:
       uses: actions/checkout@v4
       with:
         ref: ${{ inputs.sha }}
+        clean: ${{ inputs.restore-cache != 'true' }}
     
-    - name: Restore cache
-      if: ${{ inputs.restore-cache == 'true' }}
-      uses: actions/cache/restore@v4
-      with:
-        path: ./
-        key: atmos
-
     - name: Set atmos cli config path vars
       shell: bash
       run: |-
