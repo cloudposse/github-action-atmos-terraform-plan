@@ -64,17 +64,11 @@ runs:
   using: "composite"
   steps:
     - name: Checkout
+      if: ${{ inputs.restore-cache == 'false' }}
       uses: actions/checkout@v4
       with:
         ref: ${{ inputs.sha }}
         clean: ${{ inputs.restore-cache != 'true' }}
-    
-    - name: Restore cache
-      if: ${{ inputs.restore-cache == 'true' }}
-      uses: actions/cache/restore@v4
-      with:
-        path: ./
-        key: atmos-${{ inputs.sha }}
 
     - name: Set atmos cli config path vars
       shell: bash
