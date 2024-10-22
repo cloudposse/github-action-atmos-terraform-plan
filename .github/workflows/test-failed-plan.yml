@@ -31,7 +31,7 @@ jobs:
         run: |
           mkdir -p ${{ runner.temp }}
           cp ./tests/terraform/atmos.yaml ${{ runner.temp }}/atmos.yaml
-          sefor file in ./tests/terraform/stacks/catalog/*.yaml; do
+          for file in ./tests/terraform/stacks/catalog/*.yaml; do
           if [ -f "$file" ]; then
             sed -i -e "s#__INFRACOST_ENABLED__#false#g" "$file"
             sed -i -e "s#__STORAGE_REGION__#${{ env.AWS_REGION }}#g" "$file"          
