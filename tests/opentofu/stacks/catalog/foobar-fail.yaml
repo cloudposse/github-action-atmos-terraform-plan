@@ -6,7 +6,7 @@ components:
         github:
           actions_enabled: true
           gitops:
-            terraform-version: 1.5.2
+            opentofu-version: 1.7.3
             infracost-enabled: __INFRACOST_ENABLED__
             artifact-storage:
               region: __STORAGE_REGION__
