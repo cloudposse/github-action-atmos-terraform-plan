@@ -367,14 +367,15 @@ runs:
     - name: Debug Infracost conditions
       shell: bash
       run: |
-        echo "enable-infracost: ${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost }}"
-        echo "changes detected: ${{ steps.atmos-plan.outputs.changes }}"
-        echo "atmos-settings output: ${{ steps.atmos-settings.outputs.settings }}"
-        echo "atmos-plan output: ${{ toJson(steps.atmos-plan.outputs) }}"
-        echo "Condition evaluation: ${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}"
-
+        echo "Raw enable-infracost value: ${{ steps.atmos-settings.outputs.settings }}"
+        echo "Raw changes value: ${{ steps.atmos-plan.outputs.changes }}"
+        echo "Parsed enable-infracost: ${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost }}"
+        echo "Condition parts:"
+        echo "Part 1: ${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost == 'true' }}"
+        echo "Part 2: ${{ steps.atmos-plan.outputs.changes == 'true' }}"
+        
     - name: Setup Infracost
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost == "true" && steps.atmos-plan.outputs.changes == "true" }}
+      if: ${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
       uses: infracost/actions/setup@v3
       with:
         api-key: ${{ inputs.infracost-api-key }}
