@@ -374,7 +374,7 @@ runs:
         echo "Condition evaluation: ${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}"
 
     - name: Setup Infracost
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
+      if: ${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost == "true" && steps.atmos-plan.outputs.changes == "true" }}
       uses: infracost/actions/setup@v3
       with:
         api-key: ${{ inputs.infracost-api-key }}
