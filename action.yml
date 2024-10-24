@@ -475,6 +475,7 @@ runs:
         
         if [ -f ${STEP_SUMMARY_FILE} ]; then
           echo "${STEP_SUMMARY_FILE} found"
+          cat ${STEP_SUMMARY_FILE}
 
           STEP_SUMMARY=$(cat ${STEP_SUMMARY_FILE} | jq -Rs .)
           echo "result=${STEP_SUMMARY}" >> $GITHUB_OUTPUT
