@@ -66,27 +66,31 @@ this action. For more on setting up those components, see the `gitops` component
 
 ### Config
 
-The action expects the atmos configuration file `atmos.yaml` to be present in the repository.
+The action expects the atmos stack file in the component settings section to be present in the repository.
 The config should have the following structure:
 
 ```yaml
-integrations:
-  github:
-    gitops:
-      opentofu-version: 1.7.3
-      terraform-version: 1.5.2
-      infracost-enabled: false
-      artifact-storage:
-        region: us-east-2
-        bucket: cptest-core-ue2-auto-gitops
-        table: cptest-core-ue2-auto-gitops-plan-storage
-        role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
-      role:
-        plan: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
-        apply: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
-      matrix:
-        sort-by: .stack_slug
-        group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
+components:
+  terraform:
+    foobar/changes:
+      component: foobar
+      settings:
+        github:
+          gitops:
+            opentofu-version: 1.7.3
+            terraform-version: 1.5.2
+            infracost-enabled: false
+            artifact-storage:
+              region: us-east-2
+              bucket: cptest-core-ue2-auto-gitops
+              table: cptest-core-ue2-auto-gitops-plan-storage
+              role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
+            role:
+              plan: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+              apply: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
+            matrix:
+              sort-by: .stack_slug
+              group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
 ```
 
 > [!IMPORTANT]
@@ -114,10 +118,14 @@ components:
 
 ...
 
-integrations:
-  github:
-    gitops:
-      opentofu-version: 1.7.3
+components:
+  terraform:
+    foobar/changes:
+      component: foobar
+      settings:
+        github:
+          gitops:
+            opentofu-version: 1.7.3
       ...
 ```
   
@@ -153,6 +161,13 @@ integrations:
             atmos-config-path: ./rootfs/usr/local/etc/atmos/
             atmos-version: 1.81.0
 ```
+### Migrating from `v2` to `v3`
+
+The notable changes in `v3` are:
+
+- `v3` moves the integration settings from the `atmos.yaml` file to the stack file in the component settings section, which allows more granular configuration of the GitHub Action per component and not global like in version `v2`.
+- `v3` allow the the action to conditionally disable the `action/checkout` which is useful when files oare modified outside code commits.
+
 
 ### Migrating from `v1` to `v2`
 
