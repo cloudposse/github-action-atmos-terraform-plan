@@ -300,7 +300,7 @@ runs:
           plan \
           -patch \
           -- \
-           bash -c "cat ${TERRAFORM_OUTPUT_FILE}"
+            bash -c "cat ${TERRAFORM_OUTPUT_FILE}"
         fi
 
         TERRAFORM_RESULT=$?
