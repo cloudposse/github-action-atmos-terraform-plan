@@ -55,6 +55,10 @@ inputs:
     description: "Disable actions/checkout. Useful for when the checkout happens in a previous step and file are modified outside of git through other actions"
     required: false
     default: 'false'
+  pr-comment:
+    description: "Set to 'true' to create a PR comment with the summary of the plan"
+    required: false
+    default: 'false'
 outputs:
   summary:
     description: "Summary"
@@ -252,7 +256,7 @@ runs:
         TERRAFORM_OUTPUT_FILE="./terraform-${GITHUB_RUN_ID}-output.txt"
 
         tfcmt \
-        --config ${GITHUB_ACTION_PATH}/config/summary.yaml \
+        --config ${{ github.action_path }}/config/summary.yaml \
         -owner "${{ github.repository_owner }}" \
         -repo "${{ github.event.repository.name }}" \
         -var "target:${{ steps.vars.outputs.component_slug }}" \
@@ -265,7 +269,7 @@ runs:
         -var "logoUrl:${{ inputs.branding-logo-url }}" \
         -var "infracost_enabled:${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost }}" \
         -var "driftModeEnabled:${{ inputs.drift-detection-mode-enabled }}" \
-        --output ${{ steps.vars.outputs.summary_file }} \
+        $([[ "${{ inputs.pr-comment }}" == "false" ]] && echo "--output ${{ steps.vars.outputs.summary_file }}") \
         --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
         plan -- \
           atmos terraform plan ${{ inputs.component }} \
@@ -275,6 +279,29 @@ runs:
           -input=false \
           -no-color \
         &> ${TERRAFORM_OUTPUT_FILE}
+
+        if [[ "${{ inputs.pr-comment }}" == "true" ]]; then
+          tfcmt \
+          --config ${{ github.action_path }}/config/summary.yaml \
+          -owner "${{ github.repository_owner }}" \
+          -repo "${{ github.event.repository.name }}" \
+          -var "target:${{ steps.vars.outputs.component_slug }}" \
+          -var "component:${{ inputs.component }}" \
+          -var "componentPath:${{ steps.vars.outputs.component_path }}" \
+          -var "commitSHA:${{ inputs.sha }}" \
+          -var "stack:${{ inputs.stack }}" \
+          -var "job:${{ github.job }}" \
+          -var "logoImage:${{ inputs.branding-logo-image }}" \
+          -var "logoUrl:${{ inputs.branding-logo-url }}" \
+          -var "infracost_enabled:${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost }}" \
+          -var "driftModeEnabled:${{ inputs.drift-detection-mode-enabled }}" \
+          --output ${{ steps.vars.outputs.summary_file }} \
+          --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
+          plan \
+          -patch \
+          -- \
+           bash -c "cat ${TERRAFORM_OUTPUT_FILE}"
+        fi
 
         TERRAFORM_RESULT=$?
 
