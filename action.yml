@@ -371,12 +371,21 @@ runs:
         echo "changes detected: ${{ steps.atmos-plan.outputs.changes }}"
         echo "atmos-settings output: ${{ steps.atmos-settings.outputs.settings }}"
         echo "atmos-plan output: ${{ toJson(steps.atmos-plan.outputs) }}"
+        echo "Condition evaluation: ${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}"
 
     - name: Setup Infracost
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
       uses: infracost/actions/setup@v3
       with:
         api-key: ${{ inputs.infracost-api-key }}
+    
+    - name: Debug After Infracost Setup
+      if: ${{ always() }}
+      shell: bash
+      run: |
+        echo "Infracost setup step has been attempted"
+        which infracost || echo "Infracost not found"
+        echo "INFRACOST_API_KEY is set: ${{ inputs.infracost-api-key != '' }}"
 
     - name: Convert PLANFILE to JSON
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
