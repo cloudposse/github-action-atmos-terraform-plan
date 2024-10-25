@@ -183,7 +183,7 @@ runs:
             tag: ${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).opentofu-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).opentofu-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).opentofu-version) }}
             skip: ${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version == '' || fromJson(steps.atmos-settings.outputs.settings).opentofu-version == 'null' }}
           suzuki-shunsuke/tfcmt:
-            tag: v4.11.0  
+            tag: v4.14.0  
 
     - name: Configure Plan AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -280,6 +280,8 @@ runs:
           -no-color \
         &> ${TERRAFORM_OUTPUT_FILE}
 
+        TERRAFORM_RESULT=$?
+
         if [[ "${{ inputs.pr-comment }}" == "true" ]]; then
           tfcmt \
           --config ${{ github.action_path }}/config/summary.yaml \
@@ -302,8 +304,6 @@ runs:
           -- \
             bash -c "cat ${TERRAFORM_OUTPUT_FILE}"
         fi
-
-        TERRAFORM_RESULT=$?
 
         set -e
         
