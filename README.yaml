@@ -62,7 +62,7 @@ usage: |-
   
   The action supports AWS and Azure to store Terraform plan files. 
   You can read more about plan storage in the [cloudposse/github-action-terraform-plan-storage](https://github.com/cloudposse/github-action-terraform-plan-storage?tab=readme-ov-file#aws-default) documentation. 
-  Depends of cloud provider the following fields should be set in the `atmos.yaml`:
+  Depending on the cloud provider, the following fields should be set in the `atmos.yaml`:
   
   #### AWS
   
