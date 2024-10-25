@@ -166,7 +166,7 @@ components:
 Nothing is required to migrate from `v2` to `v3`, however, you can now take advantage of new functionality.
 The notable changes in `v3` are:
 
-- `v3` moves the integration settings from the `atmos.yaml` file to the stack file in the component settings section, which allows more granular configuration of the GitHub Action per component and not global like in version `v2`.
+- In `v3`, integration settings are read from each component's settings section within the stack file, inheriting from the `atmos.yaml` file. This allows for more granular configuration of the GitHub Action at the component level rather than globally, as in `v2`. You still have the option to set integration settings globally in `atmos.yaml` and extend them in each component's settings for finer control.
 - `v3` allow the the action to conditionally disable the `action/checkout` which is useful when files are modified outside code commits.
 
 
