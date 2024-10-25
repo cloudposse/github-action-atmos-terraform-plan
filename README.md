@@ -163,6 +163,7 @@ components:
 ```
 ### Migrating from `v2` to `v3`
 
+Nothing is required to migrate from `v2` to `v3`, however, you can now take advantage of new functionality.
 The notable changes in `v3` are:
 
 - `v3` moves the integration settings from the `atmos.yaml` file to the stack file in the component settings section, which allows more granular configuration of the GitHub Action per component and not global like in version `v2`.
