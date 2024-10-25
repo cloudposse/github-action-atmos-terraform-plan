@@ -72,7 +72,7 @@ usage: |-
   integrations:
     github:
       gitops:
-        opentofu-version: 1.7.3  
+        opentofu-version: 1.7.3
         terraform-version: 1.5.2
         infracost-enabled: false
         artifact-storage:
