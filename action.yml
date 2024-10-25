@@ -68,7 +68,7 @@ runs:
   using: "composite"
   steps:
     - name: Checkout
-      if: ${{ inputs.do-not-checkout == 'false' }}
+      if: ${{ inputs.checkout-enabled == 'true' }}
       uses: actions/checkout@v4
       with:
         ref: ${{ inputs.sha }}
