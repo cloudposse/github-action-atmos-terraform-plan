@@ -51,7 +51,7 @@ inputs:
       not supplied by the user. When running this action on github.com, the default value is sufficient. When running on
       GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
-  do-not-checkout:
+  skip-checkout:
     description: "Disable actions/checkout. Useful for when the checkout happens in a previous step and file are modified outside of git through other actions"
     required: false
     default: 'false'
