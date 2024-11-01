@@ -401,7 +401,7 @@ runs:
       shell: bash
       run: |
         echo "Running Infracost diff"
-        INFRACOST_LOG_LEVEL=debug infracost diff \
+       infracost diff \
           --path="${{ steps.vars.outputs.plan_file }}.json" \
           --format=diff \
           --project-name "${{ inputs.stack }}-${{ inputs.component }}" \
