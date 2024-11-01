@@ -81,6 +81,7 @@ components:
             terraform-version: 1.5.2
             infracost-enabled: false
             artifact-storage:
+              plan-repository-type: "dynamo"
               region: us-east-2
               bucket: cptest-core-ue2-auto-gitops
               table: cptest-core-ue2-auto-gitops-plan-storage
