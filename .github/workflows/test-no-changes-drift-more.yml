@@ -53,6 +53,7 @@ jobs:
           drift-detection-mode-enabled: true
           atmos-config-path: ${{ runner.temp }}
           atmos-version: 1.99.0
+          skip-checkout: true
 
     outputs:
       result: ${{ steps.current.outcome }}
