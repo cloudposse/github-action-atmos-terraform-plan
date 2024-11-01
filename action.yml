@@ -275,7 +275,7 @@ runs:
 
         if [[ "${{ inputs.pr-comment }}" == "true" ]]; then
           tfcmt \
-          --config ${{ github.action_path }}/config/summary.yaml \
+          --config ${GITHUB_ACTION_PATH}/config/summary.yaml \
           -owner "${{ github.repository_owner }}" \
           -repo "${{ github.event.repository.name }}" \
           -var "target:${{ steps.vars.outputs.component_slug }}" \
