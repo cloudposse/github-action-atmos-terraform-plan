@@ -240,7 +240,7 @@ runs:
     - name: Cache .terraform
       id: cache
       uses: actions/cache@v4
-      if: ${{ fromJson(steps.component.outputs.settings).enabled }}
+      if: ${{ fromJson(steps.atmos-settings.outputs.settings).enabled }}
       with:
         path: |
           ./${{ steps.vars.outputs.component_path }}/.terraform
