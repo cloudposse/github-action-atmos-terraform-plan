@@ -275,7 +275,7 @@ runs:
         $([[ "${{ inputs.pr-comment }}" == "false" ]] && echo "--output ${{ steps.vars.outputs.summary_file }}") \
         --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
         plan -- \
-          -patch \
+          $([[ "${{ inputs.pr-comment }}" == "true" ]] && echo "-patch") \
           atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
           -out="${{ steps.vars.outputs.plan_file }}" \
