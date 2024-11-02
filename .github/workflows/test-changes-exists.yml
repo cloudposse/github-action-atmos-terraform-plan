@@ -44,7 +44,7 @@ jobs:
         id: current
         uses: ./
         with:
-          component: "foobar/changes"
+          component: "foobar/changes/atmos"
           stack: "plat-ue2-sandbox"
           sha: ${{ github.sha }}
           atmos-config-path: ${{ runner.temp }}
