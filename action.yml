@@ -51,6 +51,9 @@ inputs:
       not supplied by the user. When running this action on github.com, the default value is sufficient. When running on
       GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+  gcp-credentials:
+    description: "Google Cloud service account key JSON"
+    required: false
 outputs:
   summary:
     description: "Summary"
@@ -83,7 +86,9 @@ runs:
         echo "opentofu-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["opentofu-version"]')" >> $GITHUB_OUTPUT
         echo "terraform-version=$(atmos describe config -f json | jq -r '.integrations.github.gitops["terraform-version"]')" >> $GITHUB_OUTPUT
         echo "enable-infracost=$(atmos describe config -f json | jq -r '.integrations.github.gitops["infracost-enabled"]')" >> $GITHUB_OUTPUT        
+        echo "backend=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].backend')" >> $GITHUB_OUTPUT
         echo "aws-region=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].region')" >> $GITHUB_OUTPUT
+        echo "gcp-project-id=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].gcp-project-id')" >> $GITHUB_OUTPUT
         echo "terraform-state-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].role')" >> $GITHUB_OUTPUT
         echo "terraform-state-table=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].table')" >> $GITHUB_OUTPUT
         echo "terraform-state-bucket=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].bucket')" >> $GITHUB_OUTPUT        
@@ -108,6 +113,7 @@ runs:
             tag: v4.11.0  
 
     - name: Configure Plan AWS Credentials
+      if: ${{ steps.config.outputs.backend == 'aws' }}
       uses: aws-actions/configure-aws-credentials@v4.0.2
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}
@@ -273,10 +279,10 @@ runs:
         role-session-name: "atmos-terraform-state-gitops"
         mask-aws-account-id: "no"
 
-    - name: Store New Plan
-      if: ${{ steps.atmos-plan.outputs.error == 'false' }}
+    - name: Store New Plan (AWS)
+      if: ${{ steps.atmos-plan.outputs.error == 'false' && steps.config.outputs.backend == 'aws' }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
-      id: store-plan
+      id: store-plan-aws
       with:
         action: storePlan
         commitSHA: ${{ inputs.sha }}
@@ -286,8 +292,24 @@ runs:
         tableName: ${{ steps.config.outputs.terraform-state-table }}
         bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
 
-    - name: Store Lockfile for New Plan
-      if: ${{ steps.atmos-plan.outputs.error == 'false' }}
+    - name: Store New Plan (Google)
+      if: ${{ steps.atmos-plan.outputs.error == 'false' && steps.config.outputs.backend == 'google' }}
+      uses: shirkevich/github-action-terraform-plan-storage@google-cloud-backend
+      id: store-plan-google
+      with:
+        action: storePlan
+        commitSHA: ${{ inputs.sha }}
+        planPath: ${{ steps.vars.outputs.plan_file }}
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}
+        planRepositoryType: gcs
+        gcpCredentials: ${{ inputs.gcp-credentials }}
+        gcpProjectId: ${{ steps.config.outputs.gcp-project-id }}
+        metadataRepositoryType: firestore
+        firestoreCollectionName: ${{ steps.config.outputs.terraform-state-table }}
+
+    - name: Store Lockfile for New Plan (AWS)
+      if: ${{ steps.atmos-plan.outputs.error == 'false' && steps.config.outputs.backend == 'aws' }}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       with:
         action: storePlan
@@ -297,6 +319,20 @@ runs:
         stack: ${{ inputs.stack }}-lockfile
         tableName: ${{ steps.config.outputs.terraform-state-table }}
         bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
+
+    - name: Store Lockfile for New Plan (Google)
+      if: ${{ steps.atmos-plan.outputs.error == 'false' && steps.config.outputs.backend == 'google' }}
+      uses: shirkevich/github-action-terraform-plan-storage@google-cloud-backend
+      with:
+        action: storePlan
+        commitSHA: ${{ inputs.sha }}
+        planPath: ${{ steps.vars.outputs.lock_file }}
+        component: ${{ inputs.component }}
+        stack: ${{ inputs.stack }}-lockfile
+        planRepositoryType: gcs
+        gcpCredentials: ${{ inputs.gcp-credentials }}
+        gcpProjectId: ${{ steps.config.outputs.gcp-project-id }}
+        metadataRepositoryType: firestore
 
     - name: Setup Infracost
       if: ${{ steps.config.outputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}

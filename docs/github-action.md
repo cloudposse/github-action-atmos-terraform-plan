@@ -16,6 +16,7 @@
 | sha | Commit SHA to plan. Default: github.sha | ${{ github.event.pull\_request.head.sha }} | true |
 | stack | The stack name for the given component. | N/A | true |
 | token | Used to pull node distributions for Atmos from Cloud Posse's GitHub repository. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting. | ${{ github.server\_url == 'https://github.com' && github.token \|\| '' }} | false |
+| gcp-credentials | Google Cloud service account key JSON | N/A | false |
 
 
 ## Outputs
