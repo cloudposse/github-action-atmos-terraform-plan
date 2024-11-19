@@ -57,6 +57,9 @@ outputs:
     description: "Summary"
     value: "${{ steps.summary.outputs.result }}"
 
+env:
+  ACTIONS_STEP_DEBUG: true
+
 runs:
   using: "composite"
   steps:
