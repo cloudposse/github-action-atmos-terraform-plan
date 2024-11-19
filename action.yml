@@ -277,7 +277,7 @@ runs:
         rm -f ${TERRAFORM_OUTPUT_FILE}
 
     - name: Configure State AWS Credentials
-      if: ${{ steps.atmos-plan.outputs.error == 'false' }}
+      if: ${{ steps.atmos-plan.outputs.error == 'false' && steps.config.outputs.backend == 'aws' }}
       uses: aws-actions/configure-aws-credentials@v4.0.2
       with:
         aws-region: ${{ steps.config.outputs.aws-region }}
