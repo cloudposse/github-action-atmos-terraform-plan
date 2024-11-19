@@ -51,9 +51,7 @@ inputs:
       not supplied by the user. When running this action on github.com, the default value is sufficient. When running on
       GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
-  gcp-credentials:
-    description: "Google Cloud service account key JSON"
-    required: false
+
 outputs:
   summary:
     description: "Summary"
@@ -89,6 +87,8 @@ runs:
         echo "backend=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].backend')" >> $GITHUB_OUTPUT
         echo "aws-region=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].region')" >> $GITHUB_OUTPUT
         echo "gcp-project-id=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."gcp-project-id"')" >> $GITHUB_OUTPUT
+        echo "google-workload-identity-provider=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."google-workload-identity-provider"')" >> $GITHUB_OUTPUT
+        echo "google-service-account=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."google-service-account"')" >> $GITHUB_OUTPUT
         echo "terraform-state-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].role')" >> $GITHUB_OUTPUT
         echo "terraform-state-table=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].table')" >> $GITHUB_OUTPUT
         echo "terraform-state-bucket=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].bucket')" >> $GITHUB_OUTPUT        
@@ -120,6 +120,13 @@ runs:
         role-to-assume: ${{ steps.config.outputs.terraform-plan-role }}
         role-session-name: "atmos-terraform-plan-gitops"
         mask-aws-account-id: "no"
+
+    - name: Configure Plan Google Credentials
+      if: ${{ fromJson(steps.component.outputs.settings).enabled && inputs.backend == 'google' }}
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ steps.config.outputs.google-workload-identity-provider }}
+        service_account: ${{ steps.config.outputs.google-service-account }}
 
     - name: Get atmos settings
       uses: cloudposse/github-action-atmos-get-setting@v1
@@ -202,12 +209,6 @@ runs:
       run: |
         set +e
         
-        if [[ "${{ steps.config.outputs.backend }}" == "google" ]]; then
-          # Create credentials file and set environment variable
-          echo '${{ inputs.gcp-credentials }}' > /tmp/gcp-credentials.json
-          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-credentials.json
-        fi
-
         TERRAFORM_OUTPUT_FILE="./terraform-${GITHUB_RUN_ID}-output.txt"
 
         tfcmt \
