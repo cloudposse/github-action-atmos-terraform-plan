@@ -300,7 +300,7 @@ runs:
 
     - name: Store New Plan (Google)
       if: ${{ steps.atmos-plan.outputs.error == 'false' && steps.config.outputs.backend == 'google' }}
-      uses: shirkevich/github-action-terraform-plan-storage@c6f8f7e0fdb4f8ed21ebceec068a68117fb9114f
+      uses: shirkevich/github-action-terraform-plan-storage@935c724bfe991c8b12260981f37118063cd5f400
       id: store-plan-google
       with:
         action: storePlan
@@ -328,7 +328,7 @@ runs:
 
     - name: Store Lockfile for New Plan (Google)
       if: ${{ steps.atmos-plan.outputs.error == 'false' && steps.config.outputs.backend == 'google' }}
-      uses: shirkevich/github-action-terraform-plan-storage@c6f8f7e0fdb4f8ed21ebceec068a68117fb9114f
+      uses: shirkevich/github-action-terraform-plan-storage@935c724bfe991c8b12260981f37118063cd5f400
       with:
         action: storePlan
         commitSHA: ${{ inputs.sha }}
