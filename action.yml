@@ -312,7 +312,7 @@ runs:
         gcpCredentials: ${{ inputs.gcp-credentials }}
         gcpProjectId: ${{ steps.config.outputs.gcp-project-id }}
         metadataRepositoryType: firestore
-        firestoreCollectionName: ${{ steps.config.outputs.terraform-state-table }}
+        tableName: ${{ steps.config.outputs.terraform-state-table }}
 
     - name: Store Lockfile for New Plan (AWS)
       if: ${{ steps.atmos-plan.outputs.error == 'false' && steps.config.outputs.backend == 'aws' }}
@@ -339,7 +339,7 @@ runs:
         gcpCredentials: ${{ inputs.gcp-credentials }}
         gcpProjectId: ${{ steps.config.outputs.gcp-project-id }}
         metadataRepositoryType: firestore
-
+        tableName: ${{ steps.config.outputs.terraform-state-table }}
     - name: Setup Infracost
       if: ${{ steps.config.outputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
       uses: infracost/actions/setup@v3
