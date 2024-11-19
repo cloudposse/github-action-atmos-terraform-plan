@@ -202,6 +202,12 @@ runs:
       run: |
         set +e
         
+        if [[ "${{ steps.config.outputs.backend }}" == "google" ]]; then
+          # Create credentials file and set environment variable
+          echo '${{ inputs.gcp-credentials }}' > /tmp/gcp-credentials.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-credentials.json
+        fi
+
         TERRAFORM_OUTPUT_FILE="./terraform-${GITHUB_RUN_ID}-output.txt"
 
         tfcmt \
