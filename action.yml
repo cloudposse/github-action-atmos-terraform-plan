@@ -90,6 +90,7 @@ runs:
         echo "backend=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].backend')" >> $GITHUB_OUTPUT
         echo "aws-region=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].region')" >> $GITHUB_OUTPUT
         echo "gcp-project-id=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."gcp-project-id"')" >> $GITHUB_OUTPUT
+        echo "google-firestore-database-id=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."google-firestore-database-id"')" >> $GITHUB_OUTPUT
         echo "google-workload-identity-provider=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."google-workload-identity-provider"')" >> $GITHUB_OUTPUT
         echo "google-service-account=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."google-service-account"')" >> $GITHUB_OUTPUT
         echo "terraform-state-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].role')" >> $GITHUB_OUTPUT
@@ -313,11 +314,11 @@ runs:
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
         planRepositoryType: gcs
-        gcpCredentials: ${{ inputs.gcp-credentials }}
         gcpProjectId: ${{ steps.config.outputs.gcp-project-id }}
         metadataRepositoryType: firestore
         tableName: ${{ steps.config.outputs.terraform-state-table }}
         bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
+        databaseId: ${{ steps.config.outputs.google-firestore-database-id }}
 
     - name: Store Lockfile for New Plan (AWS)
       if: ${{ steps.atmos-plan.outputs.error == 'false' && steps.config.outputs.backend == 'aws' }}
@@ -341,12 +342,11 @@ runs:
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}-lockfile
         planRepositoryType: gcs
-        gcpCredentials: ${{ inputs.gcp-credentials }}
         gcpProjectId: ${{ steps.config.outputs.gcp-project-id }}
         metadataRepositoryType: firestore
         tableName: ${{ steps.config.outputs.terraform-state-table }}
         bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
-
+        databaseId: ${{ steps.config.outputs.google-firestore-database-id }}
     - name: Setup Infracost
       if: ${{ steps.config.outputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
       uses: infracost/actions/setup@v3
