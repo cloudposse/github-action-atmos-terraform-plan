@@ -300,7 +300,7 @@ runs:
 
     - name: Store New Plan (Google)
       if: ${{ steps.atmos-plan.outputs.error == 'false' && steps.config.outputs.backend == 'google' }}
-      uses: shirkevich/github-action-terraform-plan-storage@google-cloud-backend
+      uses: shirkevich/github-action-terraform-plan-storage@google-cloud-backend?v=1
       id: store-plan-google
       with:
         action: storePlan
@@ -328,7 +328,7 @@ runs:
 
     - name: Store Lockfile for New Plan (Google)
       if: ${{ steps.atmos-plan.outputs.error == 'false' && steps.config.outputs.backend == 'google' }}
-      uses: shirkevich/github-action-terraform-plan-storage@google-cloud-backend
+      uses: shirkevich/github-action-terraform-plan-storage@google-cloud-backend?v=1
       with:
         action: storePlan
         commitSHA: ${{ inputs.sha }}
