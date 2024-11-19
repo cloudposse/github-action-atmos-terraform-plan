@@ -106,11 +106,11 @@ runs:
       with:
         cache: true
         config: |-
-          opentofu/opentofu: 
+          opentofu/opentofu:
             tag: ${{ startsWith(steps.config.outputs.opentofu-version, 'v') && steps.config.outputs.opentofu-version || format('v{0}', steps.config.outputs.opentofu-version) }}
             skip: ${{ steps.config.outputs.opentofu-version == '' || steps.config.outputs.opentofu-version == 'null' }}
           suzuki-shunsuke/tfcmt:
-            tag: v4.11.0  
+            tag: v4.11.0
 
     - name: Configure Plan AWS Credentials
       if: ${{ steps.config.outputs.backend == 'aws' }}
