@@ -125,7 +125,7 @@ runs:
         mask-aws-account-id: "no"
 
     - name: Configure Plan Google Credentials
-      if: ${{ fromJson(steps.component.outputs.settings).enabled && steps.config.outputs.backend == 'google' }}
+      if: ${{ steps.config.outputs.backend == 'google' }}
       uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: ${{ steps.config.outputs.google-workload-identity-provider }}
