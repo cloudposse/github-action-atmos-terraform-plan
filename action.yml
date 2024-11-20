@@ -314,11 +314,11 @@ runs:
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
         planRepositoryType: gcs
-        gcpProjectId: ${{ steps.config.outputs.gcp-project-id }}
         metadataRepositoryType: firestore
-        tableName: ${{ steps.config.outputs.terraform-state-table }}
         bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
-        databaseId: ${{ steps.config.outputs.google-firestore-database-id }}
+        gcpProjectId: ${{ steps.config.outputs.gcp-project-id }}
+        gcpFirestoreDatabaseName: ${{ steps.config.outputs.google-firestore-database-name }}
+        gcpFirestoreCollectionName: ${{ steps.config.outputs.google-firestore-collection-name }}
 
     - name: Store Lockfile for New Plan (AWS)
       if: ${{ steps.atmos-plan.outputs.error == 'false' && steps.config.outputs.backend == 'aws' }}
@@ -342,11 +342,12 @@ runs:
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}-lockfile
         planRepositoryType: gcs
-        gcpProjectId: ${{ steps.config.outputs.gcp-project-id }}
         metadataRepositoryType: firestore
-        tableName: ${{ steps.config.outputs.terraform-state-table }}
         bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
-        databaseId: ${{ steps.config.outputs.google-firestore-database-id }}
+        gcpProjectId: ${{ steps.config.outputs.google-project-id }}
+        gcpFirestoreDatabaseName: ${{ steps.config.outputs.google-firestore-database-name }}
+        gcpFirestoreCollectionName: ${{ steps.config.outputs.google-firestore-collection-name }}
+
     - name: Setup Infracost
       if: ${{ steps.config.outputs.enable-infracost == 'true' && steps.atmos-plan.outputs.changes == 'true' }}
       uses: infracost/actions/setup@v3
