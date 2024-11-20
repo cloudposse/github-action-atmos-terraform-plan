@@ -89,10 +89,11 @@ runs:
         echo "enable-infracost=$(atmos describe config -f json | jq -r '.integrations.github.gitops["infracost-enabled"]')" >> $GITHUB_OUTPUT        
         echo "backend=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].backend')" >> $GITHUB_OUTPUT
         echo "aws-region=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].region')" >> $GITHUB_OUTPUT
-        echo "gcp-project-id=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."gcp-project-id"')" >> $GITHUB_OUTPUT
-        echo "google-firestore-database-id=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."google-firestore-database-id"')" >> $GITHUB_OUTPUT
+        echo "google-project-id=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."google-project-id"')" >> $GITHUB_OUTPUT
         echo "google-workload-identity-provider=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."google-workload-identity-provider"')" >> $GITHUB_OUTPUT
         echo "google-service-account=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."google-service-account"')" >> $GITHUB_OUTPUT
+        echo "google-firestore-database-name=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."google-firestore-database-name"')" >> $GITHUB_OUTPUT
+        echo "google-firestore-collection-name=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"]."google-firestore-collection-name"')" >> $GITHUB_OUTPUT
         echo "terraform-state-role=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].role')" >> $GITHUB_OUTPUT
         echo "terraform-state-table=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].table')" >> $GITHUB_OUTPUT
         echo "terraform-state-bucket=$(atmos describe config -f json | jq -r '.integrations.github.gitops["artifact-storage"].bucket')" >> $GITHUB_OUTPUT        
@@ -316,7 +317,7 @@ runs:
         planRepositoryType: gcs
         metadataRepositoryType: firestore
         bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
-        gcpProjectId: ${{ steps.config.outputs.gcp-project-id }}
+        gcpProjectId: ${{ steps.config.outputs.google-project-id }}
         gcpFirestoreDatabaseName: ${{ steps.config.outputs.google-firestore-database-name }}
         gcpFirestoreCollectionName: ${{ steps.config.outputs.google-firestore-collection-name }}
 
