@@ -1,7 +1,8 @@
 components:
   terraform:
     foobar/changes:
-      component: foobar
+      metadata:
+        component: foobar
       settings:
         github:
           actions_enabled: true

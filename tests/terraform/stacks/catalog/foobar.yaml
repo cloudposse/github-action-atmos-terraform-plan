@@ -8,7 +8,7 @@ components:
             terraform-version: 1.5.2
             infracost-enabled: __INFRACOST_ENABLED__
             artifact-storage:
-              region: __STORAGE_REGION_2__
+              region: __STORAGE_REGION__
               bucket: __STORAGE_BUCKET__
               table: __STORAGE_TABLE__
               role: __STORAGE_ROLE__

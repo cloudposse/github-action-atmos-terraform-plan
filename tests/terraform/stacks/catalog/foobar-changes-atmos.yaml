@@ -1,7 +1,8 @@
 components:
   terraform:
     foobar/changes/atmos:
-      component: foobar
+      metadata:
+        component: foobar
       vars:
         example: blue
         enabled: true
