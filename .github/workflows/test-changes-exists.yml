@@ -52,6 +52,8 @@ jobs:
             sed -i -e "s#__APPLY_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g" "$file"
           fi
           done
+          
+          cat ${{ runner.temp }}/atmos.yaml
 
       - name: Plan Atmos Component
         id: current
