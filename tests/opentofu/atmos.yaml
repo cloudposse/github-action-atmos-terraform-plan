@@ -73,7 +73,7 @@ integrations:
     gitops:
       opentofu-version: 1.7.3
       terraform-version: 1.5.2
-      infracost-enabled: __KKINFRACOST_ENABLED__
+      infracost-enabled: __INFRACOST_ENABLED__
       artifact-storage:
         region: __STORAGE_REGION__
         bucket: __STORAGE_BUCKET__
