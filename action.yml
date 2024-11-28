@@ -152,7 +152,7 @@ runs:
             outputPath: blob-container-name
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.github.gitops.artifact-storage.metadata-repository-type
+            settingsPath: settings.integrations.github.gitops.artifact-storage.metadata-repository-type
             outputPath: metadata-repository-type
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
