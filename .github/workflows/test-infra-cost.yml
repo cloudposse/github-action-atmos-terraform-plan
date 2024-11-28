@@ -58,7 +58,7 @@ jobs:
         id: current
         uses: ./
         with:
-          component: "foobar/changes/atmos"
+          component: "foobar/changes"
           stack: "plat-ue2-sandbox"
           sha: ${{ github.sha }}
           infracost-api-key: ${{ secrets.INFRACOST_API_KEY }}
