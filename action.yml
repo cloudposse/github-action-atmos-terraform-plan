@@ -318,10 +318,8 @@ runs:
         metadataRepositoryType: firestore
         bucketName: ${{ steps.config.outputs.terraform-state-bucket }}
         gcpProjectId: ${{ steps.config.outputs.google-project-id }}
-        ${{ if steps.config.outputs.google-firestore-database-name != 'null' }}:
-          gcpFirestoreDatabaseName: ${{ steps.config.outputs.google-firestore-database-name }}
-        ${{ if steps.config.outputs.google-firestore-collection-name != 'null' }}:
-          gcpFirestoreCollectionName: ${{ steps.config.outputs.google-firestore-collection-name }}
+        gcpFirestoreDatabaseName: ${{ steps.config.outputs.google-firestore-database-name }}
+        gcpFirestoreCollectionName: ${{ steps.config.outputs.google-firestore-collection-name }}
 
     - name: Store Lockfile for New Plan (AWS)
       if: ${{ steps.atmos-plan.outputs.error == 'false' && steps.config.outputs.backend == 'aws' }}
