@@ -79,6 +79,7 @@ integrations:
         bucket: __STORAGE_BUCKET__
         table: __STORAGE_TABLE__
         role: __STORAGE_ROLE__
+        plan-repository-type: s3
         metadata-repository-type: dynamo
       role:
         plan: __PLAN_ROLE__
