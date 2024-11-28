@@ -140,7 +140,7 @@ runs:
             outputPath: terraform-state-bucket
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.github.gitops.artifact-storage.plan-repository-type
+            settingsPath: settings.integrations.github.gitops.artifact-storage.plan-repository-type
             outputPath: plan-repository-type
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
