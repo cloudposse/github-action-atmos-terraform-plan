@@ -187,7 +187,11 @@ runs:
 
     - name: Configure Plan AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).plan-repository-type == 's3' }}
+      if: ${{ fromJson(steps.atmos-settings.outputs.settings).plan-repository-type == 's3'
+        fromJson(steps.atmos-settings.outputs.settings).aws-region != '' &&
+        fromJson(steps.atmos-settings.outputs.settings).aws-region != 'null' &&
+        fromJson(steps.atmos-settings.outputs.settings).terraform-plan-role != '' &&
+        fromJson(steps.atmos-settings.outputs.settings).terraform-plan-role != 'null' }}
       with:
         aws-region: ${{ fromJson(steps.atmos-settings.outputs.settings).aws-region }}
         role-to-assume: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-plan-role }}
@@ -349,7 +353,12 @@ runs:
 
     - name: Configure State AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
-      if: ${{ steps.atmos-plan.outputs.error == 'false' && fromJson(steps.atmos-settings.outputs.settings).plan-repository-type == 's3' }}
+      if: ${{ fromJson(steps.atmos-settings.outputs.settings).plan-repository-type == 's3'
+        steps.atmos-plan.outputs.error == 'false' &&
+        fromJson(steps.atmos-settings.outputs.settings).aws-region != '' &&
+        fromJson(steps.atmos-settings.outputs.settings).aws-region != 'null' &&
+        fromJson(steps.atmos-settings.outputs.settings).terraform-state-role != '' &&
+        fromJson(steps.atmos-settings.outputs.settings).terraform-state-role != 'null' }}
       with:
         aws-region: ${{ fromJson(steps.atmos-settings.outputs.settings).aws-region }}
         role-to-assume: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-role }}
