@@ -3,6 +3,9 @@ components:
     foobar/changes/atmos:
       metadata:
         component: foobar
+      settings:
+        github:
+          actions_enabled: true
       vars:
         example: blue
         enabled: true
