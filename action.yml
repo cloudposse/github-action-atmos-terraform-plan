@@ -375,10 +375,10 @@ runs:
         planPath: ${{ steps.vars.outputs.plan_file }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
-        planRepositoryType: ${{ fromJson(steps.atmos-settings.outputs.settings).plan-repository-type }}
+        planRepositoryType: ${{ fromJson(steps.atmos-settings.outputs.settings).plan-repository-type || 's3' }}
+        metadataRepositoryType: ${{ fromJson(steps.atmos-settings.outputs.settings).metadata-repository-type || 'dynamo' }}
         blobAccountName: ${{ fromJson(steps.atmos-settings.outputs.settings).blob-account-name  }}
         blobContainerName: ${{ fromJson(steps.atmos-settings.outputs.settings).blob-container-name }}
-        metadataRepositoryType: ${{ fromJson(steps.atmos-settings.outputs.settings).metadata-repository-type }}
         cosmosContainerName: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-container-name }}
         cosmosDatabaseName: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-database-name }}
         cosmosEndpoint: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-endpoint }}
@@ -395,9 +395,9 @@ runs:
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}-lockfile
         planRepositoryType: ${{ fromJson(steps.atmos-settings.outputs.settings).plan-repository-type || 's3' }}
-        blobAccountName: ${{ fromJson(steps.atmos-settings.outputs.settings).blob-account-name || 'dynamo' }}
+        metadataRepositoryType: ${{ fromJson(steps.atmos-settings.outputs.settings).metadata-repository-type || 'dynamo' }}
+        blobAccountName: ${{ fromJson(steps.atmos-settings.outputs.settings).blob-account-name }}
         blobContainerName: ${{ fromJson(steps.atmos-settings.outputs.settings).blob-container-name }}
-        metadataRepositoryType: ${{ fromJson(steps.atmos-settings.outputs.settings).metadata-repository-type }}
         cosmosContainerName: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-container-name }}
         cosmosDatabaseName: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-database-name }}
         cosmosEndpoint: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-endpoint }}
