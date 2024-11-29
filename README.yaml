@@ -56,7 +56,9 @@ usage: |-
   ### Config
 
   > [!IMPORTANT]
-  > **Please note!** This GitHub Action only works with `atmos >= 1.63.0`. If you are using `atmos < 1.63.0` please use `v1` version of this action.      
+  > **Please note!** This GitHub Action only works with `atmos >= 1.99.0`.
+  > If you are using `atmos >= 1.63.0, < 1.99.0` please use `v2` version of this action.  
+  > If you are using `atmos < 1.63.0` please use `v1` version of this action.
 
   The action expects the atmos configuration file `atmos.yaml` to be present in the repository.
   
@@ -76,6 +78,8 @@ usage: |-
         terraform-version: 1.5.2
         infracost-enabled: false
         artifact-storage:
+          plan-repository-type: s3
+          metadata-repository-type: dynamo
           region: us-east-2
           bucket: cptest-core-ue2-auto-gitops
           table: cptest-core-ue2-auto-gitops-plan-storage
@@ -102,9 +106,9 @@ usage: |-
         infracost-enabled: false
         artifact-storage:
           plan-repository-type: azureblob
+          metadata-repository-type: cosmos
           blob-account-name: tfplans
           blob-container-name: plans
-          metadata-repository-type: cosmos
           cosmos-container-name: terraform-plan-storage
           cosmos-database-name: terraform-plan-storage
           cosmos-endpoint: "https://my-cosmo-account.documents.azure.com:443/"
@@ -175,7 +179,15 @@ usage: |-
               atmos-config-path: ./rootfs/usr/local/etc/atmos/
               atmos-version: 1.81.0
   ```
+
+  ### Migrating from `v2` to `v3`
   
+  The notable changes in `v3` are:
+
+  - `v3` works only with `atmos >= 1.99.0`
+  - `v3` drops `install-terraform` input because terraform is not required for affected stacks call
+  - `v3` drops `atmos-gitops-config-path` input and the `./.github/config/atmos-gitops.yaml` config file. Now you have to use GitHub Actions environment variables to specify the location of the `atmos.yaml`.
+    
   ### Migrating from `v1` to `v2`
   
   The notable changes in `v2` are:
