@@ -375,8 +375,8 @@ runs:
         planPath: ${{ steps.vars.outputs.plan_file }}
         component: ${{ inputs.component }}
         stack: ${{ inputs.stack }}
-        planRepositoryType: ${{ fromJson(steps.atmos-settings.outputs.settings).plan-repository-type || 's3' }}
-        blobAccountName: ${{ fromJson(steps.atmos-settings.outputs.settings).blob-account-name || 'dynamo' }}
+        planRepositoryType: ${{ fromJson(steps.atmos-settings.outputs.settings).plan-repository-type }}
+        blobAccountName: ${{ fromJson(steps.atmos-settings.outputs.settings).blob-account-name  }}
         blobContainerName: ${{ fromJson(steps.atmos-settings.outputs.settings).blob-container-name }}
         metadataRepositoryType: ${{ fromJson(steps.atmos-settings.outputs.settings).metadata-repository-type }}
         cosmosContainerName: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-container-name }}
