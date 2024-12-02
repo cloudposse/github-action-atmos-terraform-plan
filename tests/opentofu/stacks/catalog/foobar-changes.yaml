@@ -1,10 +1,30 @@
 components:
   terraform:
     foobar/changes:
-      component: foobar
+      metadata:
+        component: foobar
       settings:
         github:
           actions_enabled: true
+        integrations:
+          github:
+            actions_enabled: true
+            gitops:
+              opentofu-version: 1.7.3
+              infracost-enabled: __INFRACOST_ENABLED__
+              artifact-storage:
+                region: __STORAGE_REGION__
+                bucket: __STORAGE_BUCKET__
+                table: __STORAGE_TABLE__
+                role: __STORAGE_ROLE__
+                blob-account-name:
+                blob-container-name:
+                cosmos-container-name:
+                cosmos-database-name:
+                cosmos-endpoint:
+              role:
+                plan: __PLAN_ROLE__
+                apply: __APPLY_ROLE__
       vars:
         example: blue
         enabled: true
