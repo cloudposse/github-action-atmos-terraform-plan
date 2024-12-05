@@ -175,6 +175,14 @@ runs:
             outputPath: google-project-id
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
+            settingsPath: settings.integrations.github.gitops.artifact-storage.google-service-account
+            outputPath: google-service-account
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: settings.integrations.github.gitops.artifact-storage.google-workload-identity-provider
+            outputPath: google-workload-identity-provider
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
             settingsPath: settings.integrations.github.gitops.artifact-storage.google-firestore-database-name
             outputPath: google-firestore-database-name
           - component: ${{ inputs.component }}
