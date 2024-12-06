@@ -166,6 +166,26 @@ runs:
             stack: ${{ inputs.stack }}
             settingsPath: settings.integrations.github.gitops.artifact-storage.cosmos-endpoint
             outputPath: cosmos-endpoint
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: settings.integrations.github.gitops.artifact-storage.google-project-id
+            outputPath: google-project-id
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: settings.integrations.github.gitops.artifact-storage.google-service-account
+            outputPath: google-service-account
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: settings.integrations.github.gitops.artifact-storage.google-workload-identity-provider
+            outputPath: google-workload-identity-provider
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: settings.integrations.github.gitops.artifact-storage.google-firestore-database-name
+            outputPath: google-firestore-database-name
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: settings.integrations.github.gitops.artifact-storage.google-firestore-collection-name
+            outputPath: google-firestore-collection-name
 
     - name: Install Terraform
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version != '' && fromJson(steps.atmos-settings.outputs.settings).terraform-version != 'null' }}
@@ -196,6 +216,16 @@ runs:
         role-to-assume: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-plan-role }}
         role-session-name: "atmos-terraform-plan-gitops"
         mask-aws-account-id: "no"
+
+    - name: Configure Google Credentials
+      if: ${{ fromJson(steps.atmos-settings.outputs.settings).google-workload-identity-provider != '' &&
+        fromJson(steps.atmos-settings.outputs.settings).google-workload-identity-provider != 'null' &&
+        fromJson(steps.atmos-settings.outputs.settings).google-service-account != '' &&
+        fromJson(steps.atmos-settings.outputs.settings).google-service-account != 'null' }}
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ fromJson(steps.atmos-settings.outputs.settings).google-workload-identity-provider }}
+        service_account: ${{ fromJson(steps.atmos-settings.outputs.settings).google-service-account }}
 
     - name: Set atmos cli base path vars
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).enabled }}
@@ -369,7 +399,7 @@ runs:
 
     - name: Store New Plan
       if: ${{ steps.atmos-plan.outputs.error == 'false' }}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
+      uses: cloudposse/github-action-terraform-plan-storage@v2
       with:
         action: storePlan
         commitSHA: ${{ inputs.sha }}
@@ -383,12 +413,15 @@ runs:
         cosmosContainerName: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-container-name }}
         cosmosDatabaseName: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-database-name }}
         cosmosEndpoint: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-endpoint }}
+        gcpProjectId: ${{ fromJson(steps.atmos-settings.outputs.settings).google-project-id }}
+        gcpFirestoreDatabaseName: ${{ fromJson(steps.atmos-settings.outputs.settings).google-firestore-database-name }}
+        gcpFirestoreCollectionName: ${{ fromJson(steps.atmos-settings.outputs.settings).google-firestore-collection-name }}
         tableName: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-table }}
         bucketName: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-bucket }}
 
     - name: Store Lockfile for New Plan
       if: ${{ steps.atmos-plan.outputs.error == 'false' }}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
+      uses: cloudposse/github-action-terraform-plan-storage@v2
       with:
         action: storePlan
         commitSHA: ${{ inputs.sha }}
@@ -402,6 +435,9 @@ runs:
         cosmosContainerName: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-container-name }}
         cosmosDatabaseName: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-database-name }}
         cosmosEndpoint: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-endpoint }}
+        gcpProjectId: ${{ fromJson(steps.atmos-settings.outputs.settings).google-project-id }}
+        gcpFirestoreDatabaseName: ${{ fromJson(steps.atmos-settings.outputs.settings).google-firestore-database-name }}
+        gcpFirestoreCollectionName: ${{ fromJson(steps.atmos-settings.outputs.settings).google-firestore-collection-name }}
         tableName: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-table }}
         bucketName: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-bucket }}
 
