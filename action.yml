@@ -445,9 +445,9 @@ runs:
         cosmosContainerName: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-container-name }}
         cosmosDatabaseName: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-database-name }}
         cosmosEndpoint: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-endpoint }}
-        gcpProjectId: ${{ steps.config.outputs.google-project-id }}
-        gcpFirestoreDatabaseName: ${{ steps.config.outputs.google-firestore-database-name }}
-        gcpFirestoreCollectionName: ${{ steps.config.outputs.google-firestore-collection-name }}
+        gcpProjectId: ${{ fromJson(steps.atmos-settings.outputs.settings).google-project-id }}
+        gcpFirestoreDatabaseName: ${{ fromJson(steps.atmos-settings.outputs.settings).google-firestore-database-name }}
+        gcpFirestoreCollectionName: ${{ fromJson(steps.atmos-settings.outputs.settings).google-firestore-collection-name }}
         tableName: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-table }}
         bucketName: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-bucket }}
 
