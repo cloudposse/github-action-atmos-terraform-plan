@@ -88,12 +88,12 @@ runs:
         token: ${{ inputs.token }}
         install-wrapper: false
 
-    - name: Install OpenTofu
-      uses: cloudposse-github-actions/install-gh-releases@v1
-      with:
-        cache: true
-        config: |-
-          opentofu/opentofu: latest
+    # - name: Install OpenTofu
+    #   uses: cloudposse-github-actions/install-gh-releases@v1
+    #   with:
+    #     cache: true
+    #     config: |-
+    #       opentofu/opentofu: latest
 
     - name: Get atmos settings
       id: atmos-settings
