@@ -64,9 +64,6 @@ outputs:
     description: "Summary"
     value: "${{ steps.summary.outputs.result }}"
 
-env:
-  ACTIONS_STEP_DEBUG: true
-
 runs:
   using: "composite"
   steps:
@@ -87,13 +84,6 @@ runs:
         atmos-version: ${{ inputs.atmos-version }}
         token: ${{ inputs.token }}
         install-wrapper: false
-
-    # - name: Install OpenTofu
-    #   uses: cloudposse-github-actions/install-gh-releases@v1
-    #   with:
-    #     cache: true
-    #     config: |-
-    #       opentofu/opentofu: latest
 
     - name: Get atmos settings
       id: atmos-settings
