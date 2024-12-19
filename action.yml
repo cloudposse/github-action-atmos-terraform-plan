@@ -85,6 +85,40 @@ runs:
         token: ${{ inputs.token }}
         install-wrapper: false
 
+    - name: Get terraform and opentofu versions
+      id: terraform-versions
+      uses: cloudposse/github-action-atmos-get-setting@v2
+      with:
+        process-templates: false
+        settings: |
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: settings.integrations.github.gitops.opentofu-version
+            outputPath: opentofu-version
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: settings.integrations.github.gitops.terraform-version
+            outputPath: terraform-version
+
+    - name: Install Terraform
+      if: ${{ fromJson(steps.terraform-versions.outputs.settings).terraform-version != '' && fromJson(steps.terraform-versions.outputs.settings).terraform-version != 'null' }}
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ fromJson(steps.terraform-versions.outputs.settings).terraform-version }}
+        terraform_wrapper: false
+
+    - name: Install Dependencies
+      uses: cloudposse-github-actions/install-gh-releases@v1
+      with:
+        cache: true
+        config: |-
+          opentofu/opentofu:
+            tag: ${{ startsWith(fromJson(steps.terraform-versions.outputs.settings).opentofu-version, 'v') && fromJson(steps.terraform-versions.outputs.settings).opentofu-version || format('v{0}', fromJson(steps.terraform-versions.outputs.settings).opentofu-version) }}
+            skip: ${{ fromJson(steps.terraform-versions.outputs.settings).opentofu-version == '' || fromJson(steps.terraform-versions.outputs.settings).opentofu-version == 'null' }}
+          suzuki-shunsuke/tfcmt:
+            tag: v4.14.0
+
+
     - name: Get atmos settings
       id: atmos-settings
       uses: cloudposse/github-action-atmos-get-setting@v2
@@ -186,24 +220,6 @@ runs:
             stack: ${{ inputs.stack }}
             settingsPath: settings.integrations.github.gitops.artifact-storage.google-firestore-collection-name
             outputPath: google-firestore-collection-name
-
-    - name: Install Terraform
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version != '' && fromJson(steps.atmos-settings.outputs.settings).terraform-version != 'null' }}
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version }}
-        terraform_wrapper: false
-
-    - name: Install Dependencies
-      uses: cloudposse-github-actions/install-gh-releases@v1
-      with:
-        cache: true
-        config: |-
-          opentofu/opentofu: 
-            tag: ${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).opentofu-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).opentofu-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).opentofu-version) }}
-            skip: ${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version == '' || fromJson(steps.atmos-settings.outputs.settings).opentofu-version == 'null' }}
-          suzuki-shunsuke/tfcmt:
-            tag: v4.14.0  
 
     - name: Configure Plan AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
