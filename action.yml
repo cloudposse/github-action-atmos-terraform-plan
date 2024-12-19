@@ -148,14 +148,6 @@ runs:
             outputPath: command
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.opentofu-version
-            outputPath: opentofu-version
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.terraform-version
-            outputPath: terraform-version
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
             settingsPath: settings.integrations.github.gitops.infracost-enabled
             outputPath: enable-infracost
           - component: ${{ inputs.component }}
