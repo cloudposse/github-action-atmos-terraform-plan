@@ -63,6 +63,12 @@ outputs:
   summary:
     description: "Summary"
     value: "${{ steps.summary.outputs.result }}"
+  plan_file:
+    description: "Path to the terraform plan file"
+    value: "${{ steps.vars.outputs.plan_file }}"
+  plan_json:
+    description: "Path to the terraform plan in JSON format"
+    value: "${{ steps.vars.outputs.plan_file }}.json"
 
 runs:
   using: "composite"
