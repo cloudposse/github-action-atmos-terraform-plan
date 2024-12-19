@@ -55,14 +55,17 @@ After running this action, apply Terraform with the companion action, [github-ac
 
 ### Prerequisites
 
-This GitHub Action requires AWS access for two different purposes. This action will attempt to first run `terraform plan` against a given component and 
-then will use another role to save that given Terraform Plan to an S3 Bucket with metadata in a DynamoDB table. We recommend configuring 
-[OpenID Connect with AWS](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services) 
-to allow GitHub to assume roles in AWS and then deploying both a Terraform Plan role and a Terraform State role. 
-For Cloud Posse documentation on setting up GitHub OIDC, see our [`github-oidc-provider` component](https://docs.cloudposse.com/components/library/aws/github-oidc-provider/).
+This GitHub Action requires cloud provider access for two different purposes. This action will attempt to first run `terraform plan` against a given component and
+then will use credentials to save that given Terraform Plan to cloud storage with metadata.
 
-In order to store Terraform State, we configure an S3 Bucket to store plan files and a DynamoDB table to track plan metadata. Both will need to be deployed before running
-this action. For more on setting up those components, see the `gitops` component (__documentation pending__). This action will then use the [github-action-terraform-plan-storage](https://github.com/cloudposse/github-action-terraform-plan-storage) action to update these resources.
+For AWS, we recommend configuring [OpenID Connect with AWS](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)
+to allow GitHub to assume roles in AWS and then deploying both a Terraform Plan role and a Terraform State role.
+For Cloud Posse documentation on setting up GitHub OIDC with AWS, see our [`github-oidc-provider` component](https://docs.cloudposse.com/components/library/aws/github-oidc-provider/).
+
+For Google Cloud, we recommend configuring [Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation-with-GitHub-actions)
+to allow GitHub Actions to authenticate with Google Cloud services. This will enable access to Google Cloud Storage for plan files and Firestore for metadata storage.
+
+For AWS storage, we configure an S3 Bucket to store plan files and a DynamoDB table to track plan metadata. For Google Cloud storage, we use Google Cloud Storage buckets for plan files and Firestore for metadata. These resources will need to be deployed before running this action. For more on setting up those components, see the `gitops` component (__documentation pending__). This action will then use the [github-action-terraform-plan-storage](https://github.com/cloudposse/github-action-terraform-plan-storage) action to update these resources.
 
 ### Config
 
@@ -81,6 +84,7 @@ Depending on the cloud provider, the following fields should be set in the `atmo
 
 The config should have the following structure:
 
+#### AWS
 ```yaml
 integrations:
   github:
@@ -127,6 +131,22 @@ integrations:
       matrix:
         sort-by: .stack_slug
         group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
+```
+
+#### Google Cloud
+```yaml
+integrations:
+  github:
+    gitops:
+      ...
+      artifact-storage:
+        ...
+        bucket: cptest-core-ue2-auto-gitops
+        google-service-account: terraform@project-id.iam.gserviceaccount.com
+        google-workload-identity-provider: projects/project-id/locations/global/workloadIdentityPools/github-actions/providers/github-provider
+        google-project-id: cptest-core-ue2-auto-gitops
+        google-firestore-database-name: cptest-core-ue2-auto-gitops
+        google-firestore-collection-name: terraform-plan-storage
 ```
 
 ### Stack level configuration
