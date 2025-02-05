@@ -24,5 +24,7 @@
 
 | Name | Description |
 |------|-------------|
+| plan\_file | Path to the terraform plan file |
+| plan\_json | Path to the terraform plan in JSON format |
 | summary | Summary |
 <!-- markdownlint-restore -->
