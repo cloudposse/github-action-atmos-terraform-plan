@@ -95,6 +95,9 @@ runs:
       id: atmos-settings
       uses: cloudposse/github-action-atmos-get-setting@v2
       with:
+        # Here we do not process-templates because that requires terraform. Which we install after fetching the version
+        # processing templates here can cause an issue where cached terraform versions conflict with the version we want to install
+        process-templates: 'false'
         settings: |
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
