@@ -179,7 +179,10 @@ runs:
     - name: Install Dependencies
       uses: cloudposse-github-actions/install-gh-releases@v1
       with:
-        cache: true
+        # TODO revert
+        # testing cache disabled
+        #cache: true
+        cache: false
         config: |-
           hashicorp/terraform:
             tag: ${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).terraform-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).terraform-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).terraform-version) }}
