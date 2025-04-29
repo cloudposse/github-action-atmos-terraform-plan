@@ -176,32 +176,46 @@ runs:
             settingsPath: settings.integrations.github.gitops.artifact-storage.cosmos-endpoint
             outputPath: cosmos-endpoint
 
-    - name: Install dependencies (Terraform)
-      uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version != '' && fromJson(steps.atmos-settings.outputs.settings).terraform-version != 'null' }}
-      with:
-        aqua_version: v2.50.0
-        aqua_opts: "aquaproj/registry-standard/hashicorp/terraform@${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).terraform-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).terraform-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).terraform-version) }}"
-      env:
-        AQUA_CONFIG: aqua.yaml
-        AQUA_LOG_LEVEL: debug
+    - name: Create aqua config
+      shell: bash
+      run: |
+        # Read the existing aqua.yaml
+        cat > aqua.yaml << 'EOL'
+        registries:
+          - type: standard
+            ref: v4.233.0 # renovate: depName=aquaproj/aqua-registry
+        packages:
+          - name: suzuki-shunsuke/tfcmt@v4.14.5
+        EOL
 
-    - name: Install dependencies (OpenTofu)
-      uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version != '' && fromJson(steps.atmos-settings.outputs.settings).opentofu-version != 'null' }}
-      with:
-        aqua_version: v2.50.0
-        aqua_opts: "aquaproj/registry-standard/opentofu/opentofu@${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).opentofu-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).opentofu-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).opentofu-version) }}"
-      env:
-        AQUA_CONFIG: aqua.yaml
-        AQUA_LOG_LEVEL: debug
+        # Add Terraform if specified
+        if [[ "${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version }}" != "" && "${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version }}" != "null" ]]; then
+          VERSION="${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version }}"
+          if [[ ! "$VERSION" =~ ^v ]]; then
+            VERSION="v$VERSION"
+          fi
+          echo "          - name: hashicorp/terraform@$VERSION" >> aqua.yaml
+        fi
 
-    - name: Install shared dependencies
+        # Add OpenTofu if specified
+        if [[ "${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version }}" != "" && "${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version }}" != "null" ]]; then
+          VERSION="${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version }}"
+          if [[ ! "$VERSION" =~ ^v ]]; then
+            VERSION="v$VERSION"
+          fi
+          echo "          - name: /opentofu/opentofu@$VERSION" >> aqua.yaml
+        fi
+
+        # Debug output if debug is enabled
+        if [[ "${{ inputs.debug }}" == "true" ]]; then
+          echo "Generated aqua.yaml:"
+          cat aqua.yaml
+        fi
+
+    - name: Install dependencies
       uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
       with:
         aqua_version: v2.50.0
-        skip_install_aqua: true
-        aqua_opts: "aquaproj/registry-standard/suzuki-shunsuke/tfcmt@v4.14.5"
       env:
         AQUA_CONFIG: aqua.yaml
         AQUA_LOG_LEVEL: debug
