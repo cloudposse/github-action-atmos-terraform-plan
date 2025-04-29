@@ -176,32 +176,39 @@ runs:
             settingsPath: settings.integrations.github.gitops.artifact-storage.cosmos-endpoint
             outputPath: cosmos-endpoint
 
+    - name: Install Terraform
+      if: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version != '' && fromJson(steps.atmos-settings.outputs.settings).terraform-version != 'null' }}
+      run: |
+        set -eux
+
+        # Pin your version here
+        TERRAFORM_VERSION="${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).terraform-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).terraform-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).terraform-version) }}"
+
+        # Map runner.os → lowercase (linux, darwin, windows)
+        OS="${{ runner.os | toLowerCase() }}"
+
+        # Map runner.architecture → terraform’s naming
+        case "${{ runner.architecture }}" in
+          X64)   ARCH="amd64" ;;
+          ARM64) ARCH="arm64" ;;
+          *)     echo "Unsupported ARCH" >&2; exit 1 ;;
+        esac
+
+        URL="https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_${OS}_${ARCH}.zip"
+
+        curl -fsSL "$URL" -o terraform.zip
+        unzip terraform.zip
+        sudo mv terraform /usr/local/bin/
+
     - name: Install Dependencies
       uses: cloudposse-github-actions/install-gh-releases@v1
       with:
         cache: true
-        config: >-
-          {
-            "hashicorp/terraform": {
-              "tag": "v1.5.2",
-              "extension-matching": true
-            },
-            "opentofu/opentofu": {
-              "skip": true
-            },
-            "suzuki-shunsuke/tfcmt": {
-              "tag": "v4.14.0"
-            }
-          }
-        #config: |-
-        #    hashicorp/terraform:
-        #      tag: ${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).terraform-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).terraform-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).terraform-version) }}
-        #      skip: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version == '' || fromJson(steps.atmos-settings.outputs.settings).terraform-version == 'null' }}
-        #      extension-matching: true
-        #    opentofu/opentofu:
-        #      tag: ${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).opentofu-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).opentofu-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).opentofu-version) }}
-        #      skip: ${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version == '' || fromJson(steps.atmos-settings.outputs.settings).opentofu-version == 'null' }}
-        #    suzuki-shunsuke/tfcmt: v4.14.0
+        config: |-
+          opentofu/opentofu:
+            tag: ${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).opentofu-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).opentofu-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).opentofu-version) }}
+            skip: ${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version == '' || fromJson(steps.atmos-settings.outputs.settings).opentofu-version == 'null' }}
+          suzuki-shunsuke/tfcmt: v4.14.0
 
     - name: Configure Plan AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
