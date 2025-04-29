@@ -263,8 +263,6 @@ runs:
         COMPONENT_PATH=${{ fromJson(steps.atmos-settings.outputs.settings).component-path }}
         COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
         COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
-        # We need separate caches for Terraform and OpenTofu!
-        # Append the command to the key to ensure different caches for each command.
         COMPONENT_CACHE_KEY="${{ fromJson(steps.atmos-settings.outputs.settings).components.terraform.command || 'terraform' }}-$(basename ${{ fromJson(steps.atmos-settings.outputs.settings).component-path }})"
         PLAN_FILE="$( realpath ${COMPONENT_PATH})/$COMPONENT_SLUG-${{ inputs.sha }}.planfile"
         PLAN_FILE_JSON="$( realpath ${COMPONENT_PATH})/$COMPONENT_SLUG-${{ inputs.sha }}.planfile.json"
@@ -362,13 +360,21 @@ runs:
         set -e
 
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
-          # Split summary to 2 files - issue and step summary files
-          # Remove \0 at the end of the grep output
+          # In drift detection mode, split the summary into two parts:
+          # 1. Step summary (before the marker) - shown in GitHub Actions UI
+          # 2. Issue description (after the marker) - used to create GitHub issues
           grep -Pzo '(.|\n)*(?=_______________ISSUE-MARKDOWN_______________\n)' ${{ steps.vars.outputs.summary_file }} | grep -Pav  "\x00" > ${{ steps.vars.outputs.step_summary_file }}
           grep -Pzo '(?<=_______________ISSUE-MARKDOWN_______________\n)(.|\n)*' ${{ steps.vars.outputs.summary_file }} | grep -Pav  "\x00" > ${{ steps.vars.outputs.issue_file }}
+          # Clean up original file since content is now split
           rm -f ${{ steps.vars.outputs.summary_file }}
         else
-          mv ${{ steps.vars.outputs.summary_file }} ${{ steps.vars.outputs.step_summary_file }}
+          # In normal mode, safely move the summary to step summary location if it exists
+          if [ -f "${{ steps.vars.outputs.summary_file }}" ]; then
+            mv "${{ steps.vars.outputs.summary_file }}" "${{ steps.vars.outputs.step_summary_file }}"
+          else
+            # If summary file doesn't exist (e.g., when pr-comment is true), create an empty step summary
+            touch "${{ steps.vars.outputs.step_summary_file }}"
+          fi
         fi
 
         cat "${TERRAFORM_OUTPUT_FILE}"
