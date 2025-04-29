@@ -183,6 +183,7 @@ runs:
         aqua_version: v2.50.0
         aqua_opts: "-l aquaproj/registry-standard/hashicorp/terraform@${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).terraform-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).terraform-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).terraform-version) }}"
       env:
+        AQUA_CONFIG: aqua.yaml
         AQUA_LOG_LEVEL: debug
 
     - name: Install dependencies (OpenTofu)
@@ -192,6 +193,7 @@ runs:
         aqua_version: v2.50.0
         aqua_opts: "-l aquaproj/registry-standard/opentofu/opentofu@${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).opentofu-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).opentofu-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).opentofu-version) }}"
       env:
+        AQUA_CONFIG: aqua.yaml
         AQUA_LOG_LEVEL: debug
 
     - name: Install shared dependencies
@@ -201,6 +203,7 @@ runs:
         skip_install_aqua: true
         aqua_opts: "-l aquaproj/registry-standard/suzuki-shunsuke/tfcmt@v4.14.5"
       env:
+        AQUA_CONFIG: aqua.yaml
         AQUA_LOG_LEVEL: debug
 
     - name: Configure Plan AWS Credentials
