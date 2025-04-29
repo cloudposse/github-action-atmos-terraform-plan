@@ -179,6 +179,14 @@ runs:
     - name: Add Terraform and OpenTofu to Aqua
       shell: bash
       run: |
+        cat << EOF > aqua.yaml
+        registries:
+          - type: standard
+            ref: v4.233.0
+        packages:
+          - name: suzuki-shunsuke/tfcmt@v4.14.5
+        EOF
+
         # Add Terraform if specified
         if [[ "${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version }}" != "" && "${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version }}" != "null" ]]; then
           VERSION="${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version }}"
