@@ -178,6 +178,7 @@ runs:
 
     - name: Install Terraform
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version != '' && fromJson(steps.atmos-settings.outputs.settings).terraform-version != 'null' }}
+      shell: bash
       run: |
         set -eux
 
