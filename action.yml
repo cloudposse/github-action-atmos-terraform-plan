@@ -176,9 +176,9 @@ runs:
             settingsPath: settings.integrations.github.gitops.artifact-storage.cosmos-endpoint
             outputPath: cosmos-endpoint
 
-          #hashicorp/terraform:
-          #  tag: ${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).terraform-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).terraform-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).terraform-version) }}
-          #  skip: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version == '' || fromJson(steps.atmos-settings.outputs.settings).terraform-version == 'null' }}
+    #hashicorp/terraform:
+    #  tag: ${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).terraform-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).terraform-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).terraform-version) }}
+    #  skip: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version == '' || fromJson(steps.atmos-settings.outputs.settings).terraform-version == 'null' }}
     - name: Install Dependencies
       uses: cloudposse-github-actions/install-gh-releases@v1
       with:
