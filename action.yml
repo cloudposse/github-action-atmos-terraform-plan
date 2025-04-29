@@ -265,7 +265,7 @@ runs:
         COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
         # We need separate caches for Terraform and OpenTofu!
         # Append the command to the key to ensure different caches for each command.
-        COMPONENT_CACHE_KEY: "${{ fromJson(steps.atmos-settings.outputs.settings).components.terraform.command || 'terraform' }}-$(basename "${{ fromJson(steps.atmos-settings.outputs.settings).component-path }}")"
+        COMPONENT_CACHE_KEY="${{ fromJson(steps.atmos-settings.outputs.settings).components.terraform.command || 'terraform' }}-$(basename ${{ fromJson(steps.atmos-settings.outputs.settings).component-path }})"
         PLAN_FILE="$( realpath ${COMPONENT_PATH})/$COMPONENT_SLUG-${{ inputs.sha }}.planfile"
         PLAN_FILE_JSON="$( realpath ${COMPONENT_PATH})/$COMPONENT_SLUG-${{ inputs.sha }}.planfile.json"
         LOCK_FILE="$( realpath ${COMPONENT_PATH})/.terraform.lock.hcl"
