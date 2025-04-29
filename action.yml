@@ -367,14 +367,9 @@ runs:
           grep -Pzo '(?<=_______________ISSUE-MARKDOWN_______________\n)(.|\n)*' ${{ steps.vars.outputs.summary_file }} | grep -Pav  "\x00" > ${{ steps.vars.outputs.issue_file }}
           # Clean up original file since content is now split
           rm -f ${{ steps.vars.outputs.summary_file }}
-        else
+        elif [ -f "${{ steps.vars.outputs.summary_file }}" ]; then
           # In normal mode, safely move the summary to step summary location if it exists
-          if [ -f "${{ steps.vars.outputs.summary_file }}" ]; then
-            mv "${{ steps.vars.outputs.summary_file }}" "${{ steps.vars.outputs.step_summary_file }}"
-          else
-            # If summary file doesn't exist (e.g., when pr-comment is true), create an empty step summary
-            touch "${{ steps.vars.outputs.step_summary_file }}"
-          fi
+          mv "${{ steps.vars.outputs.summary_file }}" "${{ steps.vars.outputs.step_summary_file }}"
         fi
 
         cat "${TERRAFORM_OUTPUT_FILE}"
