@@ -360,16 +360,13 @@ runs:
         set -e
 
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
-          # In drift detection mode, split the summary into two parts:
-          # 1. Step summary (before the marker) - shown in GitHub Actions UI
-          # 2. Issue description (after the marker) - used to create GitHub issues
+          # Split summary to 2 files - issue and step summary files
+          # Remove \0 at the end of the grep output
           grep -Pzo '(.|\n)*(?=_______________ISSUE-MARKDOWN_______________\n)' ${{ steps.vars.outputs.summary_file }} | grep -Pav  "\x00" > ${{ steps.vars.outputs.step_summary_file }}
           grep -Pzo '(?<=_______________ISSUE-MARKDOWN_______________\n)(.|\n)*' ${{ steps.vars.outputs.summary_file }} | grep -Pav  "\x00" > ${{ steps.vars.outputs.issue_file }}
-          # Clean up original file since content is now split
           rm -f ${{ steps.vars.outputs.summary_file }}
-        elif [ -f "${{ steps.vars.outputs.summary_file }}" ]; then
-          # In normal mode, safely move the summary to step summary location if it exists
-          mv "${{ steps.vars.outputs.summary_file }}" "${{ steps.vars.outputs.step_summary_file }}"
+        elif [[ "${{ inputs.pr-comment }}" == "true" ]]; then
+          mv ${{ steps.vars.outputs.summary_file }} ${{ steps.vars.outputs.step_summary_file }}
         fi
 
         cat "${TERRAFORM_OUTPUT_FILE}"
