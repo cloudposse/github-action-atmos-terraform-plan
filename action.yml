@@ -176,7 +176,7 @@ runs:
             settingsPath: settings.integrations.github.gitops.artifact-storage.cosmos-endpoint
             outputPath: cosmos-endpoint
 
-    - name: Create aqua config
+    - name: Add Terraform and OpenTofu to Aqua
       shell: bash
       run: |
         # Add Terraform if specified
@@ -194,7 +194,7 @@ runs:
           if [[ ! "$VERSION" =~ ^v ]]; then
             VERSION="v$VERSION"
           fi
-          echo "  - name: /opentofu/opentofu@$VERSION" >> aqua.yaml
+          echo "  - name: opentofu/opentofu@$VERSION" >> aqua.yaml
         fi
 
         # Debug output if debug is enabled
@@ -203,7 +203,7 @@ runs:
           cat aqua.yaml
         fi
 
-    - name: Install dependencies
+    - name: Install dependencies with Aqua
       uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
       with:
         aqua_version: v2.50.0
