@@ -179,7 +179,8 @@ runs:
     - name: Add Terraform and OpenTofu to Aqua
       shell: bash
       run: |
-        cat << EOF > aqua.yaml
+        # Create aqua config with shared packages
+        cat << EOF > /tmp/aqua.yaml
         registries:
           - type: standard
             ref: v4.233.0
@@ -193,7 +194,7 @@ runs:
           if [[ ! "$VERSION" =~ ^v ]]; then
             VERSION="v$VERSION"
           fi
-          echo "  - name: hashicorp/terraform@$VERSION" >> aqua.yaml
+          echo "  - name: hashicorp/terraform@$VERSION" >> /tmp/aqua.yaml
         fi
 
         # Add OpenTofu if specified
@@ -202,13 +203,13 @@ runs:
           if [[ ! "$VERSION" =~ ^v ]]; then
             VERSION="v$VERSION"
           fi
-          echo "  - name: opentofu/opentofu@$VERSION" >> aqua.yaml
+          echo "  - name: opentofu/opentofu@$VERSION" >> /tmp/aqua.yaml
         fi
 
         # Debug output if debug is enabled
         if [[ "${{ inputs.debug }}" == "true" ]]; then
           echo "Generated aqua.yaml:"
-          cat aqua.yaml
+          cat /tmp/aqua.yaml
         fi
 
     - name: Cache Aqua
@@ -224,7 +225,7 @@ runs:
       with:
         aqua_version: v2.50.0
       env:
-        AQUA_CONFIG: aqua.yaml
+        AQUA_CONFIG: /tmp/aqua.yaml
         AQUA_LOG_LEVEL: debug
 
     - name: Configure Plan AWS Credentials
@@ -262,7 +263,7 @@ runs:
         COMPONENT_PATH=${{ fromJson(steps.atmos-settings.outputs.settings).component-path }}
         COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
         COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
-        COMPONENT_CACHE_KEY=$(basename "${{ fromJson(steps.atmos-settings.outputs.settings).component-path }}")
+        COMPONENT_CACHE_KEY="${{ fromJson(steps.atmos-settings.outputs.settings).components.terraform.command || 'terraform' }}/$(basename "${{ fromJson(steps.atmos-settings.outputs.settings).component-path }}")"
         PLAN_FILE="$( realpath ${COMPONENT_PATH})/$COMPONENT_SLUG-${{ inputs.sha }}.planfile"
         PLAN_FILE_JSON="$( realpath ${COMPONENT_PATH})/$COMPONENT_SLUG-${{ inputs.sha }}.planfile.json"
         LOCK_FILE="$( realpath ${COMPONENT_PATH})/.terraform.lock.hcl"
