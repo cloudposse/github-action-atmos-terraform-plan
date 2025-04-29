@@ -186,7 +186,7 @@ runs:
         TERRAFORM_VERSION="${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).terraform-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).terraform-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).terraform-version) }}"
 
         # Map runner.os → lowercase (linux, darwin, windows)
-        OS="${{ toLower(runner.os) }}"
+        OS="$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')"
 
         # Map runner.architecture → terraform's naming
         case "${{ runner.architecture }}" in
