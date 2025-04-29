@@ -192,7 +192,7 @@ runs:
         case "${{ runner.architecture }}" in
           X64)   ARCH="amd64" ;;
           ARM64) ARCH="arm64" ;;
-          *)     echo "Unsupported ARCH" >&2; exit 1 ;;
+          *)     echo "Unsupported ARCH: ${{ runner.architecture }}" >&2; exit 1 ;;
         esac
 
         URL="https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_${OS}_${ARCH}.zip"
