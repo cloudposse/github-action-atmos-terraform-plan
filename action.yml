@@ -196,7 +196,6 @@ runs:
 
     - name: Install shared dependencies
       uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version != '' && fromJson(steps.atmos-settings.outputs.settings).opentofu-version != 'null' }}
       with:
         aqua_version: v2.50.0
         skip_install_aqua: true
