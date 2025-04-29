@@ -58,3 +58,4 @@ jobs:
           atmos-config-path: ${{ runner.temp }}
           atmos-version: 1.99.0
           skip-checkout: true
+          debug: true
