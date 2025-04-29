@@ -181,15 +181,13 @@ runs:
       with:
         cache: true
         config: |-
-
+          suzuki-shunsuke/tfcmt: v4.14.0
           hashicorp/terraform:
             tag: ${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).terraform-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).terraform-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).terraform-version) }}
             skip: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version == '' || fromJson(steps.atmos-settings.outputs.settings).terraform-version == 'null' }}
           opentofu/opentofu:
             tag: ${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).opentofu-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).opentofu-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).opentofu-version) }}
             skip: ${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version == '' || fromJson(steps.atmos-settings.outputs.settings).opentofu-version == 'null' }}
-          suzuki-shunsuke/tfcmt:
-            tag: v4.14.0
 
     - name: Configure Plan AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
