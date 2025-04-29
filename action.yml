@@ -199,7 +199,7 @@ runs:
       with:
         aqua_version: v2.50.0
         skip_install_aqua: true
-        aqua_opts: "-l suzuki-shunsuke/tfcmt@v4.14.5"
+        aqua_opts: "-l aquaproj/registry-standard/suzuki-shunsuke/tfcmt@v4.14.5"
       env:
         AQUA_LOG_LEVEL: debug
 
