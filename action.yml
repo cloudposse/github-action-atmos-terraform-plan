@@ -176,23 +176,33 @@ runs:
             settingsPath: settings.integrations.github.gitops.artifact-storage.cosmos-endpoint
             outputPath: cosmos-endpoint
 
-    - name: Install dependencies
+    - name: Install dependencies (Terraform)
       uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
       with:
         aqua_version: v2.50.0
+        aqua_opts: "hashicorp/terraform@1.5.2"
       env:
         AQUA_CONFIG: aqua.yaml
         AQUA_LOG_LEVEL: debug
 
-    - name: Install Dependencies
-      uses: cloudposse-github-actions/install-gh-releases@v1
+    - name: Install dependencies (OpenTofu)
+      uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
       with:
-        cache: true
-        config: |-
-          opentofu/opentofu:
-            tag: ${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).opentofu-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).opentofu-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).opentofu-version) }}
-            skip: ${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version == '' || fromJson(steps.atmos-settings.outputs.settings).opentofu-version == 'null' }}
-          suzuki-shunsuke/tfcmt: v4.14.0
+        aqua_version: v2.50.0
+        aqua_opts: "opentofu/opentofu@v1.9.1"
+      env:
+        AQUA_CONFIG: aqua.yaml
+        AQUA_LOG_LEVEL: debug
+
+        #- name: Install Dependencies
+        #  uses: cloudposse-github-actions/install-gh-releases@v1
+        #  with:
+        #    cache: true
+        #    config: |-
+        #      opentofu/opentofu:
+        #        tag: ${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).opentofu-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).opentofu-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).opentofu-version) }}
+        #        skip: ${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version == '' || fromJson(steps.atmos-settings.outputs.settings).opentofu-version == 'null' }}
+        #      suzuki-shunsuke/tfcmt: v4.14.0
 
     - name: Configure Plan AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
