@@ -179,22 +179,13 @@ runs:
     - name: Create aqua config
       shell: bash
       run: |
-        # Read the existing aqua.yaml
-        cat > aqua.yaml << 'EOL'
-        registries:
-          - type: standard
-            ref: v4.233.0 # renovate: depName=aquaproj/aqua-registry
-        packages:
-          - name: suzuki-shunsuke/tfcmt@v4.14.5
-        EOL
-
         # Add Terraform if specified
         if [[ "${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version }}" != "" && "${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version }}" != "null" ]]; then
           VERSION="${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version }}"
           if [[ ! "$VERSION" =~ ^v ]]; then
             VERSION="v$VERSION"
           fi
-          echo "          - name: hashicorp/terraform@$VERSION" >> aqua.yaml
+          echo "  - name: hashicorp/terraform@$VERSION" >> aqua.yaml
         fi
 
         # Add OpenTofu if specified
@@ -203,7 +194,7 @@ runs:
           if [[ ! "$VERSION" =~ ^v ]]; then
             VERSION="v$VERSION"
           fi
-          echo "          - name: /opentofu/opentofu@$VERSION" >> aqua.yaml
+          echo "  - name: /opentofu/opentofu@$VERSION" >> aqua.yaml
         fi
 
         # Debug output if debug is enabled
