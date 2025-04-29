@@ -181,7 +181,7 @@ runs:
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version != '' && fromJson(steps.atmos-settings.outputs.settings).terraform-version != 'null' }}
       with:
         aqua_version: v2.50.0
-        aqua_opts: "-l aquaproj/registry-standard/hashicorp/terraform@${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).terraform-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).terraform-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).terraform-version) }}"
+        aqua_opts: "aquaproj/registry-standard/hashicorp/terraform@${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).terraform-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).terraform-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).terraform-version) }}"
       env:
         AQUA_CONFIG: aqua.yaml
         AQUA_LOG_LEVEL: debug
@@ -191,7 +191,7 @@ runs:
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version != '' && fromJson(steps.atmos-settings.outputs.settings).opentofu-version != 'null' }}
       with:
         aqua_version: v2.50.0
-        aqua_opts: "-l aquaproj/registry-standard/opentofu/opentofu@${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).opentofu-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).opentofu-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).opentofu-version) }}"
+        aqua_opts: "aquaproj/registry-standard/opentofu/opentofu@${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).opentofu-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).opentofu-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).opentofu-version) }}"
       env:
         AQUA_CONFIG: aqua.yaml
         AQUA_LOG_LEVEL: debug
@@ -201,7 +201,7 @@ runs:
       with:
         aqua_version: v2.50.0
         skip_install_aqua: true
-        aqua_opts: "-l aquaproj/registry-standard/suzuki-shunsuke/tfcmt@v4.14.5"
+        aqua_opts: "aquaproj/registry-standard/suzuki-shunsuke/tfcmt@v4.14.5"
       env:
         AQUA_CONFIG: aqua.yaml
         AQUA_LOG_LEVEL: debug
