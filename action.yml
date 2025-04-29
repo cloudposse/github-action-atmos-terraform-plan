@@ -176,30 +176,13 @@ runs:
             settingsPath: settings.integrations.github.gitops.artifact-storage.cosmos-endpoint
             outputPath: cosmos-endpoint
 
-    - name: Install Terraform
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version != '' && fromJson(steps.atmos-settings.outputs.settings).terraform-version != 'null' }}
-      shell: bash
-      run: |
-        set -eux
-
-        # Pin your version here
-        TERRAFORM_VERSION="${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).terraform-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).terraform-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).terraform-version) }}"
-
-        # Map runner.os → lowercase (linux, darwin, windows)
-        OS="$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')"
-
-        # Map runner.architecture → terraform's naming
-        case "${{ runner.architecture }}" in
-          X64)   ARCH="amd64" ;;
-          ARM64) ARCH="arm64" ;;
-          *)     echo "Unsupported ARCH: ${{ runner.architecture }}" >&2; exit 1 ;;
-        esac
-
-        URL="https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_${OS}_${ARCH}.zip"
-
-        curl -fsSL "$URL" -o terraform.zip
-        unzip terraform.zip
-        sudo mv terraform /usr/local/bin/
+    - name: Install dependencies
+      uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
+      with:
+        aqua_version: v2.50.0
+      env:
+        AQUA_CONFIG: aqua.yaml
+        AQUA_LOG_LEVEL: debug
 
     - name: Install Dependencies
       uses: cloudposse-github-actions/install-gh-releases@v1
