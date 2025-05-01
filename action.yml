@@ -176,23 +176,56 @@ runs:
             settingsPath: settings.integrations.github.gitops.artifact-storage.cosmos-endpoint
             outputPath: cosmos-endpoint
 
-    - name: Install Terraform
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version != '' && fromJson(steps.atmos-settings.outputs.settings).terraform-version != 'null' }}
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version }}
-        terraform_wrapper: false
+    - name: Add Terraform and OpenTofu to Aqua
+      shell: bash
+      run: |
+        cat << EOF > aqua.yaml
+        registries:
+          - type: standard
+            ref: v4.233.0
+        packages:
+          - name: suzuki-shunsuke/tfcmt@v4.14.5
+        EOF
 
-    - name: Install Dependencies
-      uses: cloudposse-github-actions/install-gh-releases@v1
+        # Add Terraform if specified
+        if [[ "${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version }}" != "" && "${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version }}" != "null" ]]; then
+          VERSION="${{ fromJson(steps.atmos-settings.outputs.settings).terraform-version }}"
+          if [[ ! "$VERSION" =~ ^v ]]; then
+            VERSION="v$VERSION"
+          fi
+          echo "  - name: hashicorp/terraform@$VERSION" >> aqua.yaml
+        fi
+
+        # Add OpenTofu if specified
+        if [[ "${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version }}" != "" && "${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version }}" != "null" ]]; then
+          VERSION="${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version }}"
+          if [[ ! "$VERSION" =~ ^v ]]; then
+            VERSION="v$VERSION"
+          fi
+          echo "  - name: opentofu/opentofu@$VERSION" >> aqua.yaml
+        fi
+
+        # Debug output if debug is enabled
+        if [[ "${{ inputs.debug }}" == "true" ]]; then
+          echo "Generated aqua.yaml:"
+          cat aqua.yaml
+        fi
+
+    - name: Cache Aqua
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
-        cache: true
-        config: |-
-          opentofu/opentofu:
-            tag: ${{ startsWith(fromJson(steps.atmos-settings.outputs.settings).opentofu-version, 'v') && fromJson(steps.atmos-settings.outputs.settings).opentofu-version || format('v{0}', fromJson(steps.atmos-settings.outputs.settings).opentofu-version) }}
-            skip: ${{ fromJson(steps.atmos-settings.outputs.settings).opentofu-version == '' || fromJson(steps.atmos-settings.outputs.settings).opentofu-version == 'null' }}
-          suzuki-shunsuke/tfcmt:
-            tag: v4.14.0
+        path: ~/.local/share/aquaproj-aqua
+        key: v2-aqua-installer-${{runner.os}}-${{runner.arch}}-${{hashFiles('aqua.yaml')}}
+        restore-keys: |
+          v2-aqua-installer-${{runner.os}}-${{runner.arch}}-
+
+    - name: Install dependencies with Aqua
+      uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
+      with:
+        aqua_version: v2.50.0
+      env:
+        AQUA_CONFIG: aqua.yaml
+        AQUA_LOG_LEVEL: debug
 
     - name: Configure Plan AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -265,6 +298,13 @@ runs:
       id: atmos-plan
       shell: bash
       run: |
+        # Verify tfcmt is installed
+        # Since we disable exit on error, the real error will be swallowed later on
+        echo "Ensure tfcmt is installed:"
+        tfcmt --version
+
+        # Disable exit on error so we can capture the terraform exit code
+        # and handle it appropriately later in the script
         set +e
 
         # Remove the environment file from the cache to avoid conflicts with workspace select
