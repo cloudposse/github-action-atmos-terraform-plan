@@ -226,7 +226,7 @@ runs:
         aqua_version: v2.50.0
         # Disable "-l", the default option
         # https://aquaproj.github.io/docs/tutorial/install-only-link
-        aqua_args: ""
+        aqua_opts: ""
       env:
         AQUA_CONFIG: /tmp/aqua.yaml
         AQUA_LOG_LEVEL: debug
