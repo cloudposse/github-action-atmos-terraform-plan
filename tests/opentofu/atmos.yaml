@@ -15,10 +15,14 @@
 # are independent settings (supporting both absolute and relative paths).
 # If `base_path` is provided, `components.terraform.base_path`, `components.helmfile.base_path`, `stacks.base_path` and `workflows.base_path`
 # are considered paths relative to `base_path`.
-base_path: "./tests"
+base_path: "./tests/opentofu"
+
+aliases:
+  tofu: terraform
 
 components:
   terraform:
+    command: "tofu"
     # Can also be set using `ATMOS_COMPONENTS_TERRAFORM_BASE_PATH` ENV var, or `--terraform-dir` command-line argument
     # Supports both absolute and relative paths
     base_path: "components/terraform"
@@ -67,16 +71,6 @@ workflows:
 integrations:
   github:
     gitops:
-      terraform-version: 1.5.2
-      infracost-enabled: __INFRACOST_ENABLED__
-      artifact-storage:
-        region: __STORAGE_REGION__
-        bucket: __STORAGE_BUCKET__
-        table: __STORAGE_TABLE__
-        role: __STORAGE_ROLE__
-      role:
-        plan: __PLAN_ROLE__
-        apply: __APPLY_ROLE__
       matrix:
         sort-by: .stack_slug
         group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")

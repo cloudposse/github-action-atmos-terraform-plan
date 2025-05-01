@@ -1,8 +1,9 @@
 
 
 <!-- markdownlint-disable -->
-# github-action-atmos-terraform-plan <a href="https://cpco.io/homepage?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/github-action-atmos-terraform-plan&utm_content="><img align="right" src="https://cloudposse.com/logo-300x69.svg" width="150" /></a>
-<a href="https://github.com/cloudposse/github-action-atmos-terraform-plan/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/github-action-atmos-terraform-plan.svg" alt="Latest Release"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/badge.svg" alt="Slack Community"/></a>
+<a href="https://cpco.io/homepage"><img src="https://github.com/cloudposse/github-action-atmos-terraform-plan/blob/main/.github/banner.png?raw=true" alt="Project Banner"/></a><br/>
+    <p align="right">
+<a href="https://github.com/cloudposse/github-action-atmos-terraform-plan/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/github-action-atmos-terraform-plan.svg" alt="Latest Release"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/badge.svg" alt="Slack Community"/></a></p>
 <!-- markdownlint-restore -->
 
 <!--
@@ -65,21 +66,37 @@ this action. For more on setting up those components, see the `gitops` component
 
 ### Config
 
+> [!IMPORTANT]
+> **Please note!** This GitHub Action only works with `atmos >= 1.99.0`.
+> If you are using `atmos >= 1.63.0, < 1.99.0` please use `v2` or `v3` version of this action.  
+> If you are using `atmos < 1.63.0` please use `v1` version of this action.
+
 The action expects the atmos configuration file `atmos.yaml` to be present in the repository.
+
+The action supports AWS and Azure to store Terraform plan files. 
+You can read more about plan storage in the [cloudposse/github-action-terraform-plan-storage](https://github.com/cloudposse/github-action-terraform-plan-storage?tab=readme-ov-file#aws-default) documentation. 
+Depending on the cloud provider, the following fields should be set in the `atmos.yaml`:
+
+#### AWS
+
 The config should have the following structure:
 
 ```yaml
 integrations:
   github:
     gitops:
+      opentofu-version: 1.7.3
       terraform-version: 1.5.2
       infracost-enabled: false
       artifact-storage:
+        plan-repository-type: s3
+        metadata-repository-type: dynamo
         region: us-east-2
         bucket: cptest-core-ue2-auto-gitops
         table: cptest-core-ue2-auto-gitops-plan-storage
         role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-core-ue2-auto-gitops-gha
       role:
+        # Set `plan` empty if you don't want to assume IAM role before terraform plan  
         plan: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
         apply: arn:aws:iam::yyyyyyyyyyyy:role/cptest-core-gbl-identity-gitops
       matrix:
@@ -87,10 +104,86 @@ integrations:
         group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
 ```
 
+#### Azure
+
+The config should have the following structure:
+
+```yaml
+integrations:
+  github:
+    gitops:
+      opentofu-version: 1.7.3  
+      terraform-version: 1.5.2
+      infracost-enabled: false
+      artifact-storage:
+        plan-repository-type: azureblob
+        metadata-repository-type: cosmos
+        blob-account-name: tfplans
+        blob-container-name: plans
+        cosmos-container-name: terraform-plan-storage
+        cosmos-database-name: terraform-plan-storage
+        cosmos-endpoint: "https://my-cosmo-account.documents.azure.com:443/"
+      # We remove the `role` section as it is AWS specific
+      matrix:
+        sort-by: .stack_slug
+        group-by: .stack_slug | split("-") | [.[0], .[2]] | join("-")
+```
+
+### Stack level configuration
+
 > [!IMPORTANT]
-> **Please note!** This GitHub Action only works with `atmos >= 1.63.0`. If you are using `atmos < 1.63.0` please use `v1` version of this action.    
+> Wherever it is possible to specify `integration.github.gitops` on stack level 
+> it is required to define default values in `atmos.yaml`
 
+It is possible to override integration settings on a stack level by defining `settings.integrations`.
 
+```yaml
+components:
+  terraform:
+    foobar:
+      settings:
+        integrations:
+          github:
+            gitops:
+              artifact-storage:
+                bucket: cptest-plat-ue2-auto-gitops
+                table: cptest-plat-ue2-auto-gitops-plan-storage
+                role: arn:aws:iam::xxxxxxxxxxxx:role/cptest-plat-ue2-auto-gitops-gha
+              role:
+                # Set `plan` empty if you don't want to assume IAM role before terraform plan  
+                plan: arn:aws:iam::yyyyyyyyyyyy:role/cptest-plat-gbl-identity-gitops
+                apply: arn:aws:iam::yyyyyyyyyyyy:role/cptest-plat-gbl-identity-gitops
+```  
+
+### Support OpenTofu
+
+This action supports [OpenTofu](https://opentofu.org/).
+
+> [!IMPORTANT]
+> **Please note!** OpenTofu supported by Atmos `>= 1.73.0`.
+> For details [read](https://atmos.tools/core-concepts/projects/configuration/opentofu/)
+
+To enable OpenTofu add the following settings to `atmos.yaml`
+  * Set the `opentofu-version` in the `atmos.yaml` to the desired version
+  * Set `components.terraform.command` to `tofu`
+
+#### Example
+
+```yaml
+
+components:
+  terraform:
+    command: tofu
+
+...
+
+integrations:
+  github:
+    gitops:
+      opentofu-version: 1.7.3
+      ...
+```
+  
 ### Workflow example
 
 ```yaml
@@ -121,8 +214,30 @@ integrations:
             component: "foobar"
             stack: "plat-ue2-sandbox"
             atmos-config-path: ./rootfs/usr/local/etc/atmos/
-            atmos-version: 1.63.0
+            atmos-version: 1.81.0
 ```
+
+### Migrating from `v3` to `v4`
+
+The notable changes in `v4` are:
+
+- `v4` works only with `atmos >= 1.99.0`
+- `v4` support azure plan and metadata storage
+- `v4` supports stack level integration gitops settings 
+- `v4` allow to skip internal checkout with `skip-checkout` input
+- `v4` support creating summary comments to PR
+
+The only required migration step is updating atmos version to `>= 1.99.0` 
+
+### Migrating from `v2` to `v3`
+
+The notable changes in `v3` are:
+
+- `v3` use `actions/upload-artifact@v4` to share artifacts so it is not compatible with `cloudposse/github-action-atmos-terraform-drift-detection` `< v2.0.0`
+- `v3` support .terraform caching to performance improvment
+
+
+No special migration steps required
 
 ### Migrating from `v1` to `v2`
 
@@ -286,7 +401,7 @@ Which would produce the same behavior as in `v1`, doing this:
 | Name | Description | Default | Required |
 |------|-------------|---------|----------|
 | atmos-config-path | The path to the atmos.yaml file | N/A | true |
-| atmos-version | The version of atmos to install | >= 1.63.0 | false |
+| atmos-version | The version of atmos to install | >= 1.99.0 | false |
 | branding-logo-image | Branding logo image url | https://cloudposse.com/logo-300x69.svg | false |
 | branding-logo-url | Branding logo url | https://cloudposse.com/ | false |
 | component | The name of the component to plan. | N/A | true |
@@ -294,7 +409,9 @@ Which would produce the same behavior as in `v1`, doing this:
 | drift-detection-mode-enabled | Indicate whether this action is used in drift detection workflow. | false | true |
 | infracost-api-key | Infracost API key | N/A | false |
 | metadata-retention-days | Infracost API key | 1 | false |
+| pr-comment | Set to 'true' to create a PR comment with the summary of the plan | false | false |
 | sha | Commit SHA to plan. Default: github.sha | ${{ github.event.pull\_request.head.sha }} | true |
+| skip-checkout | Disable actions/checkout. Useful for when the checkout happens in a previous step and file are modified outside of git through other actions | false | false |
 | stack | The stack name for the given component. | N/A | true |
 | token | Used to pull node distributions for Atmos from Cloud Posse's GitHub repository. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting. | ${{ github.server\_url == 'https://github.com' && github.token \|\| '' }} | false |
 
@@ -303,6 +420,8 @@ Which would produce the same behavior as in `v1`, doing this:
 
 | Name | Description |
 |------|-------------|
+| plan\_file | Path to the terraform plan file |
+| plan\_json | Path to the terraform plan in JSON format |
 | summary | Summary |
 <!-- markdownlint-restore -->
 

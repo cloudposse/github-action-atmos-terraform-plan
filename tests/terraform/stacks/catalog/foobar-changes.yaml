@@ -1,11 +1,13 @@
 components:
   terraform:
-    foobar-fail:
-      component: foobar
+    foobar/changes:
+      metadata:
+        component: foobar
       settings:
         github:
           actions_enabled: true
       vars:
         example: blue
         enabled: true
-        enable_failure: true
+        enable_failure: false
+        enable_warning: true

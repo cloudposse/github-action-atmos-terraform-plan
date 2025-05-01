@@ -8,3 +8,9 @@ variable "enable_failure" {
   default     = false
   description = "Always fail"
 }
+
+variable "enable_warning" {
+  type        = bool
+  default     = false
+  description = "Enable warning"
+}

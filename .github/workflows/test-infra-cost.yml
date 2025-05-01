@@ -30,15 +30,28 @@ jobs:
       - shell: bash
         run: |
           mkdir -p ${{ runner.temp }}
-          cp ./tests/atmos.yaml ${{ runner.temp }}/atmos.yaml
-          sed -i -e 's#__INFRACOST_ENABLED__#true#g' ${{ runner.temp }}/atmos.yaml          
-          sed -i -e 's#__STORAGE_REGION__#${{ env.AWS_REGION }}#g' ${{ runner.temp }}/atmos.yaml          
+          cp ./tests/terraform/atmos.yaml ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__INFRACOST_ENABLED__#true#g' ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__STORAGE_REGION__#${{ env.AWS_REGION }}#g' ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__STORAGE_BUCKET__#${{ secrets.TERRAFORM_STATE_BUCKET }}#g' ${{ runner.temp }}/atmos.yaml
-          sed -i -e 's#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g' ${{ runner.temp }}/atmos.yaml          
+          sed -i -e 's#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g' ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g' ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__STORAGE_ROLE__#${{ secrets.TERRAFORM_STATE_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__PLAN_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__APPLY_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
+
+          for file in ./tests/terraform/stacks/catalog/*.yaml; do
+          if [ -f "$file" ]; then
+            sed -i -e "s#__INFRACOST_ENABLED__#true#g" "$file"
+            sed -i -e "s#__STORAGE_REGION__#${{ env.AWS_REGION }}#g" "$file"          
+            sed -i -e "s#__STORAGE_BUCKET__#${{ secrets.TERRAFORM_STATE_BUCKET }}#g" "$file"
+            sed -i -e "s#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g" "$file"          
+            sed -i -e "s#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g" "$file"
+            sed -i -e "s#__STORAGE_ROLE__#${{ secrets.TERRAFORM_STATE_ROLE }}#g" "$file"
+            sed -i -e "s#__PLAN_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g" "$file"
+            sed -i -e "s#__APPLY_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g" "$file"
+          fi
+          done
 
 
       - name: Plan Atmos Component
@@ -47,11 +60,12 @@ jobs:
         with:
           component: "foobar/changes"
           stack: "plat-ue2-sandbox"
-          sha: 55bfef95601890afd80709da39a3ee5e6b4b0d32
+          sha: ${{ github.sha }}
           infracost-api-key: ${{ secrets.INFRACOST_API_KEY }}
           debug: true
           atmos-config-path: ${{ runner.temp }}
-          atmos-version: 1.63.0
+          atmos-version: 1.99.0
+          skip-checkout: true
 
     outputs:
       result: ${{ steps.current.outcome }}
@@ -130,10 +144,29 @@ jobs:
                 }
             
             Plan: 1 to add, 0 to change, 0 to destroy.
+            
+            Warning: Test warning summary
+            
+              with data.validation_warning.warn[0],
+              on main.tf line 20, in data "validation_warning" "warn":
+              20: data "validation_warning" "warn" {
+            
+            Test warning details
             ```
             
             </details>
             
+            
+            > [!WARNING]
+            > ```
+            > Warning: Test warning summary
+            > 
+            >   with data.validation_warning.warn[0],
+            >   on main.tf line 20, in data "validation_warning" "warn":
+            >   20: data "validation_warning" "warn" {
+            > 
+            > Test warning details
+            > ```
             
                 
             <details><summary>Infracost Estimate: monthly cost will not change</summary>

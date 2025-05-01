@@ -13,6 +13,8 @@ env:
 permissions:
   id-token: write
   contents: read
+  actions: write
+  pull-requests: write
 
 jobs:
   test:
@@ -25,19 +27,34 @@ jobs:
       - shell: bash
         run: |
           mkdir -p ${{ runner.temp }}
-          cp ./tests/atmos.yaml ${{ runner.temp }}/atmos.yaml          
+          cp ./tests/terraform/atmos.yaml ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__INFRACOST_ENABLED__#false#g' ${{ runner.temp }}/atmos.yaml
-          sed -i -e 's#__STORAGE_REGION__#${{ env.AWS_REGION }}#g' ${{ runner.temp }}/atmos.yaml          
+          sed -i -e 's#__STORAGE_REGION__#${{ env.AWS_REGION }}#g' ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__STORAGE_BUCKET__#${{ secrets.TERRAFORM_STATE_BUCKET }}#g' ${{ runner.temp }}/atmos.yaml
-          sed -i -e 's#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g' ${{ runner.temp }}/atmos.yaml          
+          sed -i -e 's#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g' ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g' ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__STORAGE_ROLE__#${{ secrets.TERRAFORM_STATE_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__PLAN_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
           sed -i -e 's#__APPLY_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
 
+          for file in ./tests/terraform/stacks/catalog/*.yaml; do
+          if [ -f "$file" ]; then
+            sed -i -e "s#__INFRACOST_ENABLED__#false#g" "$file"
+            sed -i -e "s#__STORAGE_REGION__#${{ env.AWS_REGION }}#g" "$file"          
+            sed -i -e "s#__STORAGE_BUCKET__#${{ secrets.TERRAFORM_STATE_BUCKET }}#g" "$file"
+            sed -i -e "s#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g" "$file"          
+            sed -i -e "s#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g" "$file"
+            sed -i -e "s#__STORAGE_ROLE__#${{ secrets.TERRAFORM_STATE_ROLE }}#g" "$file"
+            sed -i -e "s#__PLAN_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g" "$file"
+            sed -i -e "s#__APPLY_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g" "$file"
+          fi
+          done
+          
       - name: Plan Atmos Component
         uses: ./
         with:
           component: "foobar"
           stack: "plat-ue2-sandbox"
           atmos-config-path: ${{ runner.temp }}
+          atmos-version: 1.99.0
+          skip-checkout: true
