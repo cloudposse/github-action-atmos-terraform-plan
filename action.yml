@@ -320,7 +320,7 @@ runs:
         -var "logoUrl:${{ inputs.branding-logo-url }}" \
         -var "infracost_enabled:${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost }}" \
         -var "driftModeEnabled:${{ inputs.drift-detection-mode-enabled }}" \
-        --output ${{ steps.vars.outputs.summary_file }}" \
+        --output "${{ steps.vars.outputs.summary_file }}" \
         --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
         plan \
         $([[ "${{ inputs.pr-comment }}" == "true" ]] && echo "-patch") \
