@@ -179,8 +179,7 @@ runs:
     - name: Add Terraform and OpenTofu to Aqua
       shell: bash
       run: |
-        # Create aqua config with shared packages
-        cat << EOF > /tmp/aqua.yaml
+        cat << EOF > aqua.yaml
         registries:
           - type: standard
             ref: v4.233.0
@@ -194,7 +193,7 @@ runs:
           if [[ ! "$VERSION" =~ ^v ]]; then
             VERSION="v$VERSION"
           fi
-          echo "  - name: hashicorp/terraform@$VERSION" >> /tmp/aqua.yaml
+          echo "  - name: hashicorp/terraform@$VERSION" >> aqua.yaml
         fi
 
         # Add OpenTofu if specified
@@ -203,13 +202,13 @@ runs:
           if [[ ! "$VERSION" =~ ^v ]]; then
             VERSION="v$VERSION"
           fi
-          echo "  - name: opentofu/opentofu@$VERSION" >> /tmp/aqua.yaml
+          echo "  - name: opentofu/opentofu@$VERSION" >> aqua.yaml
         fi
 
         # Debug output if debug is enabled
         if [[ "${{ inputs.debug }}" == "true" ]]; then
           echo "Generated aqua.yaml:"
-          cat /tmp/aqua.yaml
+          cat aqua.yaml
         fi
 
     - name: Cache Aqua
@@ -224,10 +223,8 @@ runs:
       uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
       with:
         aqua_version: v2.50.0
-        # Disable "-l", the default option: https://aquaproj.github.io/docs/tutorial/install-only-link
-        aqua_opts: ""
       env:
-        AQUA_CONFIG: /tmp/aqua.yaml
+        AQUA_CONFIG: aqua.yaml
         AQUA_LOG_LEVEL: debug
 
     - name: Configure Plan AWS Credentials
@@ -289,7 +286,7 @@ runs:
 
     - name: Cache .terraform
       id: cache
-      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      uses: actions/cache@v4
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).enabled }}
       with:
         path: |
@@ -301,14 +298,6 @@ runs:
       id: atmos-plan
       shell: bash
       run: |
-        # Remove the environment file from the cache to avoid conflicts with workspace select
-        rm -f ./${{ steps.vars.outputs.component_path }}/.terraform/environment
-
-        TERRAFORM_OUTPUT_FILE="./terraform-${GITHUB_RUN_ID}-output.txt"
-
-        # Create the directory for the summary file if it doesn't exist
-        mkdir -p "$(dirname "${{ steps.vars.outputs.summary_file }}")"
-
         # Verify tfcmt is installed
         # Since we disable exit on error, the real error will be swallowed later on
         echo "Ensure tfcmt is installed:"
@@ -318,7 +307,11 @@ runs:
         # and handle it appropriately later in the script
         set +e
 
-        # Run tfcmt, atmos, and terraform to create the plan file
+        # Remove the environment file from the cache to avoid conflicts with workspace select
+        rm -f ./${{ steps.vars.outputs.component_path }}/.terraform/environment
+
+        TERRAFORM_OUTPUT_FILE="./terraform-${GITHUB_RUN_ID}-output.txt"
+
         tfcmt \
         --config ${GITHUB_ACTION_PATH}/config/summary.yaml \
         -owner "${{ github.repository_owner }}" \
@@ -333,7 +326,7 @@ runs:
         -var "logoUrl:${{ inputs.branding-logo-url }}" \
         -var "infracost_enabled:${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost }}" \
         -var "driftModeEnabled:${{ inputs.drift-detection-mode-enabled }}" \
-        --output "${{ steps.vars.outputs.summary_file }}" \
+        $([[ "${{ inputs.pr-comment }}" == "false" ]] && echo "--output ${{ steps.vars.outputs.summary_file }}") \
         --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
         plan \
         $([[ "${{ inputs.pr-comment }}" == "true" ]] && echo "-patch") \
@@ -347,11 +340,7 @@ runs:
         &> ${TERRAFORM_OUTPUT_FILE}
 
         TERRAFORM_RESULT=$?
-    
-        # Re-enable exit on error
-        set -e
 
-        # If we have comments enabled, we need to run tfcmt again to create a different summary file
         if [[ "${{ inputs.pr-comment }}" == "true" ]]; then
           tfcmt \
           --config ${GITHUB_ACTION_PATH}/config/summary.yaml \
@@ -374,8 +363,8 @@ runs:
             bash -c "cat ${TERRAFORM_OUTPUT_FILE}"
         fi
 
-        # If we have drift detection enabled, we need to split the summary file into 2 files
-        # If we dont, we just move the summary file to the step summary file
+        set -e
+
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
           # Split summary to 2 files - issue and step summary files
           # Remove \0 at the end of the grep output
