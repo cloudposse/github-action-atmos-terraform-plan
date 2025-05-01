@@ -306,6 +306,9 @@ runs:
 
         TERRAFORM_OUTPUT_FILE="./terraform-${GITHUB_RUN_ID}-output.txt"
 
+        # Create the directory for the summary file if it doesn't exist
+        mkdir -p "$(dirname "${{ steps.vars.outputs.summary_file }}")"
+
         tfcmt \
         --config ${GITHUB_ACTION_PATH}/config/summary.yaml \
         -owner "${{ github.repository_owner }}" \
