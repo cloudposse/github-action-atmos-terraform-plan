@@ -299,8 +299,6 @@ runs:
       id: atmos-plan
       shell: bash
       run: |
-        set +e
-
         # Remove the environment file from the cache to avoid conflicts with workspace select
         rm -f ./${{ steps.vars.outputs.component_path }}/.terraform/environment
 
@@ -309,6 +307,17 @@ runs:
         # Create the directory for the summary file if it doesn't exist
         mkdir -p "$(dirname "${{ steps.vars.outputs.summary_file }}")"
 
+        # Debug tfcmt
+        if [[ "${{ inputs.debug }}" == "true" ]]; then
+          echo "Debug tfcmt"
+          tfcmt --version
+        fi
+
+        # Disable exit on error so we can capture the terraform exit code
+        # and handle it appropriately later in the script
+        set +e
+
+        # Run tfcmt, atmos, and terraform to create the plan file
         tfcmt \
         --config ${GITHUB_ACTION_PATH}/config/summary.yaml \
         -owner "${{ github.repository_owner }}" \
@@ -338,12 +347,10 @@ runs:
 
         TERRAFORM_RESULT=$?
     
-        if [[ "${{ inputs.debug }}" == "true" ]]; then
-          echo "tfcmt exit code: $?"
-          ls -l "${{ steps.vars.outputs.summary_file }}" || echo "summary file not found"
-          cat ${TERRAFORM_OUTPUT_FILE}
-        fi
+        # Re-enable exit on error
+        set -e
 
+        # If we have comments enabled, we need to run tfcmt again to create a different summary file
         if [[ "${{ inputs.pr-comment }}" == "true" ]]; then
           tfcmt \
           --config ${GITHUB_ACTION_PATH}/config/summary.yaml \
@@ -366,8 +373,8 @@ runs:
             bash -c "cat ${TERRAFORM_OUTPUT_FILE}"
         fi
 
-        set -e
-
+        # If we have drift detection enabled, we need to split the summary file into 2 files
+        # If we dont, we just move the summary file to the step summary file
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
           # Split summary to 2 files - issue and step summary files
           # Remove \0 at the end of the grep output
