@@ -224,6 +224,9 @@ runs:
       uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
       with:
         aqua_version: v2.50.0
+        # Disable "-l", the default option
+        # https://aquaproj.github.io/docs/tutorial/install-only-link
+        aqua_args: ""
       env:
         AQUA_CONFIG: /tmp/aqua.yaml
         AQUA_LOG_LEVEL: debug
@@ -307,11 +310,10 @@ runs:
         # Create the directory for the summary file if it doesn't exist
         mkdir -p "$(dirname "${{ steps.vars.outputs.summary_file }}")"
 
-        # Debug tfcmt
-        if [[ "${{ inputs.debug }}" == "true" ]]; then
-          echo "Debug tfcmt"
-          tfcmt --version
-        fi
+        # Verify tfcmt is installed
+        # Since we disable exit on error, the real error will be swallowed later on
+        echo "Ensure tfcmt is installed:"
+        tfcmt --version
 
         # Disable exit on error so we can capture the terraform exit code
         # and handle it appropriately later in the script
