@@ -3,6 +3,9 @@ name: "Test - Atmos Pro Enabled"
 on:
   workflow_dispatch: {}
 
+  pull_request:
+    types: [opened, synchronize, reopened]
+
 env:
   AWS_REGION: us-east-2
 
