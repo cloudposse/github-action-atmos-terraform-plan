@@ -101,13 +101,13 @@ jobs:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
             ## Changes Found for `foobar-atmos-pro` in `plat-ue2-sandbox`
-            
+  
             <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
-            [![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#user-content-create-plat-ue2-sandbox-foobar_atmos_pro)
+            [![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#user-content-create-plat-ue2-sandbox-foobar-atmos-pro)
             
             
             
-            <details><summary><a id="result-plat-ue2-sandbox-foobar_atmos_pro" />Plan: 1 to add, 0 to change, 0 to destroy.</summary>
+            <details><summary><a id="result-plat-ue2-sandbox-foobar-atmos-pro" />Plan: 1 to add, 0 to change, 0 to destroy.</summary>
             
             <br/>      
             To reproduce this locally, run:<br/><br/>
@@ -120,7 +120,7 @@ jobs:
             
                 
             ---
-            ### <a id="create-plat-ue2-sandbox-foobar_atmos_pro" />Create
+            ### <a id="create-plat-ue2-sandbox-foobar-atmos-pro" />Create
             ```diff
             + random_id.foo[0]
             ```
