@@ -1,6 +1,8 @@
 components:
   terraform:
     foobar-atmos-pro:
+      metadata:
+        component: foobar
       settings:
         pro:
           enabled: true
