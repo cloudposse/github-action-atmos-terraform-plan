@@ -95,9 +95,9 @@ jobs:
       - uses: nick-fields/assert-action@v2
         with:
           comparison: contains
-          actual: |-
+          actual: |
             ${{ fromJSON(needs.test.outputs.summary) }}
-          expected: |-
+          expected: |
             ## Plan Failed for `foobar-fail` in `plat-ue2-sandbox`
               
             <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
