@@ -137,6 +137,7 @@ jobs:
           comparison: contains          
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
           expected: |
+          
             ## Drift Detection Failed for `foobar-fail` in `plat-ue2-sandbox`!
             
             
