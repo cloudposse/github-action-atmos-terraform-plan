@@ -62,7 +62,6 @@ jobs:
           sha: ${{ github.sha }}
           drift-detection-mode-enabled: true
           atmos-config-path: ${{ runner.temp }}
-          atmos-version: 1.99.0
           skip-checkout: true
 
     outputs:
