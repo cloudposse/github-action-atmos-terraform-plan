@@ -22,7 +22,7 @@ inputs:
   atmos-version:
     description: The version of atmos to install
     required: false
-    default: ">= 1.99.0"
+    default: ">= 1.158.0"
   atmos-config-path:
     description: The path to the atmos.yaml file
     required: true
@@ -98,6 +98,7 @@ runs:
         # Here we do not process-templates because that requires terraform. Which we install after fetching the version
         # processing templates here can cause an issue where cached terraform versions conflict with the version we want to install
         process-templates: 'false'
+        process-functions: 'false'
         settings: |
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
