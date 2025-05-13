@@ -201,7 +201,7 @@ jobs:
               "component": "foobar-fail",
               "stack": "plat-ue2-sandbox",
               "componentPath": "tests/terraform/components/terraform/foobar",
-              "commitSHA": "1d1fe7321b518b111d305dadaff2fd8f895bdc21"
+              "commitSHA": "${{ github.sha }}"
             }
             ```
             </details>
