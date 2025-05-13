@@ -92,6 +92,11 @@ jobs:
           actual: "${{ steps.metadata.outputs.dir_exists }}"
           expected: "1"
 
+      - run: |
+          echo <<<EOF
+          ${{ needs.test.outputs.summary }}
+          EOF;
+
       - uses: nick-fields/assert-action@v2
         with:
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
