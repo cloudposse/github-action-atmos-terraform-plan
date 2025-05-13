@@ -95,7 +95,8 @@ jobs:
       - uses: nick-fields/assert-action@v2
         with:
           comparison: contains
-          actual: "${{ fromJSON(needs.test.outputs.summary) }}"
+          actual: |-
+            ${{ fromJSON(needs.test.outputs.summary) }}
           expected: |-
             ## Plan Failed for `foobar-fail` in `plat-ue2-sandbox`
               
