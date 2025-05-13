@@ -62,6 +62,7 @@ jobs:
           stack: "plat-ue2-sandbox"
           sha: ${{ github.sha }}
           atmos-config-path: ${{ runner.temp }}
+          atmos-version: 1.145.0
           skip-checkout: true
 
     outputs:
