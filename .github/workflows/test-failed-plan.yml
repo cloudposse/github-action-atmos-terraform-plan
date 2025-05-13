@@ -103,18 +103,6 @@ jobs:
               
             [![failed](https://shields.io/badge/PLAN-FAILED-ff0000?style=for-the-badge)](#user-content-result-plat-ue2-sandbox-foobar-fail)
 
-
-
-            <details><summary><a id="result-plat-ue2-sandbox-foobar-fail" />:warning: Error summary</summary>
-
-            <br/>      
-            To reproduce this locally, run:<br/><br/>
-
-            ```shell
-            atmos terraform plan foobar-fail -s plat-ue2-sandbox
-            ```
-
-
   teardown:
     runs-on: ubuntu-latest
     needs: [assert]
