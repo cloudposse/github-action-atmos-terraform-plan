@@ -56,6 +56,5 @@ jobs:
           component: "foobar"
           stack: "plat-ue2-sandbox"
           atmos-config-path: ${{ runner.temp }}
-          atmos-version: 1.99.0
           skip-checkout: true
           debug: true
