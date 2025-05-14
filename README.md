@@ -67,7 +67,8 @@ this action. For more on setting up those components, see the `gitops` component
 ### Config
 
 > [!IMPORTANT]
-> **Please note!** This GitHub Action only works with `atmos >= 1.99.0`.
+> **Please note!** This GitHub Action only works with `atmos >= v1.158.0`
+> If you are using `atmos >= 1.99.0, < 1.158.0` please use `v4` version of this action.
 > If you are using `atmos >= 1.63.0, < 1.99.0` please use `v2` or `v3` version of this action.  
 > If you are using `atmos < 1.63.0` please use `v1` version of this action.
 
@@ -214,8 +215,14 @@ integrations:
             component: "foobar"
             stack: "plat-ue2-sandbox"
             atmos-config-path: ./rootfs/usr/local/etc/atmos/
-            atmos-version: 1.81.0
+            atmos-version: 1.158.0
 ```
+
+### Migrating from `v4` to `v5`
+
+The notable changes in `v5` are:
+- `v5` works only with `atmos >= 1.158.0`
+- `v5` supports atnos `templates` and `functions`
 
 ### Migrating from `v3` to `v4`
 
@@ -401,7 +408,7 @@ Which would produce the same behavior as in `v1`, doing this:
 | Name | Description | Default | Required |
 |------|-------------|---------|----------|
 | atmos-config-path | The path to the atmos.yaml file | N/A | true |
-| atmos-version | The version of atmos to install | >= 1.99.0 | false |
+| atmos-version | The version of atmos to install | >= 1.158.0 | false |
 | branding-logo-image | Branding logo image url | https://cloudposse.com/logo-300x69.svg | false |
 | branding-logo-url | Branding logo url | https://cloudposse.com/ | false |
 | component | The name of the component to plan. | N/A | true |

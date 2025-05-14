@@ -64,7 +64,6 @@ jobs:
           infracost-api-key: ${{ secrets.INFRACOST_API_KEY }}
           debug: true
           atmos-config-path: ${{ runner.temp }}
-          atmos-version: 1.99.0
           skip-checkout: true
 
     outputs:
