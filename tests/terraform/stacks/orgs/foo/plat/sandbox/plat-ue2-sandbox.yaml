@@ -3,6 +3,7 @@ import:
   - catalog/foobar-fail
   - catalog/foobar-changes
   - catalog/foobar-disabled
+  - catalog/foobar-atmos-pro
 
 terraform:
   backend_type: local

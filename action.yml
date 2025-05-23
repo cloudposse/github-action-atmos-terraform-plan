@@ -103,7 +103,11 @@ runs:
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
             settingsPath: settings.github.actions_enabled
-            outputPath: enabled
+            outputPath: github-actions-enabled
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: settings.pro.enabled
+            outputPath: atmos-pro-enabled
           - component: ${{ inputs.component }}
             stack: ${{ inputs.stack }}
             settingsPath: component_info.component_path
@@ -241,7 +245,7 @@ runs:
         mask-aws-account-id: "no"
 
     - name: Set atmos cli base path vars
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).enabled }}
+      if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
       shell: bash
       run: |-
         # Set ATMOS_BASE_PATH allow `cloudposse/utils` provider to read atmos config from the correct path
@@ -249,13 +253,13 @@ runs:
         echo "ATMOS_BASE_PATH=$(realpath ${ATMOS_BASE_PATH:-./})" >> $GITHUB_ENV
 
     - name: Prepare Artifacts Directory
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).enabled }}
+      if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
       shell: bash
       run: |
         mkdir -p metadata
 
     - name: Define Job Variables
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).enabled }}
+      if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
       id: vars
       shell: bash
       run: |
@@ -288,14 +292,14 @@ runs:
     - name: Cache .terraform
       id: cache
       uses: actions/cache@v4
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).enabled }}
+      if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
       with:
         path: |
           ./${{ steps.vars.outputs.component_path }}/.terraform
         key: ${{ steps.vars.outputs.cache-key }}
 
     - name: Atmos Terraform Plan
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).enabled }}
+      if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
       id: atmos-plan
       shell: bash
       run: |
@@ -533,7 +537,7 @@ runs:
         sed -i -e '/%INFRACOST_DIFF%/{r /tmp/infracost.txt' -e 'd}' ${{ steps.vars.outputs.step_summary_file }}
 
     - name: Store Component Metadata to Artifacts
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).enabled && inputs.drift-detection-mode-enabled == 'true' }}
+      if: ${{ (fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled) && inputs.drift-detection-mode-enabled == 'true' }}
       shell: bash
       run: |
         echo -n '{ "stack": "${{ inputs.stack }}", "component": "${{ inputs.component }}", "componentPath": "${{ steps.vars.outputs.component_path }}", "drifted": '"${{ steps.atmos-plan.outputs.changes }}"', "error": '"${{ steps.atmos-plan.outputs.error }}"' }' > "metadata/${{ steps.vars.outputs.component_slug }}.metadata.json"
@@ -577,7 +581,7 @@ runs:
         echo "rand=$(openssl rand -hex 5)" >> "$GITHUB_OUTPUT"
 
     - name: Upload Artifacts
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).enabled && inputs.drift-detection-mode-enabled == 'true' }}
+      if: ${{ (fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled) && inputs.drift-detection-mode-enabled == 'true' }}
       uses: actions/upload-artifact@v4
       with:
         # The name of the artifact needs to be unique for every job run!
@@ -587,7 +591,7 @@ runs:
         retention-days: ${{ inputs.metadata-retention-days }}
 
     - name: Exit status
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).enabled }}
+      if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
       shell: bash
       run: |
         exit ${{ steps.atmos-plan.outputs.result }}
