@@ -267,8 +267,7 @@ runs:
         COMPONENT_PATH=${{ fromJson(steps.atmos-settings.outputs.settings).component-path }}
         COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
         COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
-        COMMAND=${{ fromJson(steps.atmos-settings.outputs.settings).command }}
-        COMPONENT_CACHE_KEY="$(basename "${{ fromJson(steps.atmos-settings.outputs.settings).component-path }}")-${COMMAND}"
+        COMPONENT_CACHE_KEY="$(basename "${{ fromJson(steps.atmos-settings.outputs.settings).component-path }}")"
         PLAN_FILE="$( realpath ${COMPONENT_PATH})/$COMPONENT_SLUG-${{ inputs.sha }}.planfile"
         PLAN_FILE_JSON="$( realpath ${COMPONENT_PATH})/$COMPONENT_SLUG-${{ inputs.sha }}.planfile.json"
         LOCK_FILE="$( realpath ${COMPONENT_PATH})/.terraform.lock.hcl"
@@ -475,9 +474,11 @@ runs:
       shell: bash
       working-directory: ./${{ steps.vars.outputs.component_path }}
       run: |
-        # Initialize terraform to ensure providers are available
-        ${{ fromJson(steps.atmos-settings.outputs.settings).command }} init -input=false -no-color
-        # Now show the plan in JSON format
+        # debug
+        echo "debug"
+        ls -al
+        pwd
+        cat "${{ steps.vars.outputs.plan_file }}"
         ${{ fromJson(steps.atmos-settings.outputs.settings).command }} show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Set Plan Results
