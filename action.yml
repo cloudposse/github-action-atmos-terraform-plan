@@ -19,10 +19,6 @@ inputs:
     description: "Indicate whether this action is used in drift detection workflow."
     required: true
     default: 'false'
-  cache-enabled:
-    description: "Enable caching"
-    required: false
-    default: 'true'
   atmos-version:
     description: The version of atmos to install
     required: false
@@ -271,7 +267,8 @@ runs:
         COMPONENT_PATH=${{ fromJson(steps.atmos-settings.outputs.settings).component-path }}
         COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
         COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
-        COMPONENT_CACHE_KEY=$(basename "${{ fromJson(steps.atmos-settings.outputs.settings).component-path }}")
+        COMMAND=${{ fromJson(steps.atmos-settings.outputs.settings).command }}
+        COMPONENT_CACHE_KEY="$(basename "${{ fromJson(steps.atmos-settings.outputs.settings).component-path }}")-${COMMAND}"
         PLAN_FILE="$( realpath ${COMPONENT_PATH})/$COMPONENT_SLUG-${{ inputs.sha }}.planfile"
         PLAN_FILE_JSON="$( realpath ${COMPONENT_PATH})/$COMPONENT_SLUG-${{ inputs.sha }}.planfile.json"
         LOCK_FILE="$( realpath ${COMPONENT_PATH})/.terraform.lock.hcl"
@@ -296,7 +293,7 @@ runs:
     - name: Cache .terraform
       id: cache
       uses: actions/cache@v4
-      if: ${{ (fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled) && inputs.cache-enabled == 'true' }}
+      if: ${{ (fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled)}}
       with:
         path: |
           ./${{ steps.vars.outputs.component_path }}/.terraform
