@@ -473,8 +473,11 @@ runs:
     - name: Convert PLANFILE to JSON
       if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
       shell: bash
-      working-directory: ${{ steps.vars.outputs.component_path }}
+      working-directory: ./${{ steps.vars.outputs.component_path }}
       run: |
+        # Initialize terraform to ensure providers are available
+        ${{ fromJson(steps.atmos-settings.outputs.settings).command }} init -input=false -no-color
+        # Now show the plan in JSON format
         ${{ fromJson(steps.atmos-settings.outputs.settings).command }} show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Set Plan Results
