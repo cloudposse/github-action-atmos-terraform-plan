@@ -410,6 +410,7 @@ runs:
         rm -f ${TERRAFORM_OUTPUT_FILE}
 
         # Convert planfile to JSON if Infracost is enabled
+        # Infracost requires a JSON representation of the plan to analyze cost changes
         if [[ "${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost }}" == "true" && "${TERRAFORM_RESULT}" == "0" ]]; then
           ${{ fromJson(steps.atmos-settings.outputs.settings).command }} show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
         fi
