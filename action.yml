@@ -409,6 +409,13 @@ runs:
 
         rm -f ${TERRAFORM_OUTPUT_FILE}
 
+    - name: Convert PLANFILE to JSON
+      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
+      shell: bash
+      working-directory: ./${{ steps.vars.outputs.component_path }}
+      run: |
+        ${{ fromJson(steps.atmos-settings.outputs.settings).command }} show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
+
     - name: Configure State AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       if: ${{ ( fromJson(steps.atmos-settings.outputs.settings).plan-repository-type == 's3' ||
@@ -468,18 +475,6 @@ runs:
       uses: infracost/actions/setup@v3
       with:
         api-key: ${{ inputs.infracost-api-key }}
-
-    - name: Convert PLANFILE to JSON
-      if: ${{ steps.atmos-plan.outputs.changes == 'true' }}
-      shell: bash
-      working-directory: ./${{ steps.vars.outputs.component_path }}
-      run: |
-        # debug
-        echo "debug"
-        ls -al
-        pwd
-        cat "${{ steps.vars.outputs.plan_file }}"
-        ${{ fromJson(steps.atmos-settings.outputs.settings).command }} show -json "${{ steps.vars.outputs.plan_file }}" > "${{ steps.vars.outputs.plan_file }}.json"
 
     - name: Set Plan Results
       id: results
