@@ -298,6 +298,8 @@ runs:
         path: |
           ./${{ steps.vars.outputs.component_path }}/.terraform
         key: ${{ steps.vars.outputs.cache-key }}
+        restore-keys: |
+          ${{ steps.vars.outputs.cache-key }}
 
     - name: Atmos Terraform Plan
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
