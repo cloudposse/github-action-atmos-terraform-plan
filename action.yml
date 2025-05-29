@@ -19,6 +19,10 @@ inputs:
     description: "Indicate whether this action is used in drift detection workflow."
     required: true
     default: 'false'
+  cache-enabled:
+    description: "Enable caching"
+    required: false
+    default: 'true'
   atmos-version:
     description: The version of atmos to install
     required: false
@@ -292,7 +296,7 @@ runs:
     - name: Cache .terraform
       id: cache
       uses: actions/cache@v4
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
+      if: ${{ (fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled) && inputs.cache-enabled == 'true' }}
       with:
         path: |
           ./${{ steps.vars.outputs.component_path }}/.terraform
