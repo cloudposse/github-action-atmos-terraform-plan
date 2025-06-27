@@ -19,6 +19,14 @@ inputs:
     description: "Indicate whether this action is used in drift detection workflow."
     required: true
     default: 'false'
+  atmos-pro-base-url:
+    description: The base URL of Atmos Pro
+    required: false
+    default: "https://atmos-pro.com"    
+  atmos-pro-upload-deployment-status:
+    description: "If set atmos will upload the plan result to the pro API"
+    required: false
+    default: 'false'
   atmos-version:
     description: The version of atmos to install
     required: false
@@ -302,6 +310,8 @@ runs:
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
       id: atmos-plan
       shell: bash
+      env:
+        ATMOS_PRO_BASE_URL: ${{ inputs.atmos-pro-base-url }}      
       run: |
         # Verify tfcmt is installed
         # Since we disable exit on error, the real error will be swallowed later on
@@ -316,6 +326,12 @@ runs:
         rm -f ./${{ steps.vars.outputs.component_path }}/.terraform/environment
 
         TERRAFORM_OUTPUT_FILE="./terraform-${GITHUB_RUN_ID}-output.txt"
+
+        atmos_pro_flags=""
+
+        if [[ "${{ inputs.atmos-pro-upload-deployment-status }}" == "true" ]]; then
+          atmos_pro_flags+=" --upload-deployment-status=true"
+        fi
 
         tfcmt \
         --config ${GITHUB_ACTION_PATH}/config/summary.yaml \
@@ -342,6 +358,7 @@ runs:
           -lock=false \
           -input=false \
           -no-color \
+          ${atmos_pro_flags} \
         &> ${TERRAFORM_OUTPUT_FILE}
 
         TERRAFORM_RESULT=$?
