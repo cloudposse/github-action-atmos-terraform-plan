@@ -67,6 +67,10 @@ inputs:
     description: "Set to 'true' to create a PR comment with the summary of the plan"
     required: false
     default: 'false'
+  plan-storage:
+    description: "Enable plan storage. Default: 'true'. Set to 'false' to disable plan storage."
+    required: false
+    default: 'true'
 outputs:
   summary:
     description: "Summary"
@@ -448,7 +452,7 @@ runs:
         mask-aws-account-id: "no"
 
     - name: Store New Plan
-      if: ${{ steps.atmos-plan.outputs.error == 'false' }}
+      if: ${{ steps.atmos-plan.outputs.error == 'false' && inputs.plan-storage == 'true'}}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       with:
         action: storePlan
@@ -467,7 +471,7 @@ runs:
         bucketName: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-bucket }}
 
     - name: Store Lockfile for New Plan
-      if: ${{ steps.atmos-plan.outputs.error == 'false' }}
+      if: ${{ steps.atmos-plan.outputs.error == 'false' && inputs.plan-storage == 'true'}}
       uses: cloudposse/github-action-terraform-plan-storage@v1
       with:
         action: storePlan
