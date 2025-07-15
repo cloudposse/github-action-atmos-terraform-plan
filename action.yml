@@ -71,6 +71,10 @@ inputs:
     description: "Generate a JSON representation of the plan file. This can be used by subsequent actions to analyze the plan."
     required: false
     default: 'false'
+  disable-caching:
+    description: "Disable the cache actions in this workflow."
+    required: false
+    default: 'false'
 outputs:
   summary:
     description: "Summary"
@@ -229,6 +233,7 @@ runs:
         fi
 
     - name: Cache Aqua
+      if: ${{ inputs.disable-caching != 'true' }}
       uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: ~/.local/share/aquaproj-aqua
@@ -304,7 +309,7 @@ runs:
     - name: Cache .terraform
       id: cache
       uses: actions/cache@v4
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
+      if: ${{ (fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled) && inputs.disable-caching != 'true' }}
       with:
         path: |
           ./${{ steps.vars.outputs.component_path }}/.terraform
