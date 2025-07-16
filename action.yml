@@ -172,26 +172,26 @@ runs:
         settings=""
         if ! settings=$(echo "$COMPONENT_CONFIG" | jq -r \
           '{
-            "github-actions-enabled": (.settings.github.actions_enabled // ""),
-            "atmos-pro-enabled": (.settings.pro.enabled // ""),
-            "component-path": (.component_info.component_path // ""),
-            "base-path": (.atmos_cli_config.base_path // ""),
-            "command": (.command // ""),
-            "opentofu-version": (.settings.integrations.github.gitops."opentofu-version" // ""),
-            "terraform-version": (.settings.integrations.github.gitops."terraform-version" // ""),
-            "enable-infracost": (.settings.integrations.github.gitops."infracost-enabled" // ""),
-            "terraform-plan-role": (.settings.integrations.github.gitops.role.plan // ""),
-            "aws-region": (.settings.integrations.github.gitops."artifact-storage".region // ""),
-            "terraform-state-role": (.settings.integrations.github.gitops."artifact-storage".role // ""),
-            "terraform-state-table": (.settings.integrations.github.gitops."artifact-storage".table // ""),
-            "terraform-state-bucket": (.settings.integrations.github.gitops."artifact-storage".bucket // ""),
-            "plan-repository-type": (.settings.integrations.github.gitops."artifact-storage"."plan-repository-type" // ""),
-            "blob-account-name": (.settings.integrations.github.gitops."artifact-storage"."blob-account-name" // ""),
-            "blob-container-name": (.settings.integrations.github.gitops."artifact-storage"."blob-container-name" // ""),
-            "metadata-repository-type": (.settings.integrations.github.gitops."artifact-storage"."metadata-repository-type" // ""),
-            "cosmos-container-name": (.settings.integrations.github.gitops."artifact-storage"."cosmos-container-name" // ""),
-            "cosmos-database-name": (.settings.integrations.github.gitops."artifact-storage"."cosmos-database-name" // ""),
-            "cosmos-endpoint": (.settings.integrations.github.gitops."artifact-storage"."cosmos-endpoint" // "")
+            "github-actions-enabled": (.settings.github.actions_enabled // "") | tostring,
+            "atmos-pro-enabled": (.settings.pro.enabled // "") | tostring,
+            "component-path": (.component_info.component_path // "") | tostring,
+            "base-path": (.atmos_cli_config.base_path // "") | tostring,
+            "command": (.command // "") | tostring,
+            "opentofu-version": (.settings.integrations.github.gitops."opentofu-version" // "") | tostring,
+            "terraform-version": (.settings.integrations.github.gitops."terraform-version" // "") | tostring,
+            "enable-infracost": (.settings.integrations.github.gitops."infracost-enabled" // "") | tostring,
+            "terraform-plan-role": (.settings.integrations.github.gitops.role.plan // "") | tostring,
+            "aws-region": (.settings.integrations.github.gitops."artifact-storage".region // "") | tostring,
+            "terraform-state-role": (.settings.integrations.github.gitops."artifact-storage".role // "") | tostring,
+            "terraform-state-table": (.settings.integrations.github.gitops."artifact-storage".table // "") | tostring,
+            "terraform-state-bucket": (.settings.integrations.github.gitops."artifact-storage".bucket // "") | tostring,
+            "plan-repository-type": (.settings.integrations.github.gitops."artifact-storage"."plan-repository-type" // "") | tostring,
+            "blob-account-name": (.settings.integrations.github.gitops."artifact-storage"."blob-account-name" // "") | tostring,
+            "blob-container-name": (.settings.integrations.github.gitops."artifact-storage"."blob-container-name" // "") | tostring,
+            "metadata-repository-type": (.settings.integrations.github.gitops."artifact-storage"."metadata-repository-type" // "") | tostring,
+            "cosmos-container-name": (.settings.integrations.github.gitops."artifact-storage"."cosmos-container-name" // "") | tostring,
+            "cosmos-database-name": (.settings.integrations.github.gitops."artifact-storage"."cosmos-database-name" // "") | tostring,
+            "cosmos-endpoint": (.settings.integrations.github.gitops."artifact-storage"."cosmos-endpoint" // "") | tostring
           }' 2>&1); then
           
           echo "Error: Failed to process component configuration with jq"
