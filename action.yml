@@ -205,15 +205,7 @@ runs:
           echo "Processed output: $settings"
           exit 1
         fi
-        
-        # Check for critical settings
-        COMPONENT_PATH=$(echo "$settings" | jq -r '.component-path // ""')
-        if [[ -z "$COMPONENT_PATH" ]]; then
-          echo "Warning: component-path is empty or not found in configuration"
-        else
-          echo "Component path: $COMPONENT_PATH"
-        fi
-        
+      
         # Output debug information if debug mode is enabled
         if [[ "${{ inputs.debug }}" == "true" ]]; then
           echo "Debug: Processed settings:"
