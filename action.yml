@@ -107,95 +107,118 @@ runs:
         token: ${{ inputs.token }}
         install-wrapper: false
 
-    - name: Get atmos settings
+    - name: Get Atmos settings
       id: atmos-settings
-      uses: cloudposse/github-action-atmos-get-setting@v2
-      with:
-        # Here we do not process-templates because that requires terraform. Which we install after fetching the version
-        # processing templates here can cause an issue where cached terraform versions conflict with the version we want to install
-        process-templates: 'false'
-        process-functions: 'false'
-        settings: |
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.github.actions_enabled
-            outputPath: github-actions-enabled
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.pro.enabled
-            outputPath: atmos-pro-enabled
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: component_info.component_path
-            outputPath: component-path
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: atmos_cli_config.base_path
-            outputPath: base-path
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: command
-            outputPath: command
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.opentofu-version
-            outputPath: opentofu-version
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.terraform-version
-            outputPath: terraform-version
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.infracost-enabled
-            outputPath: enable-infracost
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.role.plan
-            outputPath: terraform-plan-role
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.region
-            outputPath: aws-region
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.role
-            outputPath: terraform-state-role
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.table
-            outputPath: terraform-state-table
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.bucket
-            outputPath: terraform-state-bucket
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.plan-repository-type
-            outputPath: plan-repository-type
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.blob-account-name
-            outputPath: blob-account-name
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.blob-container-name
-            outputPath: blob-container-name
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.metadata-repository-type
-            outputPath: metadata-repository-type
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.cosmos-container-name
-            outputPath: cosmos-container-name
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.cosmos-database-name
-            outputPath: cosmos-database-name
-          - component: ${{ inputs.component }}
-            stack: ${{ inputs.stack }}
-            settingsPath: settings.integrations.github.gitops.artifact-storage.cosmos-endpoint
-            outputPath: cosmos-endpoint
+      shell: bash
+      run: |
+        set -euo pipefail
+        
+        echo "Starting Atmos settings retrieval for component: ${{ inputs.component }} in stack: ${{ inputs.stack }}"
+        
+        # Check if jq is available
+        if ! command -v jq &> /dev/null; then
+          echo "Error: jq is not installed. Please ensure jq is available in the runner."
+          exit 1
+        fi
+        
+        # Check if atmos is available
+        if ! command -v atmos &> /dev/null; then
+          echo "Error: atmos is not installed or not in PATH."
+          exit 1
+        fi
+        
+        echo "Executing atmos describe component command..."
+        
+        # Execute atmos describe component with timeout and error handling
+        COMPONENT_CONFIG=""
+        if ! COMPONENT_CONFIG=$(timeout 300 atmos describe component "${{ inputs.component }}" \
+          -s "${{ inputs.stack }}" \
+          --format=json \
+          --process-templates=false \
+          --process-functions=false \
+          --skip=terraform.output 2>&1); then
+          
+          echo "Error: atmos describe component command failed or timed out after 5 minutes"
+          echo "Command output: $COMPONENT_CONFIG"
+          exit 1
+        fi
+        
+        # Validate that we got output
+        if [[ -z "$COMPONENT_CONFIG" ]]; then
+          echo "Error: Component configuration not found for component: ${{ inputs.component }} in stack: ${{ inputs.stack }}"
+          exit 1
+        fi
+        
+        # Check if output is valid JSON
+        if ! echo "$COMPONENT_CONFIG" | jq empty 2>/dev/null; then
+          echo "Error: Invalid JSON output from atmos describe component"
+          echo "Raw output (first 500 chars): ${COMPONENT_CONFIG:0:500}"
+          exit 1
+        fi
+        
+        echo "Successfully retrieved component configuration"
+        
+        # Get JSON size for monitoring
+        JSON_SIZE=$(echo "$COMPONENT_CONFIG" | wc -c)
+        echo "Component configuration size: ${JSON_SIZE} bytes"
+        
+        if [[ $JSON_SIZE -gt 10485760 ]]; then  # 10MB
+          echo "Warning: Large component configuration detected (${JSON_SIZE} bytes). Processing may take longer."
+        fi
+        
+        echo "Processing component configuration with jq..."
+        
+        # Process the JSON with jq using streaming for large objects
+        settings=""
+        if ! settings=$(echo "$COMPONENT_CONFIG" | jq -r \
+          '{
+            "github-actions-enabled": (.settings.github.actions_enabled // ""),
+            "atmos-pro-enabled": (.settings.pro.enabled // ""),
+            "component-path": (.component_info.component_path // ""),
+            "base-path": (.atmos_cli_config.base_path // ""),
+            "command": (.command // ""),
+            "opentofu-version": (.settings.integrations.github.gitops."opentofu-version" // ""),
+            "terraform-version": (.settings.integrations.github.gitops."terraform-version" // ""),
+            "enable-infracost": (.settings.integrations.github.gitops."infracost-enabled" // ""),
+            "terraform-plan-role": (.settings.integrations.github.gitops.role.plan // ""),
+            "aws-region": (.settings.integrations.github.gitops."artifact-storage".region // ""),
+            "terraform-state-role": (.settings.integrations.github.gitops."artifact-storage".role // ""),
+            "terraform-state-table": (.settings.integrations.github.gitops."artifact-storage".table // ""),
+            "terraform-state-bucket": (.settings.integrations.github.gitops."artifact-storage".bucket // ""),
+            "plan-repository-type": (.settings.integrations.github.gitops."artifact-storage"."plan-repository-type" // ""),
+            "blob-account-name": (.settings.integrations.github.gitops."artifact-storage"."blob-account-name" // ""),
+            "blob-container-name": (.settings.integrations.github.gitops."artifact-storage"."blob-container-name" // ""),
+            "metadata-repository-type": (.settings.integrations.github.gitops."artifact-storage"."metadata-repository-type" // ""),
+            "cosmos-container-name": (.settings.integrations.github.gitops."artifact-storage"."cosmos-container-name" // ""),
+            "cosmos-database-name": (.settings.integrations.github.gitops."artifact-storage"."cosmos-database-name" // ""),
+            "cosmos-endpoint": (.settings.integrations.github.gitops."artifact-storage"."cosmos-endpoint" // "")
+          }' 2>&1); then
+          
+          echo "Error: Failed to process component configuration with jq"
+          echo "jq error output: $settings"
+          exit 1
+        fi
+        
+        # Validate the processed settings
+        if ! echo "$settings" | jq empty 2>/dev/null; then
+          echo "Error: Invalid JSON output from jq processing"
+          echo "Processed output: $settings"
+          exit 1
+        fi
+        
+        # Check for critical settings
+        COMPONENT_PATH=$(echo "$settings" | jq -r '.component-path // ""')
+        if [[ -z "$COMPONENT_PATH" ]]; then
+          echo "Warning: component-path is empty or not found in configuration"
+        else
+          echo "Component path: $COMPONENT_PATH"
+        fi
+        
+        # Output debug information if debug mode is enabled
+        if [[ "${{ inputs.debug }}" == "true" ]]; then
+          echo "Debug: Processed settings:"
+          echo "$settings" | jq '.'
+        fi
 
     - name: Add Terraform and OpenTofu to Aqua
       shell: bash
