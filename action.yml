@@ -211,6 +211,12 @@ runs:
           echo "Debug: Processed settings:"
           echo "$settings" | jq '.'
         fi
+        
+        echo "Successfully processed component settings"
+        echo "settings=$settings" >> $GITHUB_OUTPUT
+        
+        # Clean up large variable to free memory
+        unset COMPONENT_CONFIG
 
     - name: Add Terraform and OpenTofu to Aqua
       shell: bash
