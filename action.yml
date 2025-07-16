@@ -170,7 +170,7 @@ runs:
         
         # Process the JSON with jq using streaming for large objects
         settings=""
-        if ! settings=$(echo "$COMPONENT_CONFIG" | jq -r \
+        if ! settings=$(echo "$COMPONENT_CONFIG" | jq -c \
           '{
             "github-actions-enabled": (.settings.github.actions_enabled // "") | tostring,
             "atmos-pro-enabled": (.settings.pro.enabled // "") | tostring,
