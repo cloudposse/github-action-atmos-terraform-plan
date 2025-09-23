@@ -1,0 +1,184 @@
+name: "Test - PR Comment Enabled"
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "The fully-formed ref of the branch or tag that triggered the workflow run"
+        required: false
+        type: "string"
+      sha:
+        description: "The sha of the commit that triggered the workflow run"
+        required: false
+        type: "string"
+env:
+  AWS_REGION: us-east-2
+
+# Permissions required for assuming AWS identity and PR comments
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup
+        run: echo "Do setup"
+
+  test:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    needs: [setup]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - shell: bash
+        run: |
+          mkdir -p ${{ runner.temp }}
+          cp ./tests/terraform/atmos.yaml ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__INFRACOST_ENABLED__#false#g' ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__STORAGE_REGION__#${{ env.AWS_REGION }}#g' ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__STORAGE_BUCKET__#${{ secrets.TERRAFORM_STATE_BUCKET }}#g' ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g' ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g' ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__STORAGE_ROLE__#${{ secrets.TERRAFORM_STATE_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__PLAN_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
+          sed -i -e 's#__APPLY_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g' ${{ runner.temp }}/atmos.yaml
+
+          for file in ./tests/terraform/stacks/catalog/*.yaml; do
+          if [ -f "$file" ]; then
+            sed -i -e "s#__INFRACOST_ENABLED__#false#g" "$file"
+            sed -i -e "s#__STORAGE_REGION__#${{ env.AWS_REGION }}#g" "$file"          
+            sed -i -e "s#__STORAGE_BUCKET__#${{ secrets.TERRAFORM_STATE_BUCKET }}#g" "$file"
+            sed -i -e "s#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g" "$file"          
+            sed -i -e "s#__STORAGE_TABLE__#${{ secrets.TERRAFORM_STATE_TABLE }}#g" "$file"
+            sed -i -e "s#__STORAGE_ROLE__#${{ secrets.TERRAFORM_STATE_ROLE }}#g" "$file"
+            sed -i -e "s#__PLAN_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g" "$file"
+            sed -i -e "s#__APPLY_ROLE__#${{ secrets.TERRAFORM_PLAN_ROLE }}#g" "$file"
+          fi
+          done
+          
+          cat ${{ runner.temp }}/atmos.yaml
+
+      - name: Plan Atmos Component with PR Comment
+        id: current
+        uses: ./
+        with:
+          component: "foobar/changes"
+          stack: "plat-ue2-sandbox"
+          sha: ${{ github.sha }}
+          atmos-config-path: ${{ runner.temp }}
+          skip-checkout: false
+          pr-comment: 'true'
+
+    outputs:
+      result: ${{ steps.current.outcome }}
+      summary: ${{ steps.current.outputs.summary }}
+
+  assert:
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: nick-fields/assert-action@v2
+        with:
+          expected: 'success'
+          actual: "${{ needs.test.outputs.result }}"
+
+      - name: Display structure of downloaded files
+        id: metadata
+        run: |
+          set +e
+          
+          test -d ./metadata
+          DIR_EXISTS=$?
+          echo "dir_exists=${DIR_EXISTS}" >> $GITHUB_OUTPUT
+
+      - uses: nick-fields/assert-action@v2
+        with:
+          actual: "${{ steps.metadata.outputs.dir_exists }}"
+          expected: "1"
+
+      - uses: nick-fields/assert-action@v2
+        with:
+          actual: "${{ fromJSON(needs.test.outputs.summary) }}"
+          expected: |
+            ## Changes Found for `foobar/changes` in `plat-ue2-sandbox`
+            
+            <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
+            [![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#user-content-create-plat-ue2-sandbox-foobar_changes)
+            
+            
+            
+            <details><summary><a id="result-plat-ue2-sandbox-foobar_changes" />Plan: 1 to add, 0 to change, 0 to destroy.</summary>
+            
+            <br/>      
+            To reproduce this locally, run:<br/><br/>
+            
+            ```shell
+            atmos terraform plan foobar/changes -s plat-ue2-sandbox
+            ```
+                
+            
+            
+                
+            ---
+            ### <a id="create-plat-ue2-sandbox-foobar_changes" />Create
+            ```diff
+            + random_id.foo[0]
+            ```
+                
+            </details>
+            
+            <details><summary>Terraform <strong>Plan</strong> Summary</summary>
+            
+            ```hcl
+            
+              # random_id.foo[0] will be created
+              + resource "random_id" "foo" {
+                  + b64_std     = (known after apply)
+                  + b64_url     = (known after apply)
+                  + byte_length = 8
+                  + dec         = (known after apply)
+                  + hex         = (known after apply)
+                  + id          = (known after apply)
+                  + keepers     = {
+                      + "seed" = "foo-plat-ue2-sandbox-blue"
+                    }
+                }
+            
+            Plan: 1 to add, 0 to change, 0 to destroy.
+            
+            Warning: Test warning summary
+            
+              with data.validation_warning.warn[0],
+              on main.tf line 20, in data "validation_warning" "warn":
+              20: data "validation_warning" "warn" {
+            
+            Test warning details
+            ```
+            
+            </details>
+            
+            
+            > [!WARNING]
+            > ```
+            > Warning: Test warning summary
+            > 
+            >   with data.validation_warning.warn[0],
+            >   on main.tf line 20, in data "validation_warning" "warn":
+            >   20: data "validation_warning" "warn" {
+            > 
+            > Test warning details
+            > ```
+
+  teardown:
+    runs-on: ubuntu-latest
+    needs: [assert]
+    if: ${{ always() }}
+    steps:
+      - name: Tear down
+        run: echo "Do Tear down"
