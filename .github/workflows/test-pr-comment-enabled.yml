@@ -10,7 +10,11 @@ on:
       sha:
         description: "The sha of the commit that triggered the workflow run"
         required: false
-        type: "string"
+        type: "string" 
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
 env:
   AWS_REGION: us-east-2
 
