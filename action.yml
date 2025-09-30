@@ -567,6 +567,7 @@ runs:
       id: summary
       shell: bash
       working-directory: ./${{ steps.vars.outputs.component_path }}
+      
       run: |
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
           STEP_SUMMARY_FILE="${{ steps.vars.outputs.issue_file }}"
