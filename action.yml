@@ -566,7 +566,7 @@ runs:
     - name: Publish Summary or Generate GitHub Issue Description for Drift Detection
       id: summary
       shell: bash
-      working-directory: ./${{ steps.vars.outputs.component_path }}
+      working-directory: ${{ steps.vars.outputs.component_path }}
       
       run: |
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
