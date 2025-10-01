@@ -288,10 +288,12 @@ runs:
         STEP_SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/step-summary-${COMPONENT_SLUG}.md"
         SUMMARY_FILE="$GITHUB_WORKSPACE/metadata/summary-${COMPONENT_SLUG}.md"
 
+        COMPONENT_RELPATH=$(realpath --relative-to="${PWD}" ${COMPONENT_PATH})
+
         echo "stack_name=${STACK_NAME}" >> $GITHUB_OUTPUT
         echo "component_name=${COMPONENT_NAME}" >> $GITHUB_OUTPUT
         echo "component_slug=${COMPONENT_SLUG}" >> $GITHUB_OUTPUT
-        echo "component_path=${COMPONENT_PATH}" >> $GITHUB_OUTPUT
+        echo "component_path=${COMPONENT_RELPATH}" >> $GITHUB_OUTPUT
         echo "cache-key=${COMPONENT_CACHE_KEY}" >> $GITHUB_OUTPUT
         echo "plan_file=${PLAN_FILE}" >> $GITHUB_OUTPUT
         echo "plan_file_json=${PLAN_FILE_JSON}" >> $GITHUB_OUTPUT
@@ -566,7 +568,8 @@ runs:
     - name: Publish Summary or Generate GitHub Issue Description for Drift Detection
       id: summary
       shell: bash
-      working-directory: ./${{ steps.vars.outputs.component_path }}
+      working-directory: ${{ steps.vars.outputs.component_path }}
+      
       run: |
         if [[ "${{ inputs.drift-detection-mode-enabled }}" == "true" ]]; then
           STEP_SUMMARY_FILE="${{ steps.vars.outputs.issue_file }}"
