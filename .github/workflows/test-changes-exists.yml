@@ -72,6 +72,7 @@ jobs:
           sha: ${{ github.sha }}
           atmos-config-path: ${{ runner.temp }}
           skip-checkout: false
+          pr-comment: true
 
     outputs:
       result: ${{ steps.current.outcome }}
