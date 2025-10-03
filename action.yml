@@ -23,7 +23,7 @@ inputs:
     description: The base URL of Atmos Pro
     required: false
     default: "https://atmos-pro.com"    
-  atmos-pro-upload-deployment-status:
+  atmos-pro-upload-status:
     description: "If set atmos will upload the plan result to the pro API"
     required: false
     default: 'false'
@@ -336,8 +336,8 @@ runs:
 
         atmos_pro_flags=""
 
-        if [[ "${{ inputs.atmos-pro-upload-deployment-status }}" == "true" ]]; then
-          atmos_pro_flags+=" --upload-deployment-status=true"
+        if [[ "${{ inputs.atmos-pro-upload-status }}" == "true" ]]; then
+          atmos_pro_flags+="--upload-status"
         fi
 
         tfcmt \
@@ -361,11 +361,11 @@ runs:
         -- \
           atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
+          ${atmos_pro_flags} \
           -out="${{ steps.vars.outputs.plan_file }}" \
           -lock=false \
           -input=false \
           -no-color \
-          ${atmos_pro_flags} \
         &> ${TERRAFORM_OUTPUT_FILE}
 
         TERRAFORM_RESULT=$?
