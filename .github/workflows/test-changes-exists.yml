@@ -18,6 +18,7 @@ env:
 permissions:
   id-token: write
   contents: read
+  pull-requests: write
 
 jobs:
   setup:
@@ -72,6 +73,7 @@ jobs:
           sha: ${{ github.sha }}
           atmos-config-path: ${{ runner.temp }}
           skip-checkout: false
+          pr-comment: true
 
     outputs:
       result: ${{ steps.current.outcome }}

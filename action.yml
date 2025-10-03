@@ -317,7 +317,8 @@ runs:
       id: atmos-plan
       shell: bash
       env:
-        ATMOS_PRO_BASE_URL: ${{ inputs.atmos-pro-base-url }}      
+        ATMOS_PRO_BASE_URL: ${{ inputs.atmos-pro-base-url }}
+        TFCMT_GITHUB_TOKEN: ${{ inputs.token }}
       run: |
         # Verify tfcmt is installed
         # Since we disable exit on error, the real error will be swallowed later on
