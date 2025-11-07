@@ -71,6 +71,10 @@ inputs:
     description: "Enable plan storage. Default: 'true'. Set to 'false' to disable plan storage."
     required: false
     default: 'true'
+  identity:
+    description: Atmos auth identity
+    required: false
+    default: ""
 outputs:
   summary:
     description: "Summary"
@@ -334,6 +338,12 @@ runs:
 
         TERRAFORM_OUTPUT_FILE="./terraform-${GITHUB_RUN_ID}-output.txt"
 
+        base_cmd=""
+
+        if [[ -n "${{ inputs.identity }}" ]]; then
+          base_cmd+=" --identity=${{ inputs.identity }}"
+        fi
+
         atmos_pro_flags=""
 
         if [[ "${{ inputs.atmos-pro-upload-status }}" == "true" ]]; then
@@ -361,6 +371,7 @@ runs:
         -- \
           atmos terraform plan ${{ inputs.component }} \
           --stack ${{ inputs.stack }} \
+          ${base_cmd} \
           ${atmos_pro_flags} \
           -out="${{ steps.vars.outputs.plan_file }}" \
           -lock=false \
