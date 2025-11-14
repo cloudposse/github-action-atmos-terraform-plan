@@ -101,6 +101,7 @@ runs:
         echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ inputs.atmos-config-path }})" >> $GITHUB_ENV
 
     - name: Install Atmos
+      if: ${{ inputs.atmos-version != '' }}
       uses: cloudposse/github-action-setup-atmos@v2
       with:
         atmos-version: ${{ inputs.atmos-version }}
