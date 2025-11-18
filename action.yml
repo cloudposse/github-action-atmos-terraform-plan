@@ -314,7 +314,7 @@ runs:
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
       with:
         path: |
-          ${{steps.vars.outputs.component_cache_path}}/.terraform
+          ./${{ steps.vars.outputs.component_path }}/.terraform
         key: ${{ steps.vars.outputs.cache-key }}
 
     - name: Atmos Terraform Plan
