@@ -282,6 +282,7 @@ runs:
       run: |
         STACK_NAME=$(echo "${{ inputs.stack }}" | sed 's#/#_#g')
         COMPONENT_PATH=${{ fromJson(steps.atmos-settings.outputs.settings).component-path }}
+        COMPONENT_CACHE_PATH=$(realpath ${{ fromJson(steps.atmos-settings.outputs.settings).component-path }})
         COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
         COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
         COMPONENT_CACHE_KEY=$(basename "${{ fromJson(steps.atmos-settings.outputs.settings).component-path }}")
@@ -299,6 +300,7 @@ runs:
         echo "component_name=${COMPONENT_NAME}" >> $GITHUB_OUTPUT
         echo "component_slug=${COMPONENT_SLUG}" >> $GITHUB_OUTPUT
         echo "component_path=${COMPONENT_RELPATH}" >> $GITHUB_OUTPUT
+        echo "component_cache_path=${COMPONENT_CACHE_PATH}" >> $GITHUB_OUTPUT
         echo "cache-key=${COMPONENT_CACHE_KEY}" >> $GITHUB_OUTPUT
         echo "plan_file=${PLAN_FILE}" >> $GITHUB_OUTPUT
         echo "plan_file_json=${PLAN_FILE_JSON}" >> $GITHUB_OUTPUT
@@ -314,7 +316,7 @@ runs:
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
       with:
         path: |
-          $(realpath ${{ fromJson(steps.atmos-settings.outputs.settings).component-path }})/.terraform
+          ${{steps.vars.outputs.component_cache_path}}/.terraform
         key: ${{ steps.vars.outputs.cache-key }}
 
     - name: Atmos Terraform Plan
