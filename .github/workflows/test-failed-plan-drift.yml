@@ -185,9 +185,9 @@ jobs:
             resource in this configuration you must instead obtain this result from an
             attribute of that resource.
 
-            # Error                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-            subcommand exited with code 1
+            # Error
+
+            **Error:** subcommand exited with code 1
             ```
 
                 
