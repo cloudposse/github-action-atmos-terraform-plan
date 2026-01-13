@@ -154,8 +154,8 @@ jobs:
 
             <details><summary><a id="result-plat-ue2-sandbox-foobar-fail" />:warning: Error summary</summary>
 
-            <br/>
-            To reproduce this locally, run:<br/><br/>
+            <br/>      
+            To reproduce this locally, run:<br/><br/>      
 
             ```shell
             atmos terraform plan foobar-fail -s plat-ue2-sandbox
