@@ -89,6 +89,7 @@ outputs:
     description: "Whether the plan has changes. Value is string 'true' or 'false'"
     value: "${{ steps.atmos-plan.outputs.changes }}"
 
+
 runs:
   using: "composite"
   steps:
