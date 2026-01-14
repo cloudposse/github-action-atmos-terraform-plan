@@ -85,6 +85,9 @@ outputs:
   plan_json:
     description: "Path to the terraform plan in JSON format"
     value: "${{ steps.results.outputs.plan_file_json }}"
+  has-changes:
+    description: "Whether the plan has changes. Value is string 'true' or 'false'"
+    value: "${{ steps.atmos-plan.outputs.changes }}"
 
 runs:
   using: "composite"
