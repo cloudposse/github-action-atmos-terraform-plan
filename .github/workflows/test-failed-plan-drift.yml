@@ -184,25 +184,6 @@ jobs:
             resource in this configuration you must instead obtain this result from an
             attribute of that resource.
 
-            # Error
-
-            **Error:** subcommand exited with code 1
-            ```
-
-            </details>
-
-            <details><summary>Metadata</summary>
-
-            ```json
-            {
-              "component": "foobar-fail",
-              "stack": "plat-ue2-sandbox",
-              "componentPath": "tests/terraform/components/terraform/foobar",
-              "commitSHA": "${{ github.sha }}"
-            }
-            ```
-            </details>
-
   teardown:
     runs-on: ubuntu-latest
     needs: [assert]
