@@ -474,7 +474,7 @@ runs:
 
     - name: Store New Plan
       if: ${{ steps.atmos-plan.outputs.error == 'false' && inputs.plan-storage == 'true'}}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
+      uses: cloudposse/github-action-terraform-plan-storage@v2
       with:
         action: storePlan
         commitSHA: ${{ inputs.sha }}
@@ -493,7 +493,7 @@ runs:
 
     - name: Store Lockfile for New Plan
       if: ${{ steps.atmos-plan.outputs.error == 'false' && inputs.plan-storage == 'true'}}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
+      uses: cloudposse/github-action-terraform-plan-storage@v2
       with:
         action: storePlan
         commitSHA: ${{ inputs.sha }}
