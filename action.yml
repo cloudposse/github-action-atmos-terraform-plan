@@ -238,7 +238,7 @@ runs:
         fi
 
     - name: Cache Aqua
-      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: ~/.local/share/aquaproj-aqua
         key: v2-aqua-installer-${{runner.os}}-${{runner.arch}}-${{hashFiles('aqua.yaml')}}
@@ -316,7 +316,7 @@ runs:
 
     - name: Cache .terraform
       id: cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
       with:
         path: |
