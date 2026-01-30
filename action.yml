@@ -262,9 +262,13 @@ runs:
       run: |
         STACK_NAME=$(echo "${{ inputs.stack }}" | sed 's#/#_#g')
         COMPONENT_PATH=${{ fromJson(steps.atmos-settings.outputs.settings).component-path }}
+        # Normalize absolute component_path to relative to GITHUB_WORKSPACE so ./$COMPONENT_PATH resolves correctly
+        if [[ "$COMPONENT_PATH" == /* ]]; then
+          COMPONENT_PATH=".${COMPONENT_PATH#$GITHUB_WORKSPACE}"
+        fi
         COMPONENT_NAME=$(echo "${{ inputs.component }}" | sed 's#/#_#g')
         COMPONENT_SLUG="$STACK_NAME-$COMPONENT_NAME"
-        COMPONENT_CACHE_KEY=$(basename "${{ fromJson(steps.atmos-settings.outputs.settings).component-path }}") 
+        COMPONENT_CACHE_KEY=$(basename "$COMPONENT_PATH")
         PLAN_FILE="$( realpath ${COMPONENT_PATH})/$COMPONENT_SLUG-${{ inputs.sha }}.planfile"
         LOCK_FILE="$( realpath ${COMPONENT_PATH})/.terraform.lock.hcl"
 
