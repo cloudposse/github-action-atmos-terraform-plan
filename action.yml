@@ -246,7 +246,7 @@ runs:
           v2-aqua-installer-${{runner.os}}-${{runner.arch}}-
 
     - name: Install dependencies with Aqua
-      uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
+      uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
       with:
         aqua_version: v2.50.0
       env:
