@@ -78,13 +78,13 @@ inputs:
 outputs:
   summary:
     description: "Summary"
-    value: "${{ steps.summary.outputs.result }}"
+    value: "${{ steps.atmos-plan.outputs.result }}"
   plan_file:
     description: "Path to the terraform plan file"
-    value: "${{ steps.results.outputs.plan_file }}"
+    value: "${{ steps.atmos-plan.outputs.plan_file }}"
   plan_json:
     description: "Path to the terraform plan in JSON format"
-    value: "${{ steps.results.outputs.plan_file_json }}"
+    value: "${{ steps.atmos-plan.outputs.plan_file_json }}"
   has-changes:
     description: "Whether the plan has changes. Value is string 'true' or 'false'"
     value: "${{ steps.atmos-plan.outputs.changes }}"
@@ -113,25 +113,7 @@ runs:
         token: ${{ inputs.token }}
         install-wrapper: false
 
-    - name: Set atmos cli base path vars
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
-      shell: bash
-      run: |-
-        # Set ATMOS_BASE_PATH allow `cloudposse/utils` provider to read atmos config from the correct path
-        ATMOS_BASE_PATH="${{ fromJson(steps.atmos-settings.outputs.settings).base-path }}"
-        echo "ATMOS_BASE_PATH=$(realpath ${ATMOS_BASE_PATH:-./})" >> $GITHUB_ENV
-
-    - name: Cache .terraform
-      id: cache
-      uses: actions/cache@v4
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
-      with:
-        path: |
-          ${{ steps.vars.outputs.component_cache_path }}/.terraform
-        key: ${{ steps.vars.outputs.cache-key }}
-
     - name: Atmos Terraform Plan
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
       id: atmos-plan
       shell: bash
       env:
@@ -139,9 +121,6 @@ runs:
       run: |
         atmos terraform plan ${{ inputs.component }} \
         --stack ${{ inputs.stack }} \
-        ${base_cmd} \
-        ${atmos_pro_flags} \
-        -out="${{ steps.vars.outputs.plan_file }}" \
         -lock=false \
         -input=false \
         -no-color
