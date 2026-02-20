@@ -75,6 +75,10 @@ inputs:
     description: "Disable the cache actions in this workflow."
     required: false
     default: 'false'
+  install-dependencies:
+    description: "Whether to install dependencies with Aqua. If false, it is assumed that the runner already has the necessary dependencies installed. Default: 'true'"
+    required: false
+    default: 'true'
 outputs:
   summary:
     description: "Summary"
@@ -102,6 +106,7 @@ runs:
 
     - name: Install Atmos
       uses: cloudposse/github-action-setup-atmos@v2
+      if: ${{ inputs.install-dependencies == 'true' }}
       with:
         atmos-version: ${{ inputs.atmos-version }}
         token: ${{ inputs.token }}
@@ -219,6 +224,7 @@ runs:
         unset COMPONENT_CONFIG
 
     - name: Add Terraform and OpenTofu to Aqua
+      if: ${{ inputs.install-dependencies == 'true' }}
       shell: bash
       run: |
         cat << EOF > aqua.yaml
@@ -254,7 +260,7 @@ runs:
         fi
 
     - name: Cache Aqua
-      if: ${{ inputs.disable-caching != 'true' }}
+      if: ${{ inputs.install-dependencies == 'true' && inputs.disable-caching != 'true' }}
       uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: ~/.local/share/aquaproj-aqua
@@ -263,6 +269,7 @@ runs:
           v2-aqua-installer-${{runner.os}}-${{runner.arch}}-
 
     - name: Install dependencies with Aqua
+      if: ${{ inputs.install-dependencies == 'true' }}
       uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
       with:
         aqua_version: v2.50.0
@@ -516,7 +523,7 @@ runs:
         bucketName: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-bucket }}
 
     - name: Setup Infracost
-      if: ${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost == true && steps.atmos-plan.outputs.changes == 'true' }}
+      if: ${{ inputs.install-dependencies == 'true' && fromJson(steps.atmos-settings.outputs.settings).enable-infracost == true && steps.atmos-plan.outputs.changes == 'true' }}
       uses: infracost/actions/setup@v3
       with:
         api-key: ${{ inputs.infracost-api-key }}
