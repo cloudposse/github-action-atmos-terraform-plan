@@ -109,7 +109,7 @@ runs:
       uses: cloudposse/github-action-setup-atmos@v2
       with:
         # atmos-version: ${{ inputs.atmos-version }}
-        atmos-version: v1.208.0-test.2
+        atmos-version: v1.208.0-test.3
         token: ${{ inputs.token }}
         install-wrapper: false
 
