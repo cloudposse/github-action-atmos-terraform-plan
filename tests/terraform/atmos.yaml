@@ -86,3 +86,33 @@ integrations:
 logs:
   verbose: false
   colors: true
+
+
+# # CI-specific settings (provider-agnostic naming)
+ci:
+  # Auto-enabled when CI detected, or explicit
+  enabled: true
+
+  # Output variables for downstream jobs
+  # GitHub: $GITHUB_OUTPUT, GitLab: dotenv artifacts
+  output:
+    enabled: true
+
+  # Job summary with plan/apply results
+  # GitHub: $GITHUB_STEP_SUMMARY, GitLab: job artifacts
+  summary:
+    enabled: true
+    # template: "custom-summary.md"
+
+  # Commit status checks
+  # GitHub: Check Runs API, GitLab: Commit Status API
+  checks:
+    enabled: true  # Disabled by default (requires additional permissions)
+    context_prefix: "atmos"
+
+  # PR/MR comments
+  # GitHub: PR comments, GitLab: MR notes
+  comments:
+    enabled: true
+    behavior: upsert  # create, update, upsert
+    # template: "custom-comment.md"
