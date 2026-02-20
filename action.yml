@@ -119,8 +119,8 @@ runs:
       env:
         ATMOS_PRO_BASE_URL: ${{ inputs.atmos-pro-base-url }}
       run: |
-        atmos toolchain install terraform
-        atmos toolchain install opentofu
+        atmos toolchain install hashicorp/terraform@1.14.5
+        atmos toolchain install opentofu/opentofu@1.11.0
         atmos terraform plan ${{ inputs.component }} \
         --stack ${{ inputs.stack }} \
         -lock=false \
