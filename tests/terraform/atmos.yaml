@@ -30,6 +30,34 @@ components:
     init_run_reconfigure: true
     # Can also be set using `ATMOS_COMPONENTS_TERRAFORM_AUTO_GENERATE_BACKEND_FILE` ENV var, or `--auto-generate-backend-file` command-line argument
     auto_generate_backend_file: true
+
+    # Planfile storage backends (registry pattern)
+    planfiles:
+      # Default store to use (references named store below)
+      default: "local"
+
+      # Key pattern for planfile naming (Go template)
+      key_pattern: "{{ .Stack }}/{{ .Component }}/{{ .SHA }}.tfplan"
+
+      # Named stores
+      stores:
+        s3:
+          type: s3
+          options:
+            bucket: "my-terraform-planfiles"
+            prefix: "atmos/"
+            region: "us-east-1"
+
+        github:
+          type: github-artifacts
+          options:
+            retention_days: 7
+
+        local:
+          type: local
+          options:
+            path: ".atmos/planfiles"
+    
   helmfile:
     # Can also be set using `ATMOS_COMPONENTS_HELMFILE_BASE_PATH` ENV var, or `--helmfile-dir` command-line argument
     # Supports both absolute and relative paths
