@@ -118,6 +118,7 @@ runs:
       shell: bash
       env:
         ATMOS_PRO_BASE_URL: ${{ inputs.atmos-pro-base-url }}
+        GITHUB_TOKEN: ${{ inputs.token }}
       run: |
         atmos toolchain install hashicorp/terraform@1.14.5
         atmos toolchain install opentofu/opentofu@1.11.0
