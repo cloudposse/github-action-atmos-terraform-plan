@@ -121,6 +121,7 @@ runs:
       run: |
         atmos toolchain install hashicorp/terraform@1.14.5
         atmos toolchain install opentofu/opentofu@1.11.0
+        eval "$(atmos --chdir /path/to/project toolchain env)"
         atmos terraform plan ${{ inputs.component }} \
         --stack ${{ inputs.stack }} \
         -lock=false \
