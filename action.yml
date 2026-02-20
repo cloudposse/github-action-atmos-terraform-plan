@@ -124,6 +124,7 @@ runs:
         eval "$(atmos toolchain env)"
         atmos terraform plan ${{ inputs.component }} \
         --stack ${{ inputs.stack }} \
+        --logs-level=DEBUG \
         -lock=false \
         -input=false \
         -no-color
