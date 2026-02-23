@@ -78,7 +78,7 @@ inputs:
 outputs:
   summary:
     description: "Summary"
-    value: "${{ steps.atmos-plan.outputs.result }}"
+    value: "${{ steps.atmos-plan.outputs.summary }}"
   plan_file:
     description: "Path to the terraform plan file"
     value: "${{ steps.atmos-plan.outputs.plan_file }}"
