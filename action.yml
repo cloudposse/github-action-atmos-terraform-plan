@@ -130,3 +130,5 @@ runs:
         -lock=false \
         -input=false \
         -no-color
+
+        cat ${GITHUB_OUTPUT}
