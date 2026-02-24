@@ -131,8 +131,8 @@ jobs:
 
       - uses: nick-fields/assert-action@v2
         with:
-          actual: "${{ fromJSON(needs.test.outputs.summary) }}"
-          expected: "${{ fromJSON(steps.metadata.outputs.file_md) }}"
+          actual: "${{ needs.test.outputs.summary }}"
+          expected: "${{ steps.metadata.outputs.file_md }}"
 
       - uses: nick-fields/assert-action@v2
         with:
@@ -144,7 +144,7 @@ jobs:
         with:
           comparison: contains          
           actual: |
-            ${{ fromJSON(needs.test.outputs.summary) }}
+            ${{ needs.test.outputs.summary }}
           expected: |
           
             ## Drift Detection Failed for `foobar-fail` in `plat-ue2-sandbox`!
