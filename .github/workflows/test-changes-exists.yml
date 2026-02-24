@@ -119,7 +119,6 @@ jobs:
             ```shell
             atmos terraform plan foobar/changes -s plat-ue2-sandbox
             ```
-            
                 
             ---
 
@@ -127,7 +126,6 @@ jobs:
             ```diff
             + random_id.foo[0]
             ```
-                
             </details>
             
             <details><summary>Terraform <strong>Plan</strong> Summary</summary>
