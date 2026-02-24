@@ -119,7 +119,7 @@ jobs:
             ```shell
             atmos terraform plan foobar/changes -s plat-ue2-sandbox
             ```
-                
+             
             ---
 
             ### <a id="create-plat-ue2-sandbox-foobar_changes" />Create
