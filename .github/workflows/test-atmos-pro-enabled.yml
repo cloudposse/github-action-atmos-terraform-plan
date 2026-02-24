@@ -106,7 +106,7 @@ jobs:
 
       - uses: nick-fields/assert-action@v2
         with:
-          actual: "${{ fromJSON(needs.test.outputs.summary) }}"
+          actual: "${{ needs.test.outputs.summary }}"
           expected: |
             ## Changes Found for `foobar-atmos-pro` in `plat-ue2-sandbox`
   
