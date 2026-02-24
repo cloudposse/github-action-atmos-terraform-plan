@@ -104,7 +104,7 @@ jobs:
         with:
           comparison: contains
           actual: |
-            ${{ fromJSON(needs.test.outputs.summary) }}
+            ${{ needs.test.outputs.summary }}
           expected: |
           
             ## Plan Failed for `foobar-fail` in `plat-ue2-sandbox`
