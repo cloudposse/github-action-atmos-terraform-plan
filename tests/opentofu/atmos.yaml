@@ -38,7 +38,7 @@ components:
     # Planfile storage backends (registry pattern)
     planfiles:
       # Default store to use (references named store below)
-      default: "local"
+      default: "github"
 
       # Key pattern for planfile naming (Go template)
       key_pattern: "{{ .Stack }}/{{ .Component }}/{{ .SHA }}.tfplan"
