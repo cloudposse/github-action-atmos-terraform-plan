@@ -113,6 +113,13 @@ runs:
         token: ${{ inputs.token }}
         install-wrapper: false
 
+    - name: Export artifact runtime variables
+      uses: actions/github-script@v7
+      with:
+        script: |
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);
+          core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
+
     - name: Atmos Terraform Plan
       id: atmos-plan
       shell: bash
