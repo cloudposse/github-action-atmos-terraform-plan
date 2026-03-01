@@ -201,6 +201,18 @@ runs:
             stack: ${{ inputs.stack }}
             settingsPath: settings.integrations.github.gitops.artifact-storage.cosmos-endpoint
             outputPath: cosmos-endpoint
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: settings.integrations.github.gitops.artifact-storage.gcp-project-id
+            outputPath: gcp-project-id
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: settings.integrations.github.gitops.artifact-storage.gcp-firestore-database-name
+            outputPath: gcp-firestore-database-name
+          - component: ${{ inputs.component }}
+            stack: ${{ inputs.stack }}
+            settingsPath: settings.integrations.github.gitops.artifact-storage.gcp-firestore-collection-name
+            outputPath: gcp-firestore-collection-name
 
     - name: Add Terraform and OpenTofu to Aqua
       shell: bash
@@ -474,7 +486,7 @@ runs:
 
     - name: Store New Plan
       if: ${{ steps.atmos-plan.outputs.error == 'false' && inputs.plan-storage == 'true'}}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
+      uses: cloudposse/github-action-terraform-plan-storage@v2
       with:
         action: storePlan
         commitSHA: ${{ inputs.sha }}
@@ -490,10 +502,13 @@ runs:
         cosmosEndpoint: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-endpoint }}
         tableName: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-table }}
         bucketName: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-bucket }}
+        gcpProjectId: ${{ fromJson(steps.atmos-settings.outputs.settings).gcp-project-id }}
+        gcpFirestoreDatabaseName: ${{ fromJson(steps.atmos-settings.outputs.settings).gcp-firestore-database-name }}
+        gcpFirestoreCollectionName: ${{ fromJson(steps.atmos-settings.outputs.settings).gcp-firestore-collection-name }}
 
     - name: Store Lockfile for New Plan
       if: ${{ steps.atmos-plan.outputs.error == 'false' && inputs.plan-storage == 'true'}}
-      uses: cloudposse/github-action-terraform-plan-storage@v1
+      uses: cloudposse/github-action-terraform-plan-storage@v2
       with:
         action: storePlan
         commitSHA: ${{ inputs.sha }}
@@ -509,6 +524,9 @@ runs:
         cosmosEndpoint: ${{ fromJson(steps.atmos-settings.outputs.settings).cosmos-endpoint }}
         tableName: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-table }}
         bucketName: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-bucket }}
+        gcpProjectId: ${{ fromJson(steps.atmos-settings.outputs.settings).gcp-project-id }}
+        gcpFirestoreDatabaseName: ${{ fromJson(steps.atmos-settings.outputs.settings).gcp-firestore-database-name }}
+        gcpFirestoreCollectionName: ${{ fromJson(steps.atmos-settings.outputs.settings).gcp-firestore-collection-name }}
 
     - name: Setup Infracost
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost == true && steps.atmos-plan.outputs.changes == 'true' }}
