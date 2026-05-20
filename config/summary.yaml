@@ -24,6 +24,9 @@ templates:
     ## Changes Found for `{{.Vars.component}}` in `{{.Vars.stack}}`
     {{- end }}
 
+  comment_marker: |
+    <!-- atmos-ci-comment version={{.Vars.comment_marker_version}} type={{.Vars.comment_type}} entity_key={{.Vars.comment_entity_key}} stack={{.Vars.stack}} component={{.Vars.component}} stack_slug={{.Vars.comment_stack_slug}} run_id={{.Vars.comment_run_id}} run_attempt={{.Vars.comment_run_attempt}} head_sha={{.Vars.comment_head_sha}} workflow={{.Vars.comment_workflow}} -->
+
   badge: |
     {{- if eq .ExitCode 0 }}
     {{- if .CreatedResources}}[![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#user-content-create-{{.Vars.target}}){{ end }}
@@ -171,6 +174,7 @@ terraform:
     disable_label: false
     template: |
       {{- template "summary_plan_title" .}}
+      {{- template "comment_marker" .}}
       {{- template "branding" .}}
       {{- template "badge" .}}
       {{- template "deletion_warning" .}}
@@ -182,6 +186,7 @@ terraform:
       {{- if eq .Vars.driftModeEnabled "true" }}      
       _______________ISSUE-MARKDOWN_______________
       {{template "issue_plan_title" .}}
+      {{template "comment_marker" .}}
       {{template "branding" .}}
       {{template "badge" .}}
       {{template "deletion_warning" .}}

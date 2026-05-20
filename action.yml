@@ -30,7 +30,11 @@ inputs:
   atmos-version:
     description: The version of atmos to install
     required: false
-    default: ">= 1.158.0"
+    default: "1.217.0"
+  install-atmos:
+    description: Set to 'false' to skip Atmos installation and use a preinstalled binary from the runner
+    required: false
+    default: 'true'
   atmos-config-path:
     description: The path to the atmos.yaml file
     required: true
@@ -71,6 +75,38 @@ inputs:
     description: "Enable plan storage. Default: 'true'. Set to 'false' to disable plan storage."
     required: false
     default: 'true'
+  comment-marker-version:
+    description: "Version for hidden PR comment marker metadata"
+    required: false
+    default: 'v1'
+  comment-type:
+    description: "Comment type marker used by downstream cleanup logic"
+    required: false
+    default: 'plan'
+  comment-entity-key:
+    description: "Stable entity key for comment upsert/cleanup, e.g. stack::component"
+    required: false
+    default: ''
+  comment-stack-slug:
+    description: "Stack slug marker. Defaults to computed component slug when omitted"
+    required: false
+    default: ''
+  comment-run-id:
+    description: "Run identifier marker"
+    required: false
+    default: "${{ github.run_id }}"
+  comment-run-attempt:
+    description: "Run attempt marker"
+    required: false
+    default: "${{ github.run_attempt }}"
+  comment-head-sha:
+    description: "Head SHA marker"
+    required: false
+    default: "${{ inputs.sha }}"
+  comment-workflow:
+    description: "Workflow name marker"
+    required: false
+    default: "${{ github.workflow }}"
 outputs:
   summary:
     description: "Summary"
@@ -96,7 +132,29 @@ runs:
       run: |-
         echo "ATMOS_CLI_CONFIG_PATH=$(realpath ${{ inputs.atmos-config-path }})" >> $GITHUB_ENV
 
+    - name: Check if atmos is already available
+      id: check_atmos
+      if: ${{ inputs.install-atmos != 'true' }}
+      shell: bash
+      run: |
+        if command -v atmos >/dev/null 2>&1; then
+          echo "ATMOS_AVAILABLE=true" >> $GITHUB_ENV
+          echo "atmos already available: $(which atmos)"
+          atmos --version
+        else
+          echo "ATMOS_AVAILABLE=false" >> $GITHUB_ENV
+        fi
+      continue-on-error: true
+
+    - name: Ensure preinstalled Atmos is available
+      if: ${{ inputs.install-atmos != 'true' && env.ATMOS_AVAILABLE != 'true' }}
+      shell: bash
+      run: |
+        echo "::error::install-atmos=false requires a preinstalled atmos binary on the runner"
+        exit 1
+
     - name: Install Atmos
+      if: ${{ inputs.install-atmos == 'true' }}
       uses: cloudposse/github-action-setup-atmos@v2
       with:
         atmos-version: ${{ inputs.atmos-version }}
@@ -347,6 +405,14 @@ runs:
         TERRAFORM_OUTPUT_FILE="./terraform-${GITHUB_RUN_ID}-output.txt"
 
         atmos_pro_flags=""
+        COMMENT_ENTITY_KEY="${{ inputs.comment-entity-key }}"
+        COMMENT_STACK_SLUG="${{ inputs.comment-stack-slug }}"
+        if [[ -z "${COMMENT_ENTITY_KEY}" ]]; then
+          COMMENT_ENTITY_KEY="${{ inputs.stack }}::${{ inputs.component }}"
+        fi
+        if [[ -z "${COMMENT_STACK_SLUG}" ]]; then
+          COMMENT_STACK_SLUG="${{ steps.vars.outputs.component_slug }}"
+        fi
 
         if [[ "${{ inputs.atmos-pro-upload-status }}" == "true" ]]; then
           atmos_pro_flags+="--upload-status"
@@ -366,6 +432,14 @@ runs:
         -var "logoUrl:${{ inputs.branding-logo-url }}" \
         -var "infracost_enabled:${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost }}" \
         -var "driftModeEnabled:${{ inputs.drift-detection-mode-enabled }}" \
+        -var "comment_marker_version:${{ inputs.comment-marker-version }}" \
+        -var "comment_type:${{ inputs.comment-type }}" \
+        -var "comment_entity_key:${COMMENT_ENTITY_KEY}" \
+        -var "comment_stack_slug:${COMMENT_STACK_SLUG}" \
+        -var "comment_run_id:${{ inputs.comment-run-id }}" \
+        -var "comment_run_attempt:${{ inputs.comment-run-attempt }}" \
+        -var "comment_head_sha:${{ inputs.comment-head-sha }}" \
+        -var "comment_workflow:${{ inputs.comment-workflow }}" \
         $([[ "${{ inputs.pr-comment }}" == "false" ]] && echo "--output ${{ steps.vars.outputs.summary_file }}") \
         --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
         plan \
@@ -397,6 +471,14 @@ runs:
           -var "logoUrl:${{ inputs.branding-logo-url }}" \
           -var "infracost_enabled:${{ fromJson(steps.atmos-settings.outputs.settings).enable-infracost }}" \
           -var "driftModeEnabled:${{ inputs.drift-detection-mode-enabled }}" \
+          -var "comment_marker_version:${{ inputs.comment-marker-version }}" \
+          -var "comment_type:${{ inputs.comment-type }}" \
+          -var "comment_entity_key:${COMMENT_ENTITY_KEY}" \
+          -var "comment_stack_slug:${COMMENT_STACK_SLUG}" \
+          -var "comment_run_id:${{ inputs.comment-run-id }}" \
+          -var "comment_run_attempt:${{ inputs.comment-run-attempt }}" \
+          -var "comment_head_sha:${{ inputs.comment-head-sha }}" \
+          -var "comment_workflow:${{ inputs.comment-workflow }}" \
           --output ${{ steps.vars.outputs.summary_file }} \
           --log-level $([[ "${{ inputs.debug }}" == "true" ]] && echo "DEBUG" || echo "INFO") \
           plan \
