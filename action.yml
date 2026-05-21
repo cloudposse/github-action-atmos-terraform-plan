@@ -102,7 +102,7 @@ inputs:
   comment-head-sha:
     description: "Head SHA marker"
     required: false
-    default: "${{ inputs.sha }}"
+    default: ""
   comment-workflow:
     description: "Workflow name marker"
     required: false
