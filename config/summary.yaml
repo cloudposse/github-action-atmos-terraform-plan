@@ -205,4 +205,5 @@ terraform:
         <details><summary>Result</summary>
         {{wrapCode .CombinedOutput}}
         </details>
+        {{template "metadata" .}}
         {{- end }}
