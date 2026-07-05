@@ -18,6 +18,7 @@ env:
 permissions:
   id-token: write
   contents: read
+  checks: write
 
 jobs:
   setup:
@@ -104,20 +105,15 @@ jobs:
         with:
           comparison: contains
           actual: |
-            ${{ fromJSON(needs.test.outputs.summary) }}
+            ${{ needs.test.outputs.summary }}
           expected: |
-          
             ## Plan Failed for `foobar-fail` in `plat-ue2-sandbox`
 
             <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
-
             [![failed](https://shields.io/badge/PLAN-FAILED-ff0000?style=for-the-badge)](#user-content-result-plat-ue2-sandbox-foobar-fail)
-
-
-
             <details><summary><a id="result-plat-ue2-sandbox-foobar-fail" />:warning: Error summary</summary>
 
-            <br/>      
+            <br/>
             To reproduce this locally, run:<br/><br/>
 
             ```shell
@@ -125,8 +121,8 @@ jobs:
             ```
 
             ---
-
             ```hcl
+
             Error: Invalid function argument
 
               on main.tf line 17, in locals:
@@ -140,16 +136,8 @@ jobs:
             resource in this configuration you must instead obtain this result from an
             attribute of that resource.
 
-            # Error                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-            exit status 1
             ```
-
-                
-
-
-                
-            </details>
+            </details>          
 
   teardown:
     runs-on: ubuntu-latest

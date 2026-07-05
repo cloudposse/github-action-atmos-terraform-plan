@@ -131,12 +131,12 @@ jobs:
 
       - uses: nick-fields/assert-action@v2
         with:
-          actual: "${{ fromJSON(needs.test.outputs.summary) }}"
-          expected: "${{ fromJSON(steps.metadata.outputs.file_md) }}"
+          actual: "${{ needs.test.outputs.summary }}"
+          expected: "${{ steps.metadata.outputs.file_md }}"
 
       - uses: nick-fields/assert-action@v2
         with:
-          actual: "${{ fromJSON(steps.metadata.outputs.file_json) }}"
+          actual: "${{ steps.metadata.outputs.file_json }}"
           expected: |
             { "stack": "plat-ue2-sandbox", "component": "foobar-fail", "componentPath": "tests/terraform/components/terraform/foobar", "drifted": false, "error": true }
 
@@ -144,7 +144,7 @@ jobs:
         with:
           comparison: contains          
           actual: |
-            ${{ fromJSON(needs.test.outputs.summary) }}
+            ${{ needs.test.outputs.summary }}
           expected: |
           
             ## Drift Detection Failed for `foobar-fail` in `plat-ue2-sandbox`!

@@ -142,8 +142,8 @@ jobs:
 
       - uses: nick-fields/assert-action@v2
         with:
-          actual: "${{ fromJSON(needs.test.outputs.summary) }}"
-          expected: "${{ fromJSON(steps.metadata.outputs.file_md) }}"
+          actual: "${{ needs.test.outputs.summary }}"
+          expected: "${{ steps.metadata.outputs.file_md }}"
 
       - uses: nick-fields/assert-action@v2
         with:
@@ -152,13 +152,13 @@ jobs:
 
       - uses: nick-fields/assert-action@v2
         with:
-          actual: "${{ fromJSON(steps.metadata.outputs.file_json) }}"
+          actual: "${{ steps.metadata.outputs.file_json }}"
           expected: |
             { "stack": "plat-ue2-sandbox", "component": "foobar/changes", "componentPath": "tests/opentofu/components/terraform/foobar", "drifted": true, "error": false }
 
       - uses: nick-fields/assert-action@v2
         with:
-          actual: "${{ fromJSON(needs.test.outputs.summary) }}"
+          actual: "${{ needs.test.outputs.summary }}"
           expected: |
             ## Drift Detected for `foobar/changes` in `plat-ue2-sandbox`
             

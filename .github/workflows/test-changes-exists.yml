@@ -19,6 +19,8 @@ permissions:
   id-token: write
   contents: read
   pull-requests: write
+  checks: write
+  actions: write
 
 jobs:
   setup:
@@ -104,38 +106,33 @@ jobs:
 
       - uses: nick-fields/assert-action@v2
         with:
-          actual: "${{ fromJSON(needs.test.outputs.summary) }}"
+          actual: "${{ needs.test.outputs.summary }}"
           expected: |
             ## Changes Found for `foobar/changes` in `plat-ue2-sandbox`
             
             <a href="https://cloudposse.com/"><img src="https://cloudposse.com/logo-300x69.svg" width="100px" align="right"/></a>
             [![create](https://shields.io/badge/PLAN-CREATE-success?style=for-the-badge)](#user-content-create-plat-ue2-sandbox-foobar_changes)
-            
-            
-            
             <details><summary><a id="result-plat-ue2-sandbox-foobar_changes" />Plan: 1 to add, 0 to change, 0 to destroy.</summary>
             
-            <br/>      
+            <br/>
             To reproduce this locally, run:<br/><br/>
             
             ```shell
             atmos terraform plan foobar/changes -s plat-ue2-sandbox
             ```
-                
             
-            
-                
             ---
+
             ### <a id="create-plat-ue2-sandbox-foobar_changes" />Create
             ```diff
             + random_id.foo[0]
             ```
-                
             </details>
             
             <details><summary>Terraform <strong>Plan</strong> Summary</summary>
             
             ```hcl
+
             
               # random_id.foo[0] will be created
               + resource "random_id" "foo" {
@@ -159,6 +156,7 @@ jobs:
               20: data "validation_warning" "warn" {
             
             Test warning details
+            
             ```
             
             </details>
@@ -167,11 +165,11 @@ jobs:
             > [!WARNING]
             > ```
             > Warning: Test warning summary
-            > 
+            >
             >   with data.validation_warning.warn[0],
             >   on main.tf line 20, in data "validation_warning" "warn":
             >   20: data "validation_warning" "warn" {
-            > 
+            >
             > Test warning details
             > ```
 
