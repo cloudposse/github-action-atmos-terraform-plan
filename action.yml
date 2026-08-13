@@ -95,7 +95,7 @@ runs:
   steps:
     - name: Checkout
       if: ${{ inputs.skip-checkout != 'true' }}
-      uses: actions/checkout@v4
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ inputs.sha }}
 
@@ -106,7 +106,7 @@ runs:
 
     - name: Install Atmos
       if: ${{ inputs.atmos-version != '' }}
-      uses: cloudposse/github-action-setup-atmos@v2
+      uses: cloudposse/github-action-setup-atmos@60878d48037763f759aedee74e9cc0c2dc88e9ec # v3.5.0
       with:
         atmos-version: ${{ inputs.atmos-version }}
         token: ${{ inputs.token }}
@@ -254,7 +254,7 @@ runs:
         AQUA_LOG_LEVEL: debug
 
     - name: Configure Plan AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).aws-region != '' &&
         fromJson(steps.atmos-settings.outputs.settings).aws-region != 'null' &&
         fromJson(steps.atmos-settings.outputs.settings).terraform-plan-role != '' &&
@@ -263,7 +263,7 @@ runs:
         aws-region: ${{ fromJson(steps.atmos-settings.outputs.settings).aws-region }}
         role-to-assume: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-plan-role }}
         role-session-name: "atmos-terraform-plan-gitops"
-        mask-aws-account-id: "no"
+        mask-aws-account-id: "false"
 
     - name: Set atmos cli base path vars
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
@@ -316,7 +316,7 @@ runs:
 
     - name: Cache .terraform
       id: cache
-      uses: actions/cache@v4
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       if: ${{ fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled }}
       with:
         path: |
@@ -457,7 +457,7 @@ runs:
         fi
 
     - name: Configure State AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
       if: ${{ ( fromJson(steps.atmos-settings.outputs.settings).plan-repository-type == 's3' ||
                 fromJson(steps.atmos-settings.outputs.settings).plan-repository-type == ''  ||
                 fromJson(steps.atmos-settings.outputs.settings).plan-repository-type == 'null' ) &&
@@ -470,7 +470,7 @@ runs:
         aws-region: ${{ fromJson(steps.atmos-settings.outputs.settings).aws-region }}
         role-to-assume: ${{ fromJson(steps.atmos-settings.outputs.settings).terraform-state-role }}
         role-session-name: "atmos-terraform-state-gitops"
-        mask-aws-account-id: "no"
+        mask-aws-account-id: "false"
 
     - name: Store New Plan
       if: ${{ steps.atmos-plan.outputs.error == 'false' && inputs.plan-storage == 'true'}}
@@ -625,7 +625,7 @@ runs:
 
     - name: Upload Artifacts
       if: ${{ (fromJson(steps.atmos-settings.outputs.settings).github-actions-enabled || fromJson(steps.atmos-settings.outputs.settings).atmos-pro-enabled) && inputs.drift-detection-mode-enabled == 'true' }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         # The name of the artifact needs to be unique for every job run!
         # This name is filtered in cloudposse/github-action-atmos-terraform-drift-detection by the "metadata-*" prefix
