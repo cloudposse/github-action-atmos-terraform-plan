@@ -32,6 +32,13 @@ related: []
 description: This Github Action is used to run Terraform plan for a single, Atmos-supported component and save the given planfile to S3 and DynamoDB.
 
 introduction: |-
+  > [!WARNING]
+  > **Deprecated.** Migrate to [Atmos Native CI](https://atmos.tools/ci).
+
+  This action is deprecated in favor of Atmos Native CI. See the migration guide at
+  https://atmos.tools/deprecated/github-actions/atmos-terraform-plan for the equivalent built-in
+  command (`atmos terraform plan`) and how to move your workflow over.
+
   This Github Action is used to run Terraform plan for a single, Atmos-supported component and save the given planfile to S3 and DynamoDB.
 
   After running this action, apply Terraform with the companion action, [github-action-atmos-terraform-apply](https://github.com/cloudposse/github-action-atmos-terraform-apply)
