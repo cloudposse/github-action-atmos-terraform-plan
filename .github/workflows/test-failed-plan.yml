@@ -80,7 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test]
     steps:
-      - uses: nick-fields/assert-action@v2
+      - uses: nick-fields/assert-action@v4
         with:
           expected: 'failure'
           actual: "${{ needs.test.outputs.result }}"
@@ -94,12 +94,12 @@ jobs:
           DIR_EXISTS=$?
           echo "dir_exists=${DIR_EXISTS}" >> $GITHUB_OUTPUT
 
-      - uses: nick-fields/assert-action@v2
+      - uses: nick-fields/assert-action@v4
         with:
           actual: "${{ steps.metadata.outputs.dir_exists }}"
           expected: "1"          
 
-      - uses: nick-fields/assert-action@v2
+      - uses: nick-fields/assert-action@v4
         with:
           comparison: contains
           actual: |
@@ -140,7 +140,7 @@ jobs:
             attribute of that resource.
 
       # Check the failure itself independently of Atmos terminal styling.
-      - uses: nick-fields/assert-action@v2
+      - uses: nick-fields/assert-action@v4
         with:
           comparison: contains
           actual: "${{ fromJSON(needs.test.outputs.summary) }}"
