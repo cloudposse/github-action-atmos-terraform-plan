@@ -106,7 +106,7 @@ runs:
 
     - name: Install Atmos
       if: ${{ inputs.atmos-version != '' }}
-      uses: cloudposse/github-action-setup-atmos@v2
+      uses: cloudposse/github-action-setup-atmos@v3
       with:
         atmos-version: ${{ inputs.atmos-version }}
         token: ${{ inputs.token }}
